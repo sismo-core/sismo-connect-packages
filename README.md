@@ -7,10 +7,6 @@
   </h3>
 
   <p align="center">
-    All utility packages around the PwS
-  </p>
-
-  <p align="center">
     Made by <a href="https://docs.sismo.io/" target="_blank">Sismo</a>
   </p>
   
