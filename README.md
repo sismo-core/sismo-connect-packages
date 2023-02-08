@@ -24,9 +24,9 @@
 [Prove with Sismo presentation]
   
 Packages available:
-- [@sismo-core/pws-react](./pws-verifier) 
-- [@sismo-core/pws-verifier](./pws-verifier)
-- [@sismo-core/pws](./pws)
+- [@sismo-core/pws-react](./packages/pws-verifier) 
+- [@sismo-core/pws-verifier](./packages/pws-verifier)
+- [@sismo-core/pws](./packages/pws)
 
 ## Test
 
