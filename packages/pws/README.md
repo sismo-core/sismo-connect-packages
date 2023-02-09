@@ -58,7 +58,8 @@ const Page = () => {
     }, [proof])
 
     useEffect(() => {
-      const group = await getGroup({ groupId: "[Group id]" })
+      const res = await getGroup({ groupId: "[Group id]" })
+      setGroup(res);
     }, [])
 
     return <div>
