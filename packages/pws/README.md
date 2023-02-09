@@ -50,7 +50,7 @@ const Page = () => {
     useEffect(() => {
         if (!proof) return;
         const verifyProof = async () => {
-            const pws = new PwSVerifier({ appId: "[Your app id]" });
+            const isVerified = await sendToBackend(proof);
             if (isVerified) {
                 navigateTo('/gated-service')
             } 
