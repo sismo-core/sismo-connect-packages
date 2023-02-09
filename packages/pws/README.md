@@ -23,11 +23,11 @@
 [Prove with Sismo presentation]
 
 This package export:
-- [@sismo-core/pws-groups](../pws-groups) 
-- [@sismo-core/pws-react](../pws-react) 
-- [@sismo-core/pws-verifier](../pws-verifier)
+- [@sismo-core/pws-groups](../pws-groups): manipulate groups data
+- [@sismo-core/pws-react](../pws-react): generate the proof with frontend redirection to Sismo app
+- [@sismo-core/pws-verifier](../pws-verifier): verify the proof validity
 
-We advise you to use this package rather than individual packages in order to be sure that the version of your Proof generation package is aligned with you verifier package version.
+We advise you to use this package rather than individual packages in order to be sure that the version of your packages are not de-correlated.
 
 ## Installation
 
