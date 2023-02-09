@@ -40,7 +40,7 @@ $ npm i @sismo-core/pws
 
 **Frontend**
 ```javascript
-import { PwSButton, usePws } from "@sismo-core/pws-react";
+import { PwSButton, usePws } from "@sismo-core/pws";
 import { DisplayGroup } from "..";
 
 const Page = () => {
@@ -71,7 +71,7 @@ const Page = () => {
 
 **Backend**
 ```javascript
-import { PwSVerifier } from "@sismo-core/pws-verifier";
+import { PwSVerifier } from "@sismo-core/pws";
 import { isInDatabase, storeInDatabase } from "..";
 
 const isVerified = (proof) => {
