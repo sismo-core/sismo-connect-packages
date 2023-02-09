@@ -23,11 +23,11 @@
 [Prove with Sismo]
 
 This package export:
-- [@sismo-core/pws-groups](./packages/pws-groups) 
-- [@sismo-core/pws-react](./packages/pws-react) 
-- [@sismo-core/pws-verifier](./packages/pws-verifier)
+- [@sismo-core/pws-groups](../pws-groups) 
+- [@sismo-core/pws-react](../pws-react) 
+- [@sismo-core/pws-verifier](../pws-verifier)
 
-We advise you to use the pws package rather than individual packages in order to be sure that the version of your Proof generation package is aligned with you verifier package.
+We advise you to use this package rather than individual packages in order to be sure that the version of your Proof generation package is aligned with you verifier package version.
 
 ## Installation
 

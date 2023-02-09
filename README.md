@@ -29,8 +29,6 @@ Packages available:
 - [@sismo-core/pws-react](./packages/pws-react) 
 - [@sismo-core/pws-verifier](./packages/pws-verifier)
 
-Prefer using directly [@sismo-core/pws](./packages/pws).
-
 ## Documentation
 
 You can find [here](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858) the full documentation of how to use Prove with Sismo.

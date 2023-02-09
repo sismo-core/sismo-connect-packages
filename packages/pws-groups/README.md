@@ -34,7 +34,7 @@ $ npm i @sismo-core/pws-groups
 ```javascript
 import { getGroup } from "@sismo-core/pws";
 
-const group = await getGroup({ groupName: "[Group name]" })
+const group = await getGroup({ groupId: "[Group id]" })
 ```
 
 ## Documentation
@@ -43,7 +43,15 @@ You can find [here](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391
 
 ### getGroup
 
-[TODO]
+```javascript
+const group = await getGroup({ groupId: "[Group id]", groupName: "[Group name]", timestamp: "" })
+```
+
+| Params | Type | Description |
+|---|---|---|
+| groupId | String | Group Identifier |
+| groupName | String | Group Name |
+| timestamp | String | Timestamp of the snapshot you want to fetch | 
 
 ## License
 
