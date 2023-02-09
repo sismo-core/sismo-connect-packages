@@ -195,7 +195,7 @@ const pws = new PwSVerifier({ appId: "[Your app id]" });
 
 | Params | Type | Description |
 |---|---|---|
-| appId | Identifier of your app created on factory, to learn more about this appId go [here](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858). Must match the appId used during the proof generation. |
+| appId | Identifier of your app ([learn more](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858)) |
 
 **verify** 
 ```javascript
