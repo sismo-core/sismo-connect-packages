@@ -24,7 +24,7 @@
 [Prove with Sismo presentation]
   
 Packages available:
-- [@sismo-core/pws](./packages/pws): wrap of all the individual packages (recommended)
+- [@sismo-core/pws](./packages/pws): export all pws packages with good versions (recommended)
 - [@sismo-core/pws-groups](./packages/pws-groups): manipulate groups data
 - [@sismo-core/pws-react](./packages/pws-react): generate the proof
 - [@sismo-core/pws-verifier](./packages/pws-verifier): verify the proof
