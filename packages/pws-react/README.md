@@ -55,7 +55,7 @@ const Page = () => {
 
 ## Documentation
 
-You can find [here]() the full documentation of the Prove with Sismo from how to get your appId to how to verify your proof.
+You can find [here](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858) the full documentation of the Prove with Sismo from how to get your appId to how to verify your proof.
 
 ### PwSButton
 
@@ -91,7 +91,7 @@ You can find [here]() the full documentation of the Prove with Sismo from how to
 | callbackPath | null | String | Path of the page where you want to redirect your user after the proof generation |
 | value | MAX | "MAX" \| Number | Minimum value asked to the user to generate the proof |
 | timestamp | latest | "latest" \| Number  | Timestamp of the group snapshot you want to verify your user is part of |
-| serviceName | main | string | Sub identifier of the appId to allow user proving multiple proof for one groupName |
+| serviceName | main | string | Service name of the proof, define the scope of the user nullifier [learn more](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858) |
 | acceptHigherValues | true | boolean | Define if the user can downgrade his value or not |
 
 ### usePws
