@@ -22,6 +22,8 @@
 
 [Prove with Sismo]
 
+We advise you to use directly [@sismo-core/pws](../pws) rather than this package.
+
 ## Installation
 
 ```
@@ -32,7 +34,7 @@ $ npm i @sismo-core/pws-groups
 ## Usage
 
 ```javascript
-import { getGroup } from "@sismo-core/pws";
+import { getGroup } from "@sismo-core/pws-groups";
 
 const group = await getGroup({ groupId: "[Group id]" })
 ```
