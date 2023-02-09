@@ -55,11 +55,15 @@ const Page = () => {
                 navigateTo('/gated-service')
             } 
         }
+        verifyProof();
     }, [proof])
 
     useEffect(() => {
-      const res = await getGroup({ groupId: "[Group id]" })
-      setGroup(res);
+      const getData = async () => {
+        const res = await getGroup({ groupId: "[Group id]" })
+        setGroup(res);
+      }
+      getData();
     }, [])
 
     return <div>
