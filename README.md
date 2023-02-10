@@ -1,6 +1,6 @@
 <br />
 <div align="center">
-  <img src="https://static.sismo.io/readme/top-secondary.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
+  <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
     Prove with Sismo (PwS)
@@ -266,4 +266,4 @@ Please, feel free to open issues, PRs or simply provide feedback!
 Prefer [Discord](https://discord.gg/sismo) or [Twitter](https://twitter.com/sismo_eth)
 
 <br/>
-<img src="https://static.sismo.io/readme/bottom-secondary.png" alt="bottom" width="100%" >
+<img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
