@@ -39,13 +39,13 @@ import { DisplayGroup } from "..";
 const REQUEST = { groupId: "YOUR_GROUP_ID" };
   
 const Page = () => {
-    const { proof } = usePws();
+    const { proof, claims } = usePws();
     const [group, setGroup] = useState();
 
     useEffect(() => {
-        if (!proof) return;
+        if (!proof || !claims) return;
         const verifyProof = async () => {
-            const isVerified = await sendToBackend(proof);
+            const isVerified = await sendToBackend(proof, claims);
             if (isVerified) {
                 navigateTo('/gated-service')
             } 
@@ -246,7 +246,7 @@ type VerifiedClaim = {
   timestamp: number;
   isStrict: boolean;
   serviceId: string;
-  __provingSchemeData: any
+  __provingSchemeData: any;
 }
   
 type Error = { 
