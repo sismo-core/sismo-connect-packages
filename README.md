@@ -78,8 +78,8 @@ const REQUEST = `[Group id]`;
 const isVerified = (proof: Proof, claims: Claim[]) => {
   const pws = new PwSVerifier({ appId: "[Your app id]" });
   const verifiedClaims: VerifiedClaim[] = await pws.verify(REQUEST, { proof, claims });
-  if (isInDatabase(verifiedClaims[0].nullifier)) return false;
-  storeInDatabase(verifiedClaims[0].nullifier);
+  if (isInDatabase(verifiedClaims[0].proofId)) return false;
+  storeInDatabase(verifiedClaims[0].proofId);
   return true;
 }
 ```
@@ -180,7 +180,6 @@ const Page = () => {
 
 ### PwSVerifier
 
-**Initialization** 
 ```javascript
 const pws = new PwSVerifier({ appId: "[Your app id]" });
 ```
@@ -189,7 +188,6 @@ const pws = new PwSVerifier({ appId: "[Your app id]" });
 |---|---|---|
 | appId | Identifier of your app |
 
-**verify** 
 ```javascript
 const REQUEST = `[Group id]`;
 
@@ -202,6 +200,16 @@ const verifiedClaims: VerifiedClaim[] = await pws.verify(REQUEST, { proof, claim
 | claims | Claim[] | Claims sent back from Prove with Sismo |
 
 If the proof is valid, the function should return a VerifiedClaim[], otherwise, it should return an error.
+
+In a VerifiedClaim, you can find a proofId, which is a unique number that identifies a proof.
+
+The proofId is deterministically generated based on the following elements:
+- The source account used to generate the proof
+- The group the user is proving membership in
+- The appId
+- An optional serviceId, which represents the specific service of the app that requested the proof
+
+By storing the proofId, you can determine if a source account has already been used in your app for a specific source account and group.
 
 ```javascript
 type Proof = {
@@ -220,9 +228,9 @@ type Claim = {
 }
 
 type VerifiedClaim = { 
-  nullifier: string;
+  proofId: string;
   value: number;
-  groupName: string;
+  groupId: string;
   timestamp: number;
   isStrict: boolean;
 }
@@ -233,10 +241,11 @@ type Error = {
 }
 ```
 
+
 **Optional params** 
 
 ```javascript
-const verifiedClaims = await pws.verify({ proof: proof, serviceId: "[Service id]" });
+const verifiedClaims: VerifiedClaims[] = await pws.verify(REQUEST, { proof, claims, serviceId });
 ```
 
 | Params | Type | Description |
