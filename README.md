@@ -40,7 +40,7 @@ const REQUEST = { groupId: "YOUR_GROUP_ID" };
   
 const Page = () => {
     const { proof, claims } = usePws();
-    const [group, setGroup] = useState<Group>();
+    const [groupSnapshot, setGroupSnapshot] = useState<GroupSnapshot>();
 
     useEffect(() => {
         if (!proof || !claims) return;
@@ -55,14 +55,14 @@ const Page = () => {
 
     useEffect(() => {
       const getData = async () => {
-        const res: Group = await getGroup({ groupId: "YOUR_GROUP_ID" })
-        setGroup(res);
+        const res: GroupSnapshot = await getGroupSnapshot({ groupId: "YOUR_GROUP_ID" })
+        setGroupSnapshot(res);
       }
       getData();
     }, [])
 
     return <div>
-        <DisplayGroup group={group} />
+        <DisplayGroup groupSnapshot={groupSnapshot} />
         <PwSButton appId="YOUR_APP_ID" request={REQUEST}/>
     </div>
 }
