@@ -87,11 +87,10 @@ const isVerified = (proof: Proof, claims: Claim[]) => {
 ## Types
 
 ```javascript
-
 type Request = {
   groupId: string;
-  timestamp: number | "latest"; //latest by default
-  value: number | "MAX"; //MAX by default
+  timestamp: number | "latest";
+  value: number | "MAX";
 }
 
 type Proof = {
@@ -120,6 +119,41 @@ type VerifiedClaim = {
   __provingSchemeData: any;
 }
 
+```
+
+```javascript
+type Group = {
+  id: String;
+  latestSnapshot: GroupSnapshot;
+  snapshots: GroupSnapshot[];
+  name: String;
+  eligibilityShortDescription: String;
+  eligibilitySpecifications: String;
+  generationFrequency: Once | Weekly | Continuous;
+}
+
+type GroupSnapshot {
+  id: string;
+  id: string;
+  timestamp: number! | string;
+  size: number;
+  data: AccountData[];
+  dataUrl: string;  
+  registryTreeRoot: string!
+  registryTreeURL: string!
+}
+
+type AccountData {
+  account: Account;
+  value: Number;
+  group: GroupSnapshot;
+}
+
+type Account {
+  id: string;
+  type: "twitter" | "github" | "ethereum";
+  groupsSnapshots: GroupSnapshots[];
+}
 ```
 
 ## Documentation
