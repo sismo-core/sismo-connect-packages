@@ -86,6 +86,16 @@ const isVerified = (proof: Proof, claims: Claim[]) => {
 
 ## Documentation
 
+### getGroup
+
+```javascript
+const group = await getGroup({ groupId: "YOUR_GROUP_ID", timestamp: 1676289837 })
+```
+
+| Params | Type | Description |
+|---|---|---|
+| groupId | String | Group Identifier |
+| timestamp | number | Timestamp of the snapshot you want to fetch | 
 
 ### PwSButton (React.js)
 
@@ -105,8 +115,8 @@ const REQUEST = { groupId: "YOUR_GROUP_ID" };
 ```javascript
 type Request = {
   groupId: string;
-  timestamp: number | "latest"; //Latest by default
-  value: number | "MAX"; //Max by default
+  timestamp: number | "latest"; //latest by default
+  value: number | "MAX"; //MAX by default
 }
 ```
 
@@ -168,12 +178,12 @@ type Error = {
 }
 ```
 
-### prove (prefer using PwSButton)
+### prove
 
 ```javascript
 import { prove } from "@sismo-core/pws";
 
-const REQUEST = { groupid: "YOUR_GROUP_ID" };
+const REQUEST = { groupId: "YOUR_GROUP_ID" };
   
 const Page = () => {
     const submit = () => {
@@ -255,7 +265,6 @@ type Error = {
 }
 ```
 
-
 **Optional params** 
 
 ```javascript
@@ -266,16 +275,6 @@ const verifiedClaims: VerifiedClaims[] = await pws.verify(REQUEST, { proof, clai
 |---|---|---|
 | serviceId | String | Service ID of the proof.The serviceId must match the serviceId sent to Prove with Sismo|
 
-### getGroup
-
-```javascript
-const group = await getGroup({ groupId: "YOUR_GROUP_ID", timestamp: 1676289837 })
-```
-
-| Params | Type | Description |
-|---|---|---|
-| groupId | String | Group Identifier |
-| timestamp | number | Timestamp of the snapshot you want to fetch | 
 
 ## License
 
