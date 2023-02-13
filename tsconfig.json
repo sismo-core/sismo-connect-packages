@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "outDir": "./lib",
+      "declarationDir": "./types",
+      "target": "es5",
+      "module": "esnext",
+      "moduleResolution": "Node",
+      "strict": true,
+      "esModuleInterop": true,
+      "declaration": true,
+      "skipLibCheck": true,
+      "noImplicitAny": false,
+      "sourceMap": true
+    },
+    "include": [
+      "src/*",
+      "rollup.config.ts"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+}
