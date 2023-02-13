@@ -33,14 +33,14 @@ $ npm i @sismo-core/pws
 
 **Frontend**
 ```javascript
-import { PwSButton, usePws } from "@sismo-core/pws";
+import { PwSButton, usePws, Group } from "@sismo-core/pws";
 import { DisplayGroup } from "..";
 
 const REQUEST = { groupId: "YOUR_GROUP_ID" };
   
 const Page = () => {
     const { proof, claims } = usePws();
-    const [group, setGroup] = useState();
+    const [group, setGroup] = useState<Group>();
 
     useEffect(() => {
         if (!proof || !claims) return;
@@ -55,7 +55,7 @@ const Page = () => {
 
     useEffect(() => {
       const getData = async () => {
-        const res = await getGroup({ groupId: "YOUR_GROUP_ID" })
+        const res: Group = await getGroup({ groupId: "YOUR_GROUP_ID" })
         setGroup(res);
       }
       getData();
@@ -134,8 +134,7 @@ type Group = {
 
 type GroupSnapshot {
   id: string;
-  id: string;
-  timestamp: number! | string;
+  timestamp: number | string;
   size: number;
   data: AccountData[];
   dataUrl: string;  
@@ -152,16 +151,16 @@ type AccountData {
 type Account {
   id: string;
   type: "twitter" | "github" | "ethereum";
-  groupsSnapshots: GroupSnapshots[];
+  groupsSnapshots: GroupSnapshot[];
 }
 ```
 
 ## Documentation
 
-### getGroup()
+### getGroupSnapshot()
 
 ```javascript
-const group = await getGroup({ groupId: "YOUR_GROUP_ID", timestamp: 1676289837 })
+const groupSnapshot: GroupSnapshot = await getGroupSnapshot({ groupId: "YOUR_GROUP_ID", timestamp: 1676289837 })
 ```
 
 | Params | Type | Description |
