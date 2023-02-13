@@ -114,8 +114,6 @@ const REQUEST = `[Group id]`
       callbackPath="/success" 
       serviceId="" 
       request={REQUEST}
-      timestamp={1675390857} 
-      value={5} 
       acceptHigherValues={false}
     />
 </div>  
@@ -124,8 +122,6 @@ const REQUEST = `[Group id]`
 | Params | Default | Type | Description |
 |---|---|---|---|
 | callbackPath | null | String | Path of the page where you want to redirect your user after the proof generation |
-| value | MAX | "MAX" \| Number | Minimum value asked to the user to generate the proof |
-| timestamp | latest | "latest" \| Number  | Timestamp of the group snapshot you want to verify your user is part of |
 | serviceId | main | string | Service id of the proof. Its define the scope of the user nullifier [learn more](https://www.notion.so/sismo/PwS-docs-819e88670d1c4d4e830d391d946a7858) |
 | acceptHigherValues | true | boolean | Define if the user can downgrade his value or not |
 
