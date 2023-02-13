@@ -84,6 +84,44 @@ const isVerified = (proof: Proof, claims: Claim[]) => {
 }
 ```
 
+## Types
+
+```javascript
+
+type Request = {
+  groupId: string;
+  timestamp: number | "latest"; //latest by default
+  value: number | "MAX"; //MAX by default
+}
+
+type Proof = {
+  claims: Claim[];
+  content: string[];
+  version: string;
+}
+
+type Claim = {
+  appId: string;
+  serviceId: string;
+  request: Request;
+  isStrict: boolean;
+}
+
+type Error = {
+  message: string
+}
+
+type VerifiedClaim = { 
+  appId: string;
+  serviceId: string;
+  request: Request;
+  isStrict: boolean;
+  proofId: string;
+  __provingSchemeData: any;
+}
+
+```
+
 ## Documentation
 
 ### getGroup()
@@ -133,13 +171,6 @@ const REQUEST = { groupId: "YOUR_GROUP_ID" };
 | appId | String | Identifier of your app |
 | request | Request | Request sent to Prove with Sismo | 
 
-```javascript
-type Request = {
-  groupId: string;
-  timestamp: number | "latest"; //latest by default
-  value: number | "MAX"; //MAX by default
-}
-```
 
 **Optional params**
 
@@ -177,25 +208,6 @@ const { claims, proof, error } = usePws();
 | claims | Claim[] | Corresponding Proof claims |
 | error | Error | Error returned by the Sismo app if your user fails to generate their proof |
 
-```javascript
-type Proof = {
-  claims: Claim[];
-  content: string[];
-  version: string;
-}
-
-type Claim = {
-  appId: string;
-  serviceId: string;
-  request: Request;
-  isStrict: boolean;
-}
-
-type Error = {
-  message: string
-}
-```
-
 ### PwSVerifier
 
 ```javascript
@@ -229,34 +241,6 @@ The proofId is deterministically generated based on the following elements:
 - An optional serviceId, which represents the specific service of the app that requested the proof
 
 By storing the proofId, you can determine if a source account has already been used in your app for a specific source account and group.
-
-```javascript
-type Proof = {
-  request: Request;
-  content: string;
-}
-
-type Claim = {
-  appId: string;
-  serviceId: string;
-  request: Request;
-  isStrict: boolean;
-}
-
-type VerifiedClaim = { 
-  appId: string;
-  serviceId: string;
-  request: Request;
-  isStrict: boolean;
-  proofId: string;
-  __provingSchemeData: any;
-}
-  
-type Error = { 
-  isValid: false;
-  message: string;
-}
-```
 
 **Optional params** 
 
