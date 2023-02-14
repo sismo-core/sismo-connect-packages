@@ -14,7 +14,7 @@
       "sourceMap": true
     },
     "include": [
-      "src/*",
+      "src",
       "./rollup.config.js"
     ],
     "exclude": [

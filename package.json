@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/pws-private",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "Prove with Sismo package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -30,7 +30,8 @@
     "access": "restricted"
   },
   "files": [
-    "lib"
+    "lib",
+    "src"
   ],
   "engines": {
     "npm": "USE YARN INSTEAD OF NPM"
@@ -38,7 +39,6 @@
   "repository": "git@github.com:sismo-core/pws-packages.git",
   "author": "gabin@sismo.io",
   "license": "MIT",
-  "private": true,
   "dependencies": {},
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
