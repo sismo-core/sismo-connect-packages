@@ -22,7 +22,7 @@ export default [
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
-    ],
+    ]
   },
   {
     input: "lib/esm/types/index.d.ts",

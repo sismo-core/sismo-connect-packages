@@ -6,13 +6,21 @@
   "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rollup -c --bundleConfigAsCjs"
+    "build": "rollup -c --bundleConfigAsCjs",
+    "prepare": "husky install",
+    "eslint": "eslint --max-warnings=0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "^18.0.28",
+    "eslint": "^8.34.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.2",
+    "prettier": "^2.8.4",
+    "react": "^18.2.0",
     "rollup": "^3.15.0",
     "rollup-plugin-dts": "^5.1.1",
     "tslib": "^2.5.0",
@@ -24,8 +32,18 @@
   "files": [
     "lib"
   ],
+  "engines": {
+    "npm": "USE YARN INSTEAD OF NPM"
+  },
   "repository": "git@github.com:sismo-core/pws-packages.git",
   "author": "gabin@sismo.io",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {},
+  "lint-staged": {
+    "src/**/*": "prettier --write --ignore-unknown",
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings=0"
+    ]
+  }
 }

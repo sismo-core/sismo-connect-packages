@@ -4,7 +4,8 @@
       "declarationDir": "./types",
       "target": "es5",
       "module": "esnext",
-      "moduleResolution": "Node",
+      "moduleResolution": "node",
+      "jsx": "react",
       "strict": true,
       "esModuleInterop": true,
       "declaration": true,
@@ -14,7 +15,7 @@
     },
     "include": [
       "src/*",
-      "rollup.config.ts"
+      "./rollup.config.js"
     ],
     "exclude": [
       "node_modules"
