@@ -1,7 +1,5 @@
 {
     "compilerOptions": {
-      "outDir": "./lib",
-      "declarationDir": "./types",
       "target": "es5",
       "module": "esnext",
       "moduleResolution": "node",
@@ -11,7 +9,8 @@
       "declaration": true,
       "skipLibCheck": true,
       "noImplicitAny": false,
-      "sourceMap": true
+      "sourceMap": true,
+      "baseUrl": ".",
     },
     "include": [
       "src",
