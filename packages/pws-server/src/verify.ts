@@ -104,43 +104,46 @@ export class PwsVerifier {
         if (request.mode !== "==" && claim.isStrict === "1") {
             throw new Error("request isStrict mismatch");
         }
-
-        let requestedValue: number;
         
         if (request.value == "MAX") {
-            //TODO get the value of the user in the group
-            requestedValue = 1000;
+            //TODO A bit weird the MAX with the mode in request
+            if (claim.isStrict !== "1") {
+                throw new Error("request isStrict mismatch");
+            }
+            if (request.mode !== "==") {
+                throw new Error("request wrong input");
+            }
         } else {
-            requestedValue = request.value as number;
+            request.value = request.value as number;
+            switch (request.mode) {
+                case '==':
+                    if (request.value !== claim.value) {
+                        throw new Error("request value mismatch");
+                    }
+                    break;
+                case '>':
+                    if (request.value > claim.value) {
+                        throw new Error("request value mismatch");
+                    }
+                    break;
+                case '>=':
+                    if (request.value >= claim.value) {
+                        throw new Error("request value mismatch");
+                    }
+                    break;
+                case '<':
+                    if (request.value < claim.value) {
+                        throw new Error("request value mismatch");
+                    }
+                    break;
+                case '<=':
+                    if (request.value <= claim.value) {
+                        throw new Error("request value mismatch");
+                    }
+                    break;
+            }
         }
 
-        switch (request.mode) {
-            case '==':
-                if (requestedValue !== claim.value) {
-                    throw new Error("request value mismatch");
-                }
-                break;
-            case '>':
-                if (requestedValue > claim.value) {
-                    throw new Error("request value mismatch");
-                }
-                break;
-            case '>=':
-                if (requestedValue >= claim.value) {
-                    throw new Error("request value mismatch");
-                }
-                break;
-            case '<':
-                if (requestedValue < claim.value) {
-                    throw new Error("request value mismatch");
-                }
-                break;
-            case '<=':
-                if (requestedValue <= claim.value) {
-                    throw new Error("request value mismatch");
-                }
-                break;
-        }
     }
 
     private async validateInput(proofPublicInputs: ProofPublicInputs, claim: Claim) {
