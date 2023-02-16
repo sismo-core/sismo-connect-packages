@@ -46,4 +46,8 @@ describe("Eddsa account", () => {
     const isValid = await HydraS1Verifier.verifyProof(validSnarkProof.a, validSnarkProof.b, validSnarkProof.c, validSnarkProof.input);
     expect(isValid).toEqual(false);
   });
+
+  it("", async () => {
+    
+  });
 });

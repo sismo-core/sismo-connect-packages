@@ -1,3 +1,5 @@
 export const BASE_URL = `https://app.sismo.io`;
 export const VERSION = `off-chain-1`;
 export const DEFAULT_SERVICE_ID = `main`;
+export const COMMITMENT_MAPPER_REGISTRY_ADDRESS = "0xe205Fb31B656791850AC65f0623937Bf6170a5Da";
+export const AVAILABLE_ROOTS_REGISTRY_ADDRESS = "0x453bF14103CC941A96721de9A32d5E3d3095e049";
