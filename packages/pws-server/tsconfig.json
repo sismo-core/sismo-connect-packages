@@ -6,8 +6,9 @@
     },
     "include": [
       "src",
+      "tests",
       "./rollup.config.js"
-    ],
+, "tests/verify.test.ts"    ],
     "exclude": [
       "node_modules"
     ]

@@ -40,6 +40,7 @@
   "author": "gabin@sismo.io",
   "license": "MIT",
   "dependencies": {
+    "@ethersproject/bignumber": "^5.7.0",
     "@sismo-core/hydra-s1": "^1.0.7"
   },
   "lint-staged": {

@@ -3,6 +3,7 @@ export type Request = {
     groupId: string;
     timestamp?: number | "latest";
     value?: number | "MAX";
+    acceptHigherValue?: boolean;
 }
 
 export type Proof = {
@@ -17,19 +18,19 @@ export type Proof = {
 
 export type Claim = {
     appId: string;
-    serviceId: string;
+    serviceName: string;
     value: number;
     groupId: string;
-    groupTimestamp: number;
-    isStrict: string;
+    timestamp: number;
+    isStrict: boolean;
 }
 
 export type VerifiedClaim = {
     appId: string;
-    serviceId: string;
+    serviceName: string;
     value: number;
     groupId: string;
-    groupTimestamp: number;
-    isStrict: string;
+    timestamp: number;
+    isStrict: boolean;
     proofId: string;
 }

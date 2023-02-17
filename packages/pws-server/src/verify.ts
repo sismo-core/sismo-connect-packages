@@ -1,15 +1,21 @@
-import { HydraS1Verifier, keccak256 } from "@sismo-core/hydra-s1";
-import { AVAILABLE_ROOTS_REGISTRY_ADDRESS, COMMITMENT_MAPPER_REGISTRY_ADDRESS, VERSION } from "./constants";
+import { HydraS1Verifier, keccak256, SNARK_FIELD } from "@sismo-core/hydra-s1";
+import { 
+    GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS, 
+    GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS, 
+    GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS, 
+    VERSION 
+} from "./constants";
 import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./contracts";
 import { Claim, Proof, Request, VerifiedClaim } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
-import { Signer } from "ethers";
+import { ethers, Signer } from "ethers";
 import { getWeb3Provider } from "./contracts/web3-providers";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export type VerifyParams = {
     proofs: Proof[];
     claims: Claim[];
-    serviceId?: string;
+    serviceName?: string;
 }
 
 export type ProofPublicInputs = {
@@ -30,26 +36,30 @@ export type VerifierParams = {
 }
 
 export type VerifierOpts = {
-    signerOrProvider: Signer | Provider,
-    commitmentMapperRegistryAddress: string,
-    availableRootsRegistryAddress: string
+    signerOrProvider?: Signer | Provider,
+    commitmentMapperRegistryAddress?: string,
+    availableRootsRegistryAddress?: string,
+    attesterAddress?: string
 }
 
 export class PwsVerifier {
     private commitmentMapperRegistry: CommitmentMapperRegistryContract;
     private availableRootsRegistry: AvailableRootsRegistryContract;
+    private attesterAddress: string;
     public appId: string;
 
     constructor({ appId }: VerifierParams, opts?: VerifierOpts) {
         this.appId = appId;
+        this.attesterAddress = opts?.attesterAddress || GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS;
+
         //By default use public gnosis provider
         const signerOrProvider = opts?.signerOrProvider || getWeb3Provider(); 
         this.commitmentMapperRegistry = new CommitmentMapperRegistryContract({ 
-            address: opts?.commitmentMapperRegistryAddress || COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+            address: opts?.commitmentMapperRegistryAddress || GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
             signerOrProvider
         });
         this.availableRootsRegistry = new AvailableRootsRegistryContract({
-            address: opts?.commitmentMapperRegistryAddress || AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+            address: opts?.commitmentMapperRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
             signerOrProvider
         });
     }
@@ -62,11 +72,11 @@ export class PwsVerifier {
             proofPublicInputs
        } = this.sanitize(request, claims, proofs);
 
-        if (proof.version !== VERSION) throw new Error(`version of the proof (${proof.version}) not compatible with this verifier`);
-        if (claim.appId !== this.appId) throw new Error(`appId mismatch`);
+        if (proof.version !== VERSION) throw new Error(`version of the proof "${proof.version}" not compatible with this verifier "${VERSION}"`);
+        if (claim.appId !== this.appId) throw new Error(`claim appId "${claim.appId}" mismatch with verifier appId "${this.appId}"`);
 
         //Check that the public input of the proof matches the claim
-        this.validateInput(proofPublicInputs, claim);
+        await this.validateInput(proofPublicInputs, claim);
 
         //Check the request
         this.validateRequest(request, claim);
@@ -77,11 +87,11 @@ export class PwsVerifier {
 
         const verifiedClaim: VerifiedClaim = {
             appId: claim.appId,
-            serviceId: claim.serviceId,
+            serviceName: claim.serviceName,
             value: claim.value,
             isStrict: claim.isStrict,
             groupId: claim.groupId,
-            groupTimestamp: claim.groupTimestamp,
+            timestamp: claim.timestamp,
             proofId: proofPublicInputs.nullifier
         };
 
@@ -116,6 +126,7 @@ export class PwsVerifier {
         if (typeof request.timestamp  === 'undefined') request.timestamp = 0;
         if (request.timestamp  === 'latest') request.timestamp = 0;
         if (typeof request.value  === 'undefined') request.value = "MAX";
+        if (typeof request.acceptHigherValue === 'undefined') request.acceptHigherValue = true;
 
         return {
             claim, 
@@ -125,59 +136,128 @@ export class PwsVerifier {
         }
     }
 
-    private async validateRequest(request: Request, claim: Claim) {
+    private validateRequest(request: Request, claim: Claim) {
         if (request.groupId !== claim.groupId) {
-            throw new Error("request groupId mismatch");
+            throw new Error(`request groupId "${request.groupId}" mismatch with claim groupId "${claim.groupId}"`);
         }
-        if (request.value == "MAX" && claim.isStrict !== "1") {
-            throw new Error("request isStrict mismatch");
+        if (request.value === "MAX" && claim.isStrict === false) {
+            throw new Error(`request value "MAX" mismatch with claim isStrict "false"`);
+        }
+        if (request.acceptHigherValue === false && request.value !== "MAX" && request.value !== claim.value) {
+            throw new Error(`with acceptHigherValue "false" request value ${request.value} must be equal to claim value ${claim.value}`);
         }
     }
 
     private async validateInput(proofPublicInputs: ProofPublicInputs, claim: Claim) {
-        if (proofPublicInputs.isStrict !== claim.isStrict) {
-            throw new Error("claim isStrict mismatch");
+        const isStrict = proofPublicInputs.isStrict === "0" ? false : true
+        if (isStrict !== claim.isStrict) {
+            throw new Error(`claim isStrict "${claim.isStrict}" mismatch with proof input isStrict "${isStrict}"`);
         }
+
         if (proofPublicInputs.claimedValue !== claim.value.toString()) {
-            throw new Error("claim value mismatch");
+            throw new Error(`claim value "${claim.value}" mismatch with proof input claimedValue "${proofPublicInputs.claimedValue}"`);
         }
 
-        const externalNullifier =  this.encodeExternalNullifier(claim.appId, claim.groupId, claim.groupTimestamp, claim.serviceId);
-        if (proofPublicInputs.externalNullifier !== externalNullifier) {
-            throw new Error("claim externalNullifier mismatch");
-        }
+        // const externalNullifier = this.encodeExternalNullifier(claim.appId, claim.groupId, claim.timestamp, claim.serviceName);
+        // if (proofPublicInputs.externalNullifier !== externalNullifier) {
+        //     throw new Error("claim externalNullifier mismatch");
+        // }
 
-        const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] = await this.commitmentMapperRegistry.getCommitmentMapperPubKey();
+        const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] = await this.getCommitmentMapperPubKey();
         if (commitmentMapperPubKeyX.toString() !== proofPublicInputs.commitmentMapperPubKeyX) {
-            throw new Error("claim commitmentMapper mismatch");
+            throw new Error(`commitmentMapperPubKeyX "${commitmentMapperPubKeyX}" mismatch with proof input commitmentMapperPubKeyX "${proofPublicInputs.commitmentMapperPubKeyX}"`);
         }
         if (commitmentMapperPubKeyY.toString() !== proofPublicInputs.commitmentMapperPubKeyY) {
-            throw new Error("claim commitmentMapper mismatch");
+            throw new Error(`commitmentMapperPubKeyY "${commitmentMapperPubKeyY}" mismatch with proof input commitmentMapperPubKeyY "${proofPublicInputs.commitmentMapperPubKeyY}"`);
         }
 
         if (proofPublicInputs.chainId !== "0") {
-            throw new Error("claim chainId must be 0");
+            throw new Error(`proof input chainId must be 0`);
         }
-        if (proofPublicInputs.destination !== "0x0000000000000000000000000000000000515110") {
-            throw new Error("claim destination must be 0x0000000000000000000000000000000000515110");
+        if (!BigNumber.from(proofPublicInputs.destination).eq("0x0000000000000000000000000000000000515110")) {
+            throw new Error(`proof input destination must be 0x0000000000000000000000000000000000515110`);
         }
 
-        const isAvailable = await this.availableRootsRegistry.isRootAvailable(proofPublicInputs.registryTreeRoot)
+        const isAvailable = await this.isRootAvailableForAttester(this.attesterAddress, proofPublicInputs.registryTreeRoot)
         if (!isAvailable) {
-            throw new Error("registry root not available");
+            throw new Error(`registry root "${proofPublicInputs.registryTreeRoot}" not available for attester with address ${this.attesterAddress}`);
         }
         
-        const groupSnapshotId = this.encodeGroupSnapshotId(claim.groupId, claim.groupTimestamp);
-        if (proofPublicInputs.accountsTreeValue !== groupSnapshotId) {
-            throw new Error("claim accountsTreeValue mismatch");
-        }
+        // const groupSnapshotId = this.encodeTreeValue(claim.groupId, claim.timestamp);
+        // if (proofPublicInputs.accountsTreeValue !== groupSnapshotId) {
+        //     throw new Error("claim accountsTreeValue mismatch");
+        // }
     }
 
-    private encodeGroupSnapshotId = (groupId: string, timestamp: number) => {
-        return keccak256([keccak256([groupId]), timestamp]).toString()
+    protected getCommitmentMapperPubKey = async () => {
+        return await this.commitmentMapperRegistry.getCommitmentMapperPubKey();
     }
 
-    private encodeExternalNullifier = (appId: string, groupId: string, groupTimestamp: number, serviceId: string) => {
-        return keccak256([appId, groupId, groupTimestamp, serviceId]).toString();
+    protected isRootAvailableForAttester = async (attesterAddress: string, registryTreeRoot: string) => {
+        return await this.availableRootsRegistry.isRootAvailableForAttester(attesterAddress, registryTreeRoot);
     }
+
+    public encodeTreeValue = (
+        groupId: string,
+        timestamp: number | "latest"
+      ) => {
+        const encodedGroupId = ethers.utils.keccak256(
+          ethers.utils.toUtf8Bytes(groupId)
+        );
+      
+        const encodedTimestamp =
+          timestamp === "latest"
+            ? ethers.utils.formatBytes32String("latest")
+            : BigNumber.from(timestamp);
+        
+        const accountsTreeValue = BigNumber.from(
+          ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [encodedGroupId, encodedTimestamp]
+            )
+          )
+        )
+          .mod(SNARK_FIELD)
+          .toHexString();
+        return accountsTreeValue;
+      };
+
+    public encodeExternalNullifier = (
+        appId: string,
+        groupId: string,
+        timestamp: number | "latest",
+        serviceName: string,
+      ) => {
+        const encodedAppId = ethers.utils.keccak256(
+          ethers.utils.toUtf8Bytes(appId)
+        );
+
+        
+        const encodedGroupId = ethers.utils.keccak256(
+          ethers.utils.toUtf8Bytes(groupId)
+        );
+      
+        const encodedTimestamp =
+          timestamp === "latest"
+            ? ethers.utils.formatBytes32String("latest")
+            : BigNumber.from(timestamp);
+      
+        const encodedServiceName = ethers.utils.keccak256(
+          ethers.utils.toUtf8Bytes(serviceName)
+        );
+
+        const externalNullifier = BigNumber.from(
+          ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32", "bytes32", "bytes32"],
+              [encodedAppId, encodedGroupId, encodedTimestamp, encodedServiceName]
+            )
+          )
+        )
+          .mod(SNARK_FIELD)
+          .toHexString();
+      
+        return externalNullifier;
+    };
 }
