@@ -40,7 +40,7 @@ export const prove = (params: ProveParams, opts?: ProveOpts): void => {
 }
 
 export type Response = {
-    proof: Proof;
+    proofs: Proof[];
     claims: Claim[];
 }
 
@@ -48,10 +48,10 @@ export const getResponse = (): Response | null => {
     if (!window) throw new Error(`getProof is not available outside of a browser`);
     const url = new URL(window.location.href);
     if (url.searchParams.has("proof") && url.searchParams.has("claims")) {
-        const proof = JSON.parse(url.searchParams.get("proof") as string);
+        const proofs = JSON.parse(url.searchParams.get("proofs") as string);
         const claims = JSON.parse(url.searchParams.get("claims") as string);
         return {
-            proof,
+            proofs,
             claims
         }
     }   

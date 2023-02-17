@@ -76,15 +76,23 @@ describe("PwsVerifier", () => {
 
   describe('Check version and appId', () => {
     it("Should throw with incorrect appId", async () => {
-      const invalidClaim = {...claim};
+      const invalidClaim = JSON.parse(JSON.stringify(claim));
       invalidClaim.appId = invalidClaim.appId + "-invalid";
       await expect(
         pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
       ).rejects.toThrow(`claim appId "${invalidClaim.appId}" mismatch with verifier appId "${appId}"`)    
     });
 
+    it("Should throw with incorrect serviceName", async () => {
+      const invalidClaim = JSON.parse(JSON.stringify(claim));
+      invalidClaim.serviceName = invalidClaim.serviceName + "-invalid";
+      await expect(
+        pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
+      ).rejects.toThrow(`claim serviceName "${invalidClaim.serviceName}" mismatch with verifier serviceName "${serviceName}"`)
+    });
+
     it("Should throw with invalid version of the proof", async () => {
-      const invalidProof = {...proof};
+      const invalidProof = JSON.parse(JSON.stringify(proof));
       invalidProof.version = invalidProof.version + "-invalid";
       await expect(
         pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
@@ -110,7 +118,7 @@ describe("PwsVerifier", () => {
 
   describe('validateInput', () => {
     it("Should throw with incorrect input isStrict", async () => {
-      const invalidClaim = {...claim};
+      const invalidClaim = JSON.parse(JSON.stringify(claim));
       const proofInputIsStrict = invalidClaim.isStrict;
       invalidClaim.isStrict = false;
       await expect(
@@ -119,7 +127,7 @@ describe("PwsVerifier", () => {
     });
 
     it("Should throw with incorrect input claimedValue", async () => {
-      const invalidClaim = {...claim};
+      const invalidClaim = JSON.parse(JSON.stringify(claim));
       const proofInputClaimedValue = invalidClaim.value;
       invalidClaim.value = invalidClaim.value + 1;
       await expect(

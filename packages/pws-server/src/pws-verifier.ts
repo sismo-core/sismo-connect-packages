@@ -64,16 +64,18 @@ export class PwsVerifier {
         });
     }
 
-    async verify (request: Request, { proofs, claims }: VerifyParams): Promise<VerifiedClaim[]> {
+    async verify (request: Request, params: VerifyParams): Promise<VerifiedClaim[]> {
        const { 
             claim, 
             proof,
             snarkProof,
-            proofPublicInputs
-       } = this.sanitize(request, claims, proofs);
+            proofPublicInputs,
+            serviceName
+       } = this.sanitize(request, params.claims, params.proofs, params.serviceName);
 
         if (proof.version !== VERSION) throw new Error(`version of the proof "${proof.version}" not compatible with this verifier "${VERSION}"`);
         if (claim.appId !== this.appId) throw new Error(`claim appId "${claim.appId}" mismatch with verifier appId "${this.appId}"`);
+        if (claim.serviceName !== serviceName) throw new Error(`claim serviceName "${claim.serviceName}" mismatch with verifier serviceName "${serviceName}"`);
 
         //Check that the public input of the proof matches the claim
         await this.validateInput(proofPublicInputs, claim);
@@ -98,7 +100,7 @@ export class PwsVerifier {
         return [verifiedClaim];
     }
 
-    private sanitize(request: Request, claims: Claim[], proofs: Proof[]) {
+    private sanitize(request: Request, claims: Claim[], proofs: Proof[], serviceName: string) {
         if (claims.length > 1) {
             throw new Error("current version of the package does not support more than one claim");
         }
@@ -127,12 +129,14 @@ export class PwsVerifier {
         if (request.timestamp  === 'latest') request.timestamp = 0;
         if (typeof request.value  === 'undefined') request.value = "MAX";
         if (typeof request.acceptHigherValue === 'undefined') request.acceptHigherValue = true;
+        if (typeof serviceName === 'undefined') serviceName = "main";
 
         return {
             claim, 
             proof,
             snarkProof,
-            proofPublicInputs
+            proofPublicInputs,
+            serviceName
         }
     }
 

@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    Prove with Sismo (PwS)
+    Prove with Sismo (PwS) React.js 
   </h3>
 
   <p align="center">
@@ -20,24 +20,4 @@
   </p>
 </div>
 
-[Prove with Sismo presentation]
-
-## Packages
-
-- [`@sismo-core/pws-client`](./packages/pws-client)
-- [`@sismo-core/pws-server`](./packages/pws-server)
-
-## License
-
-Distributed under the MIT License.
-
-## Contribute
-
-Please, feel free to open issues, PRs or simply provide feedback!
-
-## Contact
-
-Prefer [Discord](https://discord.gg/sismo) or [Twitter](https://twitter.com/sismo_eth)
-
-<br/>
-<img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
+TODO
