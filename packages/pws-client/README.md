@@ -58,6 +58,13 @@ console.log(response.claims);
 ### prove
 
 ```javascript
+type Request = {
+    groupId: string;
+    timestamp?: number | "latest";
+    value?: number | "MAX";
+    acceptHigherValue?: boolean;
+}
+
 type ProveParams = {
     appId: string;
     request: Request;
