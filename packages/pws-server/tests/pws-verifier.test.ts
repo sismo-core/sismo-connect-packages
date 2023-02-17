@@ -1,7 +1,7 @@
 import { Claim, Proof, Request, VERSION } from "../src";
-import { PwsVerifierMocked } from "./verifyMocked";
 import { proofMock1 } from "./mocks";
 import { BigNumber } from "@ethersproject/bignumber";
+import { PwsVerifierMocked } from "./pws-verifier-mocked";
 
 describe("PwsVerifier", () => {
   let pwsVerifier: PwsVerifierMocked;

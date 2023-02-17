@@ -12,7 +12,6 @@ export const getWeb3Provider = (): Provider => {
       "https://rpc.gnosis.gateway.fm",
       100
     );
-    _provider.pollingInterval = 8000;
     provider = _provider;
     return _provider;
   }

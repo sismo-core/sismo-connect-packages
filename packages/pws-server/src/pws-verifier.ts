@@ -1,15 +1,15 @@
-import { HydraS1Verifier, keccak256, SNARK_FIELD } from "@sismo-core/hydra-s1";
+import { HydraS1Verifier, SNARK_FIELD } from "@sismo-core/hydra-s1";
 import { 
     GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS, 
     GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS, 
     GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS, 
     VERSION 
 } from "./constants";
-import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./contracts";
+import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./libs/contracts";
 import { Claim, Proof, Request, VerifiedClaim } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
 import { ethers, Signer } from "ethers";
-import { getWeb3Provider } from "./contracts/web3-providers";
+import { getWeb3Provider } from "./libs/web3-providers";
 import { BigNumber } from "@ethersproject/bignumber";
 
 export type VerifyParams = {

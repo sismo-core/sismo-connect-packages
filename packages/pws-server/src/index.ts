@@ -1,3 +1,3 @@
 export * from "./types";
-export * from "./verify";
+export * from "./pws-verifier";
 export * from "./constants";

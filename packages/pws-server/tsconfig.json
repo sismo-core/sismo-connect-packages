@@ -8,7 +8,7 @@
       "src",
       "tests",
       "./rollup.config.js"
-, "tests/verify.test.ts"    ],
+, "tests/pws-verifier.test.tsest.ts"    ],
     "exclude": [
       "node_modules"
     ]
