@@ -57,7 +57,7 @@ const pws = new PwSVerifier({ appId: "YOUR_APP_ID" }, opts);
 
 **options**
 | Params | Type | Default | Description |
-|---|---|---|
+|---|---|---|---|
 | signerOrProvider | | | | 
 | commitmentMapperRegistryAddress | | | | 
 | availableRootsRegistryAddress | | | | 
