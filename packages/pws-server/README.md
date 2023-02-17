@@ -63,6 +63,8 @@ const pws = new PwSVerifier({ appId: "YOUR_APP_ID" }, opts);
 | availableRootsRegistryAddress | | | | 
 | attesterAddress | | | | 
 
+### verify
+
 ```javascript
 type Request = {
     groupId: string;
