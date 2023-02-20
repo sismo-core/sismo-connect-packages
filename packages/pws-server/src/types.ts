@@ -1,5 +1,7 @@
 
 export type Request = {
+    appId: string;
+    serviceName: string;
     groupId: string;
     timestamp?: number | "latest";
     value?: number | "MAX";
@@ -17,20 +19,22 @@ export type Proof = {
 }
 
 export type Claim = {
-    appId: string;
-    serviceName: string;
-    value: number;
+    value: number | "MAX";
     groupId: string;
-    timestamp: number;
-    isStrict: boolean;
+    timestamp: number | "latest";
+    acceptHigherValue: boolean;
 }
 
 export type VerifiedClaim = {
     appId: string;
     serviceName: string;
-    value: number;
+    serviceId: string;
+    value: number | "MAX";
     groupId: string;
-    timestamp: number;
-    isStrict: boolean;
+    timestamp: number | "latest";
+    acceptHigherValue: boolean;
     proofId: string;
+    groupSnapshotId: string;
+    requestIdentifier: string;
+    __snarkProof: any;
 }

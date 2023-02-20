@@ -2,25 +2,27 @@ import { Claim, Proof, Request, VERSION } from "../src";
 import { proofMock1 } from "./mocks";
 import { BigNumber } from "@ethersproject/bignumber";
 import { PwsVerifierMocked } from "./pws-verifier-mocked";
+import { encodeRequestIdentifier } from "../src/utils/encodeRequestIdentifier";
+import { encodeAccountsTreeValue } from "../src/utils/encodeAccountsTreeValue";
 
 describe("PwsVerifier", () => {
   let pwsVerifier: PwsVerifierMocked;
   let appId: string;
   let serviceName: string;
   let groupId: string;
-  let timestamp: number;
-  let isStrict: boolean;
+  let timestamp: number | "latest";
+  let acceptHigherValue: boolean;
 
   let claim: Claim;
   let proof: Proof;
   let request: Request;
 
   beforeAll(() => {
-    appId = "123-456-789";
+    appId = '0xc6acc12e813a48e6a8151ce405551123';
     serviceName = "main";
-    groupId = "group-id";
-    timestamp = 0;
-    isStrict = true;
+    groupId = "0xc4c12da439e843268db139408f1d5573";
+    timestamp = "latest";
+    acceptHigherValue = true;
 
     pwsVerifier = new PwsVerifierMocked({
       commitmentMapperPubKey: [
@@ -32,12 +34,10 @@ describe("PwsVerifier", () => {
     });
 
     claim = {
-      appId,
-      serviceName,
       value: 1,
       groupId,
       timestamp,
-      isStrict,
+      acceptHigherValue,
     }
 
     proof = {
@@ -46,27 +46,23 @@ describe("PwsVerifier", () => {
     }
 
     request = {
+      appId,
+      serviceName,
       groupId,
       timestamp,
       value: "MAX"
     }
   })
 
-  describe('Check externalNullifier + accounts tree value encode functions', () => {
+  describe('check externalNullifier + accounts tree value encode functions', () => {
     it("Should encode the right external nullifier", async () => {
-      const appId = 'c6acc12e-813a-48e6-a815-1ce405551123';
-      const groupId = 'c4c12da4-39e8-4326-8db1-39408f1d5573';
-      const timestamp = 'latest';
-      const serviceName = 'main';
-      const externalNullifier = pwsVerifier.encodeExternalNullifier(appId, groupId, timestamp, serviceName);
-      expect(externalNullifier).toEqual("0x2798e8c3d3c84c7fdd18e9c3d22773a2b9a9e97c1c8a3bd999c96516685e555e");
+      const externalNullifier = encodeRequestIdentifier(appId, groupId, timestamp, serviceName);
+      expect(externalNullifier).toEqual("0x227084ef4e9392373c0f4108ff309cd1b16c94a7a7ba065d9e73b809d9159f50");
     });
-
+    
     it("Should encode the right Accounts Tree value", async () => {
-      const groupId = 'c4c12da4-39e8-4326-8db1-39408f1d5573';
-      const timestamp = 'latest';
-      const accountsTreeValue = pwsVerifier.encodeTreeValue(groupId, timestamp);
-      expect(accountsTreeValue).toEqual("0x02d736340d55f9b8e06b75c021badf5103c68b44d0f1bd272ac5f5a0c6164bd8");
+      const accountsTreeValue = encodeAccountsTreeValue(groupId, timestamp);
+      expect(accountsTreeValue).toEqual("0x032ff3d8b521c27fac7022668917f3fecb91d3438c8e3dbaf07829b03ffffffc");
     });
   })
 
@@ -74,23 +70,7 @@ describe("PwsVerifier", () => {
   /******************************************* VERSION + APPID ********************************************/
   /********************************************************************************************************/
 
-  describe('Check version and appId', () => {
-    it("Should throw with incorrect appId", async () => {
-      const invalidClaim = JSON.parse(JSON.stringify(claim));
-      invalidClaim.appId = invalidClaim.appId + "-invalid";
-      await expect(
-        pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
-      ).rejects.toThrow(`claim appId "${invalidClaim.appId}" mismatch with verifier appId "${appId}"`)    
-    });
-
-    it("Should throw with incorrect serviceName", async () => {
-      const invalidClaim = JSON.parse(JSON.stringify(claim));
-      invalidClaim.serviceName = invalidClaim.serviceName + "-invalid";
-      await expect(
-        pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
-      ).rejects.toThrow(`claim serviceName "${invalidClaim.serviceName}" mismatch with verifier serviceName "${serviceName}"`)
-    });
-
+  describe('check version and appId', () => {
     it("Should throw with invalid version of the proof", async () => {
       const invalidProof = JSON.parse(JSON.stringify(proof));
       invalidProof.version = invalidProof.version + "-invalid";
@@ -119,11 +99,10 @@ describe("PwsVerifier", () => {
   describe('validateInput', () => {
     it("Should throw with incorrect input isStrict", async () => {
       const invalidClaim = JSON.parse(JSON.stringify(claim));
-      const proofInputIsStrict = invalidClaim.isStrict;
-      invalidClaim.isStrict = false;
+      invalidClaim.acceptHigherValue = false;
       await expect(
         pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
-      ).rejects.toThrow(`claim isStrict "${invalidClaim.isStrict}" mismatch with proof input isStrict "${proofInputIsStrict}"`)    
+      ).rejects.toThrow(`claim acceptHigherValue "${invalidClaim.acceptHigherValue}" mismatch with proof input acceptHigherValue "${!invalidClaim.acceptHigherValue}"`)    
     });
 
     it("Should throw with incorrect input claimedValue", async () => {
@@ -135,14 +114,21 @@ describe("PwsVerifier", () => {
       ).rejects.toThrow(`claim value "${invalidClaim.value}" mismatch with proof input claimedValue "${proofInputClaimedValue}"`)    
     });
 
-    //TODO Test externalNullifier
+    it("Should throw with incorrect input external nullifier", async () => {
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[5] = invalidProof.snarkProof.input[5] + "1";
+      const externalNullifier = encodeRequestIdentifier(appId, groupId, timestamp, serviceName);
+      await expect(
+        pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`requestIdentifier "${BigNumber.from(externalNullifier).toHexString()}" mismatch with proof input externalNullifier "${BigNumber.from(invalidProof.snarkProof.input[5]).toHexString()}"`)    
+    });
 
     it("Should throw with incorrect input commitmentMapperPubKeyX", async () => {
       const invalidProof = JSON.parse(JSON.stringify(proof));
       invalidProof.snarkProof.input[2] = invalidProof.snarkProof.input[2] + "1";
       await expect(
         pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
-      ).rejects.toThrow(`commitmentMapperPubKeyX "${proofMock1.commitmentMapperPubKey[0]}" mismatch with proof input commitmentMapperPubKeyX "${invalidProof.snarkProof.input[2]}"`)    
+      ).rejects.toThrow(`commitmentMapperPubKeyX "${BigNumber.from(proofMock1.commitmentMapperPubKey[0]).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(invalidProof.snarkProof.input[2]).toHexString()}"`)    
     });
 
     it("Should throw with incorrect input commitmentMapperPubKeyY", async () => {
@@ -150,7 +136,7 @@ describe("PwsVerifier", () => {
       invalidProof.snarkProof.input[3] = invalidProof.snarkProof.input[3] + "1";
       await expect(
         pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
-      ).rejects.toThrow(`commitmentMapperPubKeyY "${proofMock1.commitmentMapperPubKey[1]}" mismatch with proof input commitmentMapperPubKeyY "${invalidProof.snarkProof.input[3]}"`)    
+      ).rejects.toThrow(`commitmentMapperPubKeyY "${BigNumber.from(proofMock1.commitmentMapperPubKey[1]).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(invalidProof.snarkProof.input[3]).toHexString()}"`)    
     });
 
     it("Should throw with incorrect input chainId", async () => {
@@ -168,6 +154,16 @@ describe("PwsVerifier", () => {
         pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
       ).rejects.toThrow(`proof input destination must be 0x0000000000000000000000000000000000515110`)    
     });
+
+    it("Should throw with incorrect accountsTreeValue", async () => {
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[8] = "0x123456789";
+
+      const accountsTreeValue = encodeAccountsTreeValue(groupId, timestamp);
+      await expect(
+        pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`claim accountsTreeValue "${accountsTreeValue}" mismatch with proof input accountsTreeValue "${invalidProof.snarkProof.input[8]}"`)    
+    });
   });
 
   /********************************************************************************************************/
@@ -178,41 +174,93 @@ describe("PwsVerifier", () => {
     it("Should throw with incorrect request groupId", async () => {
       const invalidRequest = JSON.parse(JSON.stringify(request));
       invalidRequest.groupId = "1";
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[5] = "0x2c22fb131056c3f27dc64de632312bd63eb08244ff51b8c8f394bb8bee20ac89";
       await expect(
-        pwsVerifier.verify(invalidRequest, { proofs: [proof], claims: [claim] })
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
       ).rejects.toThrow(`request groupId "${invalidRequest.groupId}" mismatch with claim groupId "${claim.groupId}"`)    
     });
 
-    it("Should throw with value max and claim isStrict false", async () => {
+    it("Should throw with incorrect isStrict", async () => {
       const invalidClaim = JSON.parse(JSON.stringify(claim));
-      invalidClaim.isStrict = false;
+      invalidClaim.acceptHigherValue = false;
       const invalidProof= JSON.parse(JSON.stringify(proof));
       invalidProof.snarkProof.input[9] = "0";
       await expect(
         pwsVerifier.verify(request, { proofs: [invalidProof], claims: [invalidClaim] })
-      ).rejects.toThrow(`request value "MAX" mismatch with claim isStrict "false"`)    
+      ).rejects.toThrow(`request acceptHigherValue "${request.acceptHigherValue}" mismatch with claim acceptHigherValue "${invalidClaim.acceptHigherValue}"`)    
     });
-
-
-    it("Should throw with acceptHigherValue false and request.value !== claim.value", async () => {
+    
+    it("Should throw with incorrect appId", async () => {
       const invalidRequest = JSON.parse(JSON.stringify(request));
-      invalidRequest.acceptHigherValue = false;
-      invalidRequest.value = "2";
-      const invalidProof= JSON.parse(JSON.stringify(proof));
-      invalidProof.snarkProof.input[7] = "3";
-      const invalidClaim= JSON.parse(JSON.stringify(claim));
-      invalidClaim.value = "3";
+      invalidRequest.appId = "1230";
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[5] = "0x0b7994dcd861d5517a3975efa64e4341285c5c56c5af3d801b79f04ec3f88758";
       await expect(
-        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [invalidClaim] })
-      ).rejects.toThrow(`with acceptHigherValue "false" request value ${invalidRequest.value} must be equal to claim value ${invalidClaim.value}`)    
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`request appId "${invalidRequest.appId}" mismatch with verifier appId "${appId}"`)    
     });
-  })
+  });
 
   /********************************************************************************************************/
   /****************************************** PROOF VALIDITY **********************************************/
   /********************************************************************************************************/
 
   describe('proof validity', () => {
-    //TODO Check proof validity
+    it("Should throw with incorrect proof", async () => {
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.a[0] = invalidProof.snarkProof.a[0] + "1";
+      await expect(
+        pwsVerifier.verify(request, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow("proof not valid")  
+    });
+
+    it("Should return a verified claim with correct proof", async () => {
+      const verifiedClaim = await pwsVerifier.verify(request, { proofs: [proof], claims: [claim] });
+      expect(verifiedClaim).toEqual([{
+        appId: '0xc6acc12e813a48e6a8151ce405551123',
+        serviceName: 'main',
+        serviceId: "0xc6acc12e813a48e6a8151ce405551123b8e2054f8a912367e38a22ce773328ff",
+        groupSnapshotId: "0x032ff3d8b521c27fac7022668917f3fecb91d3438c8e3dbaf07829b03ffffffc",
+        value: 1,
+        acceptHigherValue: true,
+        groupId: '0xc4c12da439e843268db139408f1d5573',
+        timestamp: 'latest',
+        proofId: '8972282394841268138633080018831883405423777974665648640910556154949929529300',
+        requestIdentifier: "0x227084ef4e9392373c0f4108ff309cd1b16c94a7a7ba065d9e73b809d9159f50",
+        __snarkProof: {
+          input: [
+            '5329168',
+            '0',
+            '3268380547641047729088085784617708493474401130426516096643943726492544573596',
+            '15390691699624678165709040191639591743681460873292995904381058558679154201615',
+            '18842723479429738246940957542769420419574146477922407789765830653118305296077',
+            '15577441205306332055325931989411418517707301098017345995017221025629465845584',
+            '8972282394841268138633080018831883405423777974665648640910556154949929529300',
+            '1',
+            '1441663324580546192156355205263195961988190260857585525130097835837963108348',
+            '1'
+          ],
+          a: [
+            '4196736981696408709086117209472386403791660536026706959200452407795010156604',
+            '10580236049154242771546166284584401854611591853679777784963153391363424691954'
+          ],
+          b: [
+            [
+              '21830407776151870670024118581447977151357859514884184106141072711593241127597',
+              '9176031632615948628380541651774655423474358409175566600161655728696414402014'
+            ],
+            [
+              '5681414268806358182066702054377689227486911090254536963556758484068123421602',
+              '20696263251728531998359123510072866687967761505540730550489315318398013516015'
+            ]
+          ],
+          c: [
+            '16981187939803963895177873437103091261521867024828554602853151345947339905502',
+            '5791640696146075943241392388778281863220982357101564680314775332054029456965'
+          ]
+        },
+      }]);
+    })
   })
-});
+})
