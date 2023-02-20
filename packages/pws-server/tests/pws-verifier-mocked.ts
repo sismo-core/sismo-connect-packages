@@ -9,8 +9,8 @@ type VerifierMockedParams = {
 export class PwsVerifierMocked extends PwsVerifier {
     private commitmentMapperPubKey: [BigNumber, BigNumber];
 
-    constructor(mockedParams: VerifierMockedParams, params: VerifierParams, opts?: VerifierOpts) {
-        super(params, opts);
+    constructor(mockedParams: VerifierMockedParams, opts?: VerifierOpts) {
+        super(opts);
         this.commitmentMapperPubKey = mockedParams.commitmentMapperPubKey;
     }
 

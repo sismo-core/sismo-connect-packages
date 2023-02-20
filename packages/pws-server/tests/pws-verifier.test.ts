@@ -22,18 +22,18 @@ describe("PwsVerifier", () => {
     serviceName = "main";
     groupId = "0xc4c12da439e843268db139408f1d5573";
     timestamp = "latest";
-    acceptHigherValue = true;
+    acceptHigherValue = false;
 
     pwsVerifier = new PwsVerifierMocked({
       commitmentMapperPubKey: [
         BigNumber.from(proofMock1.commitmentMapperPubKey[0]), 
         BigNumber.from(proofMock1.commitmentMapperPubKey[1])
       ]
-    }, { 
-      appId 
     });
 
     claim = {
+      appId,
+      serviceName,
       value: 1,
       groupId,
       timestamp,
@@ -50,7 +50,8 @@ describe("PwsVerifier", () => {
       serviceName,
       groupId,
       timestamp,
-      value: "MAX"
+      value: "MAX",
+      acceptHigherValue
     }
   })
 
@@ -70,7 +71,7 @@ describe("PwsVerifier", () => {
   /******************************************* VERSION + APPID ********************************************/
   /********************************************************************************************************/
 
-  describe('check version and appId', () => {
+  describe('check version of the proof', () => {
     it("Should throw with invalid version of the proof", async () => {
       const invalidProof = JSON.parse(JSON.stringify(proof));
       invalidProof.version = invalidProof.version + "-invalid";
@@ -99,7 +100,7 @@ describe("PwsVerifier", () => {
   describe('validateInput', () => {
     it("Should throw with incorrect input isStrict", async () => {
       const invalidClaim = JSON.parse(JSON.stringify(claim));
-      invalidClaim.acceptHigherValue = false;
+      invalidClaim.acceptHigherValue = true;
       await expect(
         pwsVerifier.verify(request, { proofs: [proof], claims: [invalidClaim] })
       ).rejects.toThrow(`claim acceptHigherValue "${invalidClaim.acceptHigherValue}" mismatch with proof input acceptHigherValue "${!invalidClaim.acceptHigherValue}"`)    
@@ -181,16 +182,48 @@ describe("PwsVerifier", () => {
       ).rejects.toThrow(`request groupId "${invalidRequest.groupId}" mismatch with claim groupId "${claim.groupId}"`)    
     });
 
-    it("Should throw with incorrect isStrict", async () => {
-      const invalidClaim = JSON.parse(JSON.stringify(claim));
-      invalidClaim.acceptHigherValue = false;
-      const invalidProof= JSON.parse(JSON.stringify(proof));
-      invalidProof.snarkProof.input[9] = "0";
+    it("Should throw with incorrect request timestamp", async () => {
+      const invalidRequest = JSON.parse(JSON.stringify(request));
+      invalidRequest.timestamp = 0;
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[5] = "0x1706c37c2b8f34951e1a244b37a5948d40a6f2f17604a3eae4e96c0ab86c68b7";
       await expect(
-        pwsVerifier.verify(request, { proofs: [invalidProof], claims: [invalidClaim] })
-      ).rejects.toThrow(`request acceptHigherValue "${request.acceptHigherValue}" mismatch with claim acceptHigherValue "${invalidClaim.acceptHigherValue}"`)    
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`request timestamp "${invalidRequest.timestamp}" mismatch with claim timestamp "${claim.timestamp}"`)    
+    });
+
+    it("Should throw with incorrect request value", async () => {
+      const invalidRequest = JSON.parse(JSON.stringify(request));
+      invalidRequest.value = 10;
+      const invalidProof = JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[5] = "0x227084ef4e9392373c0f4108ff309cd1b16c94a7a7ba065d9e73b809d9159f50";
+      await expect(
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`request value "${invalidRequest.value}" is higher than claim value "${claim.value}"`)    
+    });
+
+    it("Should throw with incorrect acceptHigherValue", async () => {
+      const invalidRequest = JSON.parse(JSON.stringify(request));
+      invalidRequest.acceptHigherValue = true;
+      const invalidProof= JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[9] = "1";
+      await expect(
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
+      ).rejects.toThrow(`request acceptHigherValue "${invalidRequest.acceptHigherValue}" mismatch with claim acceptHigherValue "${claim.acceptHigherValue}"`)    
     });
     
+    it("Should throw with acceptHigherValue false and claim.value > request.value", async () => {
+      const invalidClaim= JSON.parse(JSON.stringify(claim));
+      invalidClaim.value = 2;
+      const invalidProof= JSON.parse(JSON.stringify(proof));
+      invalidProof.snarkProof.input[7] = "2";
+      const invalidRequest= JSON.parse(JSON.stringify(request));
+      invalidRequest.value = 1;
+      await expect(
+        pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [invalidClaim] })
+      ).rejects.toThrow(`with acceptHigherValue "false" request value "${invalidRequest.value}" can't be lower than claim value "${invalidClaim.value}"`)    
+    });
+
     it("Should throw with incorrect appId", async () => {
       const invalidRequest = JSON.parse(JSON.stringify(request));
       invalidRequest.appId = "1230";
@@ -198,7 +231,7 @@ describe("PwsVerifier", () => {
       invalidProof.snarkProof.input[5] = "0x0b7994dcd861d5517a3975efa64e4341285c5c56c5af3d801b79f04ec3f88758";
       await expect(
         pwsVerifier.verify(invalidRequest, { proofs: [invalidProof], claims: [claim] })
-      ).rejects.toThrow(`request appId "${invalidRequest.appId}" mismatch with verifier appId "${appId}"`)    
+      ).rejects.toThrow(`request appId "${invalidRequest.appId}" mismatch with claim appId "${claim.appId}"`)    
     });
   });
 
@@ -223,7 +256,7 @@ describe("PwsVerifier", () => {
         serviceId: "0xc6acc12e813a48e6a8151ce405551123b8e2054f8a912367e38a22ce773328ff",
         groupSnapshotId: "0x032ff3d8b521c27fac7022668917f3fecb91d3438c8e3dbaf07829b03ffffffc",
         value: 1,
-        acceptHigherValue: true,
+        acceptHigherValue: false,
         groupId: '0xc4c12da439e843268db139408f1d5573',
         timestamp: 'latest',
         proofId: '8972282394841268138633080018831883405423777974665648640910556154949929529300',

@@ -19,6 +19,8 @@ export type Proof = {
 }
 
 export type Claim = {
+    appId: string;
+    serviceName: string;
     value: number | "MAX";
     groupId: string;
     timestamp: number | "latest";

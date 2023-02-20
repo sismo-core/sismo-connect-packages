@@ -48,10 +48,8 @@ export class PwsVerifier {
     private commitmentMapperRegistry: CommitmentMapperRegistryContract;
     private availableRootsRegistry: AvailableRootsRegistryContract;
     private attesterAddress: string;
-    public appId: string;
 
-    constructor({ appId }: VerifierParams, opts?: VerifierOpts) {
-        this.appId = appId;
+    constructor(opts?: VerifierOpts) {
         this.attesterAddress = opts?.attesterAddress || GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS;
 
         //By default use public gnosis provider
@@ -87,9 +85,9 @@ export class PwsVerifier {
         if (!isValid) throw new Error("proof not valid");
 
         const verifiedClaim: VerifiedClaim = {
-            appId: request.appId,
-            serviceId: encodeServiceId(request.appId, request.serviceName),
-            serviceName: request.serviceName,
+            appId: claim.appId,
+            serviceId: encodeServiceId(claim.appId, claim.serviceName),
+            serviceName: claim.serviceName,
             value: claim.value,
             acceptHigherValue: claim.acceptHigherValue,
             groupId: claim.groupId,
@@ -145,14 +143,24 @@ export class PwsVerifier {
         if (request.groupId !== claim.groupId) {
             throw new Error(`request groupId "${request.groupId}" mismatch with claim groupId "${claim.groupId}"`);
         }
+        if (request.timestamp !== claim.timestamp) {
+            throw new Error(`request timestamp "${request.timestamp}" mismatch with claim timestamp "${claim.timestamp}"`);
+        }
+        if (request.value > claim.value) {
+            throw new Error(`request value "${request.value}" is higher than claim value "${claim.value}"`);
+        }
+        if (!request.acceptHigherValue && (request.value < claim.value)) {
+            throw new Error(`with acceptHigherValue "false" request value "${request.value}" can't be lower than claim value "${claim.value}"`);
+        }
         if (request.acceptHigherValue !== claim.acceptHigherValue) {
             throw new Error(`request acceptHigherValue "${request.acceptHigherValue}" mismatch with claim acceptHigherValue "${claim.acceptHigherValue}"`);
         }
-        if (request.appId !== this.appId) throw new Error(`request appId "${request.appId}" mismatch with verifier appId "${this.appId}"`);
+        if (request.appId !== claim.appId) throw new Error(`request appId "${request.appId}" mismatch with claim appId "${claim.appId}"`);
+        if (request.serviceName !== claim.serviceName) throw new Error(`request serviceName "${request.serviceName}" mismatch with claim serviceName "${claim.serviceName}"`);
       }
 
     private async validateInput(proofPublicInputs: ProofPublicInputs, claim: Claim, request: Request) {
-        const proofAcceptHigherValue = proofPublicInputs.isStrict !== "0"
+        const proofAcceptHigherValue = (proofPublicInputs.isStrict === "0");
         if (proofAcceptHigherValue !== claim.acceptHigherValue) {
             throw new Error(`claim acceptHigherValue "${claim.acceptHigherValue}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`);
         }
