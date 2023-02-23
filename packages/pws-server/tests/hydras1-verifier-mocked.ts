@@ -1,12 +1,12 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { PwsVerifier, VerifierOpts, VerifierParams } from "../src";
+import { HydraS1Verifier, VerifierOpts } from "../src/verifier/hydras1-verifier";
 
 
 type VerifierMockedParams = {
     commitmentMapperPubKey: [BigNumber, BigNumber]
 }
 
-export class PwsVerifierMocked extends PwsVerifier {
+export class PwsVerifierMocked extends HydraS1Verifier {
     private commitmentMapperPubKey: [BigNumber, BigNumber];
 
     constructor(mockedParams: VerifierMockedParams, opts?: VerifierOpts) {

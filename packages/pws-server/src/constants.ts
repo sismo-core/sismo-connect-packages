@@ -1,5 +1,4 @@
 export const BASE_URL = `https://app.sismo.io`;
-export const VERSION = `off-chain-1`;
 export const DEFAULT_SERVICE_ID = `main`;
 
 export const GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS = "0xe205Fb31B656791850AC65f0623937Bf6170a5Da";
