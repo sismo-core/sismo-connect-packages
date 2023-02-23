@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./lib",
+      "declarationDir": "./types",
+    },
+    "include": [
+      "src",
+      "tests",
+      "./rollup.config.js"
+, "tests/pws-verifier.test.tsest.ts"    ],
+    "exclude": [
+      "node_modules"
+    ]
+}

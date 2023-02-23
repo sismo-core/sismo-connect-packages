@@ -5,24 +5,13 @@ import dts from "rollup-plugin-dts";
 
 export default [
   {
-    input: "src/index.esm.ts",
+    input: "src/index.ts",
     output: [
       {
         file: "lib/esm/index.js",
         format: "esm",
         sourcemap: true,
       },
-    ],
-    plugins: [
-      resolve(),
-      commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
-    ],
-    external: ['react']
-  },
-  {
-    input: "src/index.cjs.ts",
-    output: [
       {
         file: "lib/cjs/index.js",
         format: "cjs",
@@ -33,7 +22,7 @@ export default [
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
-    ]
+    ],
   },
   {
     input: "lib/esm/types/index.d.ts",
