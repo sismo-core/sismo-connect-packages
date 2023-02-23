@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/pws-client-private",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Prove with Sismo client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
