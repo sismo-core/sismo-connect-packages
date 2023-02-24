@@ -93,6 +93,7 @@ export class HydraS1Verifier extends BaseVerifier {
         const { membership, appId, serviceName, targetGroup } = params;
         const snarkProof = membership.proof;
 
+        if (typeof targetGroup.additionalProperties === 'undefined') targetGroup.additionalProperties = {};
         if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') {
             targetGroup.additionalProperties.acceptHigherValue = true;
         }
@@ -113,7 +114,7 @@ export class HydraS1Verifier extends BaseVerifier {
         if (membership.timestamp !== targetGroup.timestamp) {
             throw new Error(`on proofId "${membership.proofId}" timestamp "${membership.timestamp}" mismatch with targetGroup timestamp "${targetGroup.timestamp}"`);
         }
-        if (targetGroup.value !== 'MAX' &&  membership.value !== targetGroup.value) {
+        if (targetGroup.value !== 'MAX' &&  (Number(membership.value) !== Number(targetGroup.value))) {
             throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" is not equal to targetGroup value "${targetGroup.value}"`);
         }
     }

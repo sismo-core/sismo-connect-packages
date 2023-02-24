@@ -6,9 +6,7 @@
     },
     "include": [
       "src",
-      "tests",
-      "./rollup.config.js"
-, "tests/pws-verifier.test.tsest.ts"    ],
+      "./rollup.config.js"],
     "exclude": [
       "node_modules"
     ]

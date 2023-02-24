@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { Provider } from "@ethersproject/abstract-provider";
 
 let provider;
-
 export const getWeb3Provider = (): Provider => {
   if (provider) {
     return provider;

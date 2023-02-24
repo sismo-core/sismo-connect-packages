@@ -1,7 +1,7 @@
 export type TargetGroup = {
     groupId: string;
-    timestamp: number | 'latest';
-    value: number | 'MAX';
+    timestamp?: number | 'latest';
+    value?: number | 'MAX';
     additionalProperties?: any;
   }
   
