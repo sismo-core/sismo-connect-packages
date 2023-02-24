@@ -1,10 +1,11 @@
 import { PwsProof, PwsReceipt, TargetComposedGroup, TargetGroup } from "./types";
-import { Verifier } from "./verifier";
-import { Provider } from "@ethersproject/abstract-provider";
-import { Signer } from "ethers";
+import { Verifier, VerifierOpts } from "./verifier";
 
 export type PwsParams = {
     appId: string;
+    opts?: {
+        verifier?: VerifierOpts
+    }
 }
 
 export type VerifyParams = {
@@ -13,27 +14,16 @@ export type VerifyParams = {
     serviceName?: string,
 }
 
-export type PwsOpts = {
-    verifier?: {
-        hydraS1?: {
-            signerOrProvider?: Signer | Provider,
-            commitmentMapperRegistryAddress?: string,
-            availableRootsRegistryAddress?: string,
-            attesterAddress?: string
-        }
-    }
-}
-
 export const PWS_VERSION = `off-chain-1`;
 
 export class Pws {
     private _appId: string;
     private _verifier: Verifier;
 
-    constructor(params: PwsParams, opts?: PwsOpts) {
+    constructor(params: PwsParams) {
         const { appId } = params;
         this._appId = appId;
-        this._verifier = new Verifier(opts?.verifier);
+        this._verifier = new Verifier(params?.opts?.verifier);
     }
 
     public verify = async (params: VerifyParams): Promise<PwsReceipt>  => {
