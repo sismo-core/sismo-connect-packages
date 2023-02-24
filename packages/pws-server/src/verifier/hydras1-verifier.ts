@@ -1,8 +1,7 @@
 import { HydraS1Verifier as HydraS1VerifierPS } from "@sismo-core/hydra-s1";
 import { 
     GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS, 
-    GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS, 
-    GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS
+    GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
 } from "../constants";
 import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./libs/contracts";
 import { Membership, TargetGroup } from "../types";
@@ -34,8 +33,7 @@ export type VerifierParams = {
 export type HydraS1VerifierOpts = {
     signerOrProvider?: Signer | Provider,
     commitmentMapperRegistryAddress?: string,
-    availableRootsRegistryAddress?: string,
-    attesterAddress?: string
+    availableRootsRegistryAddress?: string
 }
 
 export type SnarkProof = {
@@ -55,7 +53,6 @@ export class HydraS1Verifier extends BaseVerifier {
 
     constructor(opts?: HydraS1VerifierOpts) {
         super();
-        this._attesterAddress = opts?.attesterAddress || GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS;
 
         //By default use public gnosis provider
         const signerOrProvider = opts?.signerOrProvider || getWeb3Provider(); 
@@ -166,7 +163,7 @@ export class HydraS1Verifier extends BaseVerifier {
         if (!BigNumber.from(input[0]).eq("0x0000000000000000000000000000000000515110")) {
             throw new Error(`on proofId "${membership.proofId}" proof input destination must be 0x0000000000000000000000000000000000515110`);
         }
-        const isAvailable = await this.IsRootAvailable(this._attesterAddress, input[4])
+        const isAvailable = await this.IsRootAvailable(input[4])
         if (!isAvailable) {
             throw new Error(`on proofId "${membership.proofId}" registry root "${input[4]}" not available for attester with address ${this._attesterAddress}`);
         }
@@ -180,7 +177,7 @@ export class HydraS1Verifier extends BaseVerifier {
         return await this._commitmentMapperRegistry.getCommitmentMapperPubKey();
     }
 
-    protected IsRootAvailable = async (attesterAddress: string, registryTreeRoot: string) => {
-        return await this._availableRootsRegistry.IsRootAvailable(attesterAddress, registryTreeRoot);
+    protected IsRootAvailable = async (registryTreeRoot: string) => {
+        return await this._availableRootsRegistry.IsRootAvailable(registryTreeRoot);
     }
 }
