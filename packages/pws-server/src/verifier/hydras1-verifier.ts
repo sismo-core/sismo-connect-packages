@@ -49,7 +49,6 @@ export const HYDRAS1_VERIFIER_VERSION = "1.0.7";
 export class HydraS1Verifier extends BaseVerifier {
     private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
     private _availableRootsRegistry: AvailableRootsRegistryContract;
-    private _attesterAddress: string;
 
     constructor(opts?: HydraS1VerifierOpts) {
         super();
@@ -165,7 +164,7 @@ export class HydraS1Verifier extends BaseVerifier {
         }
         const isAvailable = await this.IsRootAvailable(input[4])
         if (!isAvailable) {
-            throw new Error(`on proofId "${membership.proofId}" registry root "${input[4]}" not available for attester with address ${this._attesterAddress}`);
+            throw new Error(`on proofId "${membership.proofId}" registry root "${input[4]}" not available`);
         }
         const groupSnapshotId = encodeAccountsTreeValue(membership.groupId, membership.timestamp);
         if (!BigNumber.from(input[8]).eq(groupSnapshotId)) {
