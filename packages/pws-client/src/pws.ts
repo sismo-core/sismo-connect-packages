@@ -1,18 +1,16 @@
-import { DEFAULT_BASE_URL, DEFAULT_SERVICE_NAME, VERSION } from "./constants";
+import { DEFAULT_BASE_URL, VERSION } from "./constants";
 import { PwsProof, TargetComposedGroup, TargetGroup } from "./types";
 
 export type PwsParams = {
     appId: string;
-}
-
-export type PwsOpts = {
-    vaultAppBaseUrl?: string;
+    opts?: {
+        vaultAppBaseUrl?: string;
+    }
 }
 
 export type PwsProofRequestParams = {
-    appId: string;
-    serviceName: string;
     targetGroup: TargetGroup | TargetComposedGroup;
+    serviceName?: string;
     callbackPath?: string;
 }
 
@@ -20,16 +18,15 @@ export class Pws {
     private _appId: string;
     private _vaultAppBaseUrl: string;
 
-    constructor(params: PwsParams, opts?: PwsOpts) {
-        this.appId = params.appId;
-        this.vaultAppBaseUrl = opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
+    constructor(params: PwsParams) {
+        this._appId = params.appId;
+        this._vaultAppBaseUrl = params?.opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
     }
 
     public requestProof = (params: PwsProofRequestParams)  => {
         if (!window) throw new Error(`requestProof is not available outside of a browser`);
 
         let url = `${this._vaultAppBaseUrl}/pws?version=${VERSION}&appId=${this._appId}`;
-        url += `&serviceName=${params.serviceName || DEFAULT_SERVICE_NAME}`
         if ((params.targetGroup as TargetGroup).groupId) {
             let targetGroup: TargetGroup = (params.targetGroup as TargetGroup);
             if (typeof targetGroup.timestamp === 'undefined') {
@@ -44,6 +41,9 @@ export class Pws {
         }
         if (typeof params.callbackPath !== 'undefined') {
             url += `&callbackPath=${params.callbackPath}`
+        }
+        if (typeof params.serviceName !== 'undefined') {
+            url += `&serviceName=${params.serviceName}`
         }
 
         window.location.href = encodeURI(url);
