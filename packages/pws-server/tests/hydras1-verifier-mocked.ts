@@ -1,15 +1,14 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { PwsVerifier, VerifierOpts, VerifierParams } from "../src";
-
+import { HydraS1Verifier, HydraS1VerifierOpts } from "../src/verifier/hydras1-verifier";
 
 type VerifierMockedParams = {
     commitmentMapperPubKey: [BigNumber, BigNumber]
 }
 
-export class PwsVerifierMocked extends PwsVerifier {
+export class PwsVerifierMocked extends HydraS1Verifier {
     private commitmentMapperPubKey: [BigNumber, BigNumber];
 
-    constructor(mockedParams: VerifierMockedParams, opts?: VerifierOpts) {
+    constructor(mockedParams: VerifierMockedParams, opts?: HydraS1VerifierOpts) {
         super(opts);
         this.commitmentMapperPubKey = mockedParams.commitmentMapperPubKey;
     }
@@ -18,7 +17,7 @@ export class PwsVerifierMocked extends PwsVerifier {
         return this.commitmentMapperPubKey;
     }
 
-    protected isRootAvailableForAttester = async (attesterAddress: string, registryTreeRoot: string) => {
+    protected IsRootAvailable = async (registryTreeRoot: string) => {
         return true;
     }
 }

@@ -1,36 +1,46 @@
-
-export type Request = {
+export type TargetGroup = {
     groupId: string;
-    timestamp?: number | "latest";
-    value?: number | "MAX";
-    acceptHigherValue?: boolean;
+    timestamp: number | 'latest';
+    value: number | 'MAX';
+    additionalProperties: any;
 }
-
-export type Proof = {
-    snarkProof: {
-        a: string[], 
-        b: string[][], 
-        c: string[], 
-        input: string[]
-    },
+  
+export type TargetComposedGroup = {
+    groups: TargetGroup;
+    operator: 'AND' | 'OR';
+}
+  
+export type PwsProofRequest = {
+    appId: string;
+    serviceName: string;
+    targetGroup: TargetGroup | TargetComposedGroup;
+    callbackPath?: string;
     version: string;
 }
-
-export type Claim = {
+  
+export type PwsProof = { 
     appId: string;
     serviceName: string;
-    value: number;
-    groupId: string;
-    timestamp: number;
-    isStrict: boolean;
-}
-
-export type VerifiedClaim = {
-    appId: string;
-    serviceName: string;
-    value: number;
-    groupId: string;
-    timestamp: number;
-    isStrict: boolean;
+    membershipProofs: Membership[]; 
+    version: string;
+};
+  
+export type Membership = {
     proofId: string;
+    groupId: string;
+    value: number;
+    timestamp: string;
+    additionalProperties: Record<string, any>;
+    provingScheme: string;
+    version: string;
+    proof: any; 
 }
+  
+export type PwsReceipt = {
+    proofId?: string;
+    proofIds: string[];
+    provedMembership?: Membership;
+    provedMemberships: Membership[];
+};
+  
+  
