@@ -20,7 +20,7 @@ export class AvailableRootsRegistryContract {
     ) as AvailableRootsRegistry;
   }
 
-  public async isRootAvailableForAttester(attesterAddress: string, registryRoot: BigNumberish) {
+  public async IsRootAvailable(attesterAddress: string, registryRoot: BigNumberish) {
     return await this.contract.isRootAvailableForAttester(
       attesterAddress,
       registryRoot

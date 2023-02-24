@@ -267,24 +267,7 @@ describe("PwsVerifier", () => {
           serviceName, 
           targetGroup: invalidTargetGroup
         })
-      ).rejects.toThrow(`on proofId "${invalidMembership.proofId}" value "${invalidMembership.value}" is lower than targetGroup value "${invalidTargetGroup.value}"`)    
-    });
-    
-    it("Should throw with acceptHigherValue false and membership.value > targetGroup.value", async () => {
-      const invalidMembership= JSON.parse(JSON.stringify(membership));
-      invalidMembership.value = 10;
-      invalidMembership.proof.input[7] = "10";
-      const invalidTargetGroup= JSON.parse(JSON.stringify(targetGroup));
-      invalidTargetGroup.value = 2;
-
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup: invalidTargetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" value "${invalidMembership.value}" can't be higher than targetGroup value "${invalidTargetGroup.value}" with acceptHigherValue "false"`)    
+      ).rejects.toThrow(`on proofId "${invalidMembership.proofId}" value "${invalidMembership.value}" is not equal to targetGroup value "${invalidTargetGroup.value}"`)    
     });
   });
 

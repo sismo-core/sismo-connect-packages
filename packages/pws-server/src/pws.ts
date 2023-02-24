@@ -10,7 +10,7 @@ export type PwsParams = {
 export type VerifyParams = {
     proof: PwsProof,
     targetGroup: TargetGroup | TargetComposedGroup,
-    serviceName: string,
+    serviceName?: string,
 }
 
 export type PwsOpts = {
@@ -27,13 +27,13 @@ export type PwsOpts = {
 export const PWS_VERSION = `off-chain-1`;
 
 export class Pws {
-    private appId: string;
-    private verifier: Verifier;
+    private _appId: string;
+    private _verifier: Verifier;
 
     constructor(params: PwsParams, opts?: PwsOpts) {
         const { appId } = params;
-        this.appId = appId;
-        this.verifier = new Verifier(opts?.verifier);
+        this._appId = appId;
+        this._verifier = new Verifier(opts?.verifier);
     }
 
     public verify = async (params: VerifyParams): Promise<PwsReceipt>  => {
@@ -42,14 +42,14 @@ export class Pws {
         if (proof.version !== PWS_VERSION) {
             throw new Error(`version of the proof "${proof.version}" not compatible with this version "${PWS_VERSION}"`);
         }
-        if (proof.appId !== this.appId) {
-            throw new Error(`proof appId "${proof.appId}" does not match with server appId "${this.appId}"`);
+        if (proof.appId !== this._appId) {
+            throw new Error(`proof appId "${proof.appId}" does not match with server appId "${this._appId}"`);
         }
         if (proof.serviceName !== serviceName) {
             throw new Error(`proof serviceName "${proof.serviceName}" does not match with server serverName "${serviceName}"`);
         }
 
-        return await this.verifier.verify(proof, targetGroup);
+        return this._verifier.verify(proof, targetGroup);
     }
 
     private sanitize = (params: VerifyParams): { proof: PwsProof, serviceName: string, targetGroup: TargetGroup } => {
@@ -60,12 +60,10 @@ export class Pws {
         }
         targetGroup = targetGroup as TargetGroup
 
-        if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') {
-            targetGroup.additionalProperties.acceptHigherValue = true;
-        }
-
         if (typeof targetGroup.timestamp  === 'undefined') targetGroup.timestamp = 'latest';
         if (typeof targetGroup.value  === 'undefined') targetGroup.value = 1;
+        if (typeof serviceName  === 'undefined') serviceName = 'main';
+        
         return { proof, serviceName, targetGroup };
     }
 }

@@ -1,35 +1,15 @@
 import { Membership, PwsProof, PwsReceipt, TargetGroup } from "../types";
-import { Provider } from "@ethersproject/abstract-provider";
-import { Signer } from "ethers";
-import { HydraS1Verifier } from "./hydras1-verifier";
-
-export type ProofPublicInputs = {
-    destination: string; 
-    chainId: string;
-    commitmentMapperPubKeyX: string;
-    commitmentMapperPubKeyY: string;
-    registryTreeRoot: string;
-    externalNullifier: string;
-    nullifier: string;
-    claimedValue: string;
-    accountsTreeValue: string;
-    isStrict: string;
-}
+import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 
 export type VerifierOpts = {
-    hydraS1?: {
-        signerOrProvider?: Signer | Provider,
-        commitmentMapperRegistryAddress?: string,
-        availableRootsRegistryAddress?: string,
-        attesterAddress?: string
-    }
+    hydraS1Verifier?: HydraS1VerifierOpts
 }
 
 export class Verifier {
     private hydraS1Verifier: HydraS1Verifier;
 
     constructor(opts?: VerifierOpts) {
-        this.hydraS1Verifier = new HydraS1Verifier(opts?.hydraS1);
+        this.hydraS1Verifier = new HydraS1Verifier(opts?.hydraS1Verifier);
     }
 
     async verify (proof: PwsProof, targetGroup: TargetGroup): Promise<PwsReceipt> {

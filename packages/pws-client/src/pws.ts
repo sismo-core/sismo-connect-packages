@@ -5,6 +5,10 @@ export type PwsParams = {
     appId: string;
 }
 
+export type PwsOpts = {
+    vaultAppBaseUrl?: string;
+}
+
 export type PwsProofRequestParams = {
     appId: string;
     serviceName: string;
@@ -12,21 +16,19 @@ export type PwsProofRequestParams = {
     callbackPath?: string;
 }
 
-export type PwsProofRequestOpts = {
-    url?: string;
-}
-
 export class Pws {
-    private appId: string;
+    private _appId: string;
+    private _vaultAppBaseUrl: string;
 
-    constructor(params: PwsParams) {
+    constructor(params: PwsParams, opts?: PwsOpts) {
         this.appId = params.appId;
+        this.vaultAppBaseUrl = opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
     }
 
-    public requestProof = (params: PwsProofRequestParams, opts?: PwsProofRequestOpts)  => {
+    public requestProof = (params: PwsProofRequestParams)  => {
         if (!window) throw new Error(`requestProof is not available outside of a browser`);
 
-        let url = `${opts?.url || DEFAULT_BASE_URL}/pws?version=${VERSION}&appId=${this.appId}`;
+        let url = `${this._vaultAppBaseUrl}/pws?version=${VERSION}&appId=${this._appId}`;
         url += `&serviceName=${params.serviceName || DEFAULT_SERVICE_NAME}`
         if ((params.targetGroup as TargetGroup).groupId) {
             let targetGroup: TargetGroup = (params.targetGroup as TargetGroup);
@@ -44,7 +46,7 @@ export class Pws {
             url += `&callbackPath=${params.callbackPath}`
         }
 
-        window.location.href = url;
+        window.location.href = encodeURI(url);
     }
 
     public getRequestedProof = (): PwsProof | null => {

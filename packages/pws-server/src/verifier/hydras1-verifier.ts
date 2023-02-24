@@ -12,6 +12,7 @@ import { getWeb3Provider } from "./libs/web3-providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
+import { BaseVerifier, VerifyParams } from "./base-verifier";
 
 export type ProofPublicInputs = {
     destination: string; 
@@ -30,7 +31,7 @@ export type VerifierParams = {
     appId: string;
 }
 
-export type VerifierOpts = {
+export type HydraS1VerifierOpts = {
     signerOrProvider?: Signer | Provider,
     commitmentMapperRegistryAddress?: string,
     availableRootsRegistryAddress?: string,
@@ -46,28 +47,23 @@ export type SnarkProof = {
 
 export const HYDRAS1_VERIFIER_VERSION = "1.0.7";
 
-export type VerifyParams = {
-    membership: Membership, 
-    appId: string, 
-    serviceName: string, 
-    targetGroup: TargetGroup
-}
 
-export class HydraS1Verifier {
-    private commitmentMapperRegistry: CommitmentMapperRegistryContract;
-    private availableRootsRegistry: AvailableRootsRegistryContract;
-    private attesterAddress: string;
+export class HydraS1Verifier extends BaseVerifier {
+    private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
+    private _availableRootsRegistry: AvailableRootsRegistryContract;
+    private _attesterAddress: string;
 
-    constructor(opts?: VerifierOpts) {
-        this.attesterAddress = opts?.attesterAddress || GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS;
+    constructor(opts?: HydraS1VerifierOpts) {
+        super();
+        this._attesterAddress = opts?.attesterAddress || GNOSIS_HYDRAS1_OFFCHAIN_ATTESTER_ADDRESS;
 
         //By default use public gnosis provider
         const signerOrProvider = opts?.signerOrProvider || getWeb3Provider(); 
-        this.commitmentMapperRegistry = new CommitmentMapperRegistryContract({ 
+        this._commitmentMapperRegistry = new CommitmentMapperRegistryContract({ 
             address: opts?.commitmentMapperRegistryAddress || GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
             signerOrProvider
         });
-        this.availableRootsRegistry = new AvailableRootsRegistryContract({
+        this._availableRootsRegistry = new AvailableRootsRegistryContract({
             address: opts?.commitmentMapperRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
             signerOrProvider
         });
@@ -79,15 +75,14 @@ export class HydraS1Verifier {
             serviceName,
             membership,
             targetGroup,
-            snarkProof,
-            proofPublicInputs
+            snarkProof
        } = this.sanitize(params);
 
        if (membership.version !== HYDRAS1_VERIFIER_VERSION) throw new Error(`on proofId "${membership.proofId}" proving scheme version "${membership.version}" must be "${HYDRAS1_VERIFIER_VERSION}"`);
 
        this.validateTargetGroup(membership, targetGroup);
 
-        await this.validateInput(proofPublicInputs, membership, appId, serviceName, targetGroup);
+        await this.validateInput(snarkProof.input, membership, appId, serviceName, targetGroup);
 
         return await HydraS1VerifierPS.verifyProof(snarkProof.a, snarkProof.b, snarkProof.c, snarkProof.input);
     }
@@ -97,23 +92,13 @@ export class HydraS1Verifier {
         serviceName: string,
         membership: Membership,
         targetGroup: TargetGroup,
-        snarkProof: SnarkProof,
-        proofPublicInputs: ProofPublicInputs,
+        snarkProof: SnarkProof
     } {
         const { membership, appId, serviceName, targetGroup } = params;
         const snarkProof = membership.proof;
 
-        const proofPublicInputs: ProofPublicInputs = {
-            destination: snarkProof.input[0],
-            chainId: snarkProof.input[1],
-            commitmentMapperPubKeyX: snarkProof.input[2],
-            commitmentMapperPubKeyY: snarkProof.input[3],
-            registryTreeRoot: snarkProof.input[4],
-            externalNullifier: snarkProof.input[5],
-            nullifier: snarkProof.input[6],
-            claimedValue: snarkProof.input[7],
-            accountsTreeValue: snarkProof.input[8],
-            isStrict: snarkProof.input[9],
+        if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') {
+            targetGroup.additionalProperties.acceptHigherValue = true;
         }
 
         return {
@@ -121,8 +106,7 @@ export class HydraS1Verifier {
             serviceName,
             membership,
             targetGroup,
-            snarkProof,
-            proofPublicInputs
+            snarkProof
         }
     }
 
@@ -133,62 +117,70 @@ export class HydraS1Verifier {
         if (membership.timestamp !== targetGroup.timestamp) {
             throw new Error(`on proofId "${membership.proofId}" timestamp "${membership.timestamp}" mismatch with targetGroup timestamp "${targetGroup.timestamp}"`);
         }
-        if (membership.value < targetGroup.value) {
-            throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" is lower than targetGroup value "${targetGroup.value}"`);
-        }
-        if (!targetGroup.additionalProperties.acceptHigherValue && (membership.value > targetGroup.value)) {
-            throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" can't be higher than targetGroup value "${targetGroup.value}" with acceptHigherValue "false"`);
+        if (targetGroup.value !== 'MAX' &&  membership.value !== targetGroup.value) {
+            throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" is not equal to targetGroup value "${targetGroup.value}"`);
         }
     }
 
-    private async validateInput(proofPublicInputs: ProofPublicInputs, membership: Membership, appId: string, serviceName: string, targetGroup: TargetGroup) {
-        const proofAcceptHigherValue = (proofPublicInputs.isStrict === "0");
+    private async validateInput(input: string[], membership: Membership, appId: string, serviceName: string, targetGroup: TargetGroup) {
+        // destination: input[0],
+        // chainId: input[1],
+        // commitmentMapperPubKeyX: input[2],
+        // commitmentMapperPubKeyY: input[3],
+        // registryTreeRoot: input[4],
+        // externalNullifier: input[5],
+        // nullifier: input[6],
+        // claimedValue: input[7],
+        // accountsTreeValue: input[8],
+        // isStrict: input[9],
+
+        const proofAcceptHigherValue = BigNumber.from(input[9]).eq("0");
         if (proofAcceptHigherValue !== targetGroup.additionalProperties.acceptHigherValue) {
             throw new Error(`on proofId "${membership.proofId}" acceptHigherValue "${targetGroup.additionalProperties.acceptHigherValue}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`);
         }
 
-        if (proofPublicInputs.claimedValue !== membership.value.toString()) {
-            throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" mismatch with proof input claimedValue "${proofPublicInputs.claimedValue}"`);
+        if (!BigNumber.from(input[7]).eq(membership.value)) {
+            throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" mismatch with proof input claimedValue "${input[7]}"`);
         }
 
-        if (proofPublicInputs.nullifier !== membership.proofId) {
-            throw new Error(`on proofId "${membership.proofId}" invalid proof input nullifier "${proofPublicInputs.nullifier}"`);
+        if (!BigNumber.from(input[6]).eq(membership.proofId)) {
+            throw new Error(`on proofId "${membership.proofId}" invalid proof input nullifier "${input[6]}"`);
         }
 
         const requestIdentifier = encodeRequestIdentifier(appId, membership.groupId, membership.timestamp, serviceName);
-        if (!BigNumber.from(proofPublicInputs.externalNullifier).eq(requestIdentifier)) {
-            throw new Error(`on proofId "${membership.proofId}" requestIdentifier "${BigNumber.from(requestIdentifier).toHexString()}" mismatch with proof input externalNullifier "${BigNumber.from(proofPublicInputs.externalNullifier).toHexString()}"`);
+        if (!BigNumber.from(input[5]).eq(requestIdentifier)) {
+            throw new Error(`on proofId "${membership.proofId}" requestIdentifier "${BigNumber.from(requestIdentifier).toHexString()}" mismatch with proof input externalNullifier "${BigNumber.from(input[5]).toHexString()}"`);
         }
 
         const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] = await this.getCommitmentMapperPubKey();
-        if (!commitmentMapperPubKeyX.eq(proofPublicInputs.commitmentMapperPubKeyX)) {
-            throw new Error(`on proofId "${membership.proofId}" commitmentMapperPubKeyX "${BigNumber.from(commitmentMapperPubKeyX).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(proofPublicInputs.commitmentMapperPubKeyX).toHexString()}"`);
+        if (!commitmentMapperPubKeyX.eq(input[2])) {
+            throw new Error(`on proofId "${membership.proofId}" commitmentMapperPubKeyX "${BigNumber.from(commitmentMapperPubKeyX).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(input[2]).toHexString()}"`);
         }
-        if (!commitmentMapperPubKeyY.eq(proofPublicInputs.commitmentMapperPubKeyY)) {
-            throw new Error(`on proofId "${membership.proofId}" commitmentMapperPubKeyY "${BigNumber.from(commitmentMapperPubKeyY).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(proofPublicInputs.commitmentMapperPubKeyY).toHexString()}"`);
+        if (!commitmentMapperPubKeyY.eq(input[3])) {
+            throw new Error(`on proofId "${membership.proofId}" commitmentMapperPubKeyY "${BigNumber.from(commitmentMapperPubKeyY).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(input[3]).toHexString()}"`);
         }
 
-        if (proofPublicInputs.chainId !== "0") {
+        if (!BigNumber.from(input[1]).eq("0")) {
             throw new Error(`on proofId "${membership.proofId}" proof input chainId must be 0`);
         }
-        if (!BigNumber.from(proofPublicInputs.destination).eq("0x0000000000000000000000000000000000515110")) {
+        if (!BigNumber.from(input[0]).eq("0x0000000000000000000000000000000000515110")) {
             throw new Error(`on proofId "${membership.proofId}" proof input destination must be 0x0000000000000000000000000000000000515110`);
         }
-        const isAvailable = await this.isRootAvailableForAttester(this.attesterAddress, proofPublicInputs.registryTreeRoot)
+        const isAvailable = await this.IsRootAvailable(this._attesterAddress, input[4])
         if (!isAvailable) {
-            throw new Error(`on proofId "${membership.proofId}" registry root "${proofPublicInputs.registryTreeRoot}" not available for attester with address ${this.attesterAddress}`);
+            throw new Error(`on proofId "${membership.proofId}" registry root "${input[4]}" not available for attester with address ${this._attesterAddress}`);
         }
         const groupSnapshotId = encodeAccountsTreeValue(membership.groupId, membership.timestamp);
-        if (!BigNumber.from(proofPublicInputs.accountsTreeValue).eq(groupSnapshotId)) {
+        if (!BigNumber.from(input[8]).eq(groupSnapshotId)) {
             throw new Error(`on proofId "${membership.proofId}" groupId "${targetGroup.groupId}" or timestamp "${targetGroup.timestamp}" incorrect`);
         }
     }
 
     protected getCommitmentMapperPubKey = async () => {
-        return await this.commitmentMapperRegistry.getCommitmentMapperPubKey();
+        return await this._commitmentMapperRegistry.getCommitmentMapperPubKey();
     }
 
-    protected isRootAvailableForAttester = async (attesterAddress: string, registryTreeRoot: string) => {
-        return await this.availableRootsRegistry.isRootAvailableForAttester(attesterAddress, registryTreeRoot);
+    protected IsRootAvailable = async (attesterAddress: string, registryTreeRoot: string) => {
+        return await this._availableRootsRegistry.IsRootAvailable(attesterAddress, registryTreeRoot);
     }
 }
