@@ -6,7 +6,8 @@
     },
     "include": [
       "src",
-      "./rollup.config.js"],
+      "./rollup.config.js"
+    ],
     "exclude": [
       "node_modules"
     ]
