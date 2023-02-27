@@ -6,8 +6,7 @@ import {
 import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./libs/contracts";
 import { Membership, TargetGroup } from "../types";
 import { Provider } from "@ethersproject/abstract-provider";
-import { Signer } from "ethers";
-import { getWeb3Provider } from "./libs/web3-providers";
+import { ethers, Signer } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
@@ -54,13 +53,16 @@ export class HydraS1Verifier extends BaseVerifier {
         super();
 
         //By default use public gnosis provider
-        const signerOrProvider = opts?.signerOrProvider || getWeb3Provider(); 
+        const signerOrProvider = opts?.signerOrProvider || new ethers.providers.JsonRpcProvider(
+            "https://rpc.gnosis.gateway.fm",
+            100
+        );
         this._commitmentMapperRegistry = new CommitmentMapperRegistryContract({ 
             address: opts?.commitmentMapperRegistryAddress || GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
             signerOrProvider
         });
         this._availableRootsRegistry = new AvailableRootsRegistryContract({
-            address: opts?.commitmentMapperRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+            address: opts?.availableRootsRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
             signerOrProvider
         });
     }
@@ -93,6 +95,7 @@ export class HydraS1Verifier extends BaseVerifier {
         const { membership, appId, serviceName, targetGroup } = params;
         const snarkProof = membership.proof;
 
+        if (typeof targetGroup.additionalProperties === 'undefined') targetGroup.additionalProperties = {};
         if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') {
             targetGroup.additionalProperties.acceptHigherValue = true;
         }
@@ -113,7 +116,7 @@ export class HydraS1Verifier extends BaseVerifier {
         if (membership.timestamp !== targetGroup.timestamp) {
             throw new Error(`on proofId "${membership.proofId}" timestamp "${membership.timestamp}" mismatch with targetGroup timestamp "${targetGroup.timestamp}"`);
         }
-        if (targetGroup.value !== 'MAX' &&  membership.value !== targetGroup.value) {
+        if (targetGroup.value !== 'MAX' &&  (Number(membership.value) !== Number(targetGroup.value))) {
             throw new Error(`on proofId "${membership.proofId}" value "${membership.value}" is not equal to targetGroup value "${targetGroup.value}"`);
         }
     }
@@ -164,19 +167,19 @@ export class HydraS1Verifier extends BaseVerifier {
         }
         const isAvailable = await this.IsRootAvailable(input[4])
         if (!isAvailable) {
-            throw new Error(`on proofId "${membership.proofId}" registry root "${input[4]}" not available`);
+            throw new Error(`on proofId "${membership.proofId}" registry root "${BigNumber.from(input[4]).toHexString()}" not available`);
         }
         const groupSnapshotId = encodeAccountsTreeValue(membership.groupId, membership.timestamp);
         if (!BigNumber.from(input[8]).eq(groupSnapshotId)) {
             throw new Error(`on proofId "${membership.proofId}" groupId "${targetGroup.groupId}" or timestamp "${targetGroup.timestamp}" incorrect`);
         }
     }
-
+    
     protected getCommitmentMapperPubKey = async () => {
-        return await this._commitmentMapperRegistry.getCommitmentMapperPubKey();
+        return this._commitmentMapperRegistry.getCommitmentMapperPubKey();
     }
 
     protected IsRootAvailable = async (registryTreeRoot: string) => {
-        return await this._availableRootsRegistry.IsRootAvailable(registryTreeRoot);
+        return this._availableRootsRegistry.IsRootAvailable(registryTreeRoot);
     }
 }

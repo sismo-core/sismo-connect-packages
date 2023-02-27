@@ -3,7 +3,7 @@ import { Provider } from "@ethersproject/abstract-provider";
 import ContractABI from "../commons/abis/AvailableRootsRegistry.json";
 import { AvailableRootsRegistry } from "../commons/typechain/AvailableRootsRegistry";
 
-const OFFCHAIN_ATTESTER_ADDRESS = "0x67eD29a0d69D278cd617A26A7822746602a2c308";
+const OFFCHAIN_ATTESTER_ADDRESS = "0xBbE9377123AEd30a3ec60daef42ca8Ef50C1632C";
 
 export class AvailableRootsRegistryContract {
   private contract: AvailableRootsRegistry;

@@ -2,14 +2,14 @@ import { Membership, PwsProof, PwsReceipt, TargetGroup } from "../types";
 import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 
 export type VerifierOpts = {
-    hydraS1Verifier?: HydraS1VerifierOpts
+    hydraS1?: HydraS1VerifierOpts
 }
 
 export class Verifier {
     private hydraS1Verifier: HydraS1Verifier;
 
     constructor(opts?: VerifierOpts) {
-        this.hydraS1Verifier = new HydraS1Verifier(opts?.hydraS1Verifier);
+        this.hydraS1Verifier = new HydraS1Verifier(opts?.hydraS1);
     }
 
     async verify (proof: PwsProof, targetGroup: TargetGroup): Promise<PwsReceipt> {
