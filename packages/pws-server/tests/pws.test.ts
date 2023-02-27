@@ -19,9 +19,9 @@ describe("PwsVerifier", () => {
     pws = new Pws({ 
       appId: "0xf68985adfc209fafebfb1a956913e7fa",
       opts: {
+        provider: _provider,
         verifier: {
           hydraS1: {
-            signerOrProvider: _provider,
             commitmentMapperRegistryAddress: "0x0844662f25817B735BC9B6d9D11995F1A6c4dCB1",
             availableRootsRegistryAddress: "0xdDa4c8d2933dAA21Aac75B88fF59725725ba813F"
           }

@@ -29,8 +29,8 @@ export type Membership = {
     proofId: string;
     groupId: string;
     value: number;
-    timestamp: string;
-    additionalProperties: Record<string, any>;
+    timestamp: number | 'latest';
+    additionalProperties?: Record<string, any>;
     provingScheme: string;
     version: string;
     proof: any; 

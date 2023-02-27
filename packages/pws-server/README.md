@@ -32,16 +32,48 @@ $ npm i @sismo-core/pws-server
 ## Usage
 
 ```javascript
-import { PwsVerifier } from "@sismo-core/pws-verifier";
+import express from 'express';
+import { Pws } from "@sismo-core/pws-server-private"
 
-const verifier = new PwsVerifier();
-const proofs = [...]; // Sent by your client
-const claims = [...]; // Sent by your client
-const request = {
-    appId: "your-app-id",
-    groupId: "your-group-id"
-};
-const verifiedClaims = await verifier.verify(request, { proofs, claims });
+const pws = new Pws({ 
+  appId: "your-ap-id"
+});
+
+//This target group should not be send by the front, it should be hard coded in the backend
+const TARGET_GROUP = { groupId: "your-group-id" };
+
+const emails = new Map();
+
+const app = express();
+app.use(express.json());
+
+app.post('/subscribe-newsletter', async (req, res) => {
+  const { pwsProof, email } = req.body;
+  try {
+    const receipt = await pws.verify({
+      proof: proof,
+      targetGroup: TARGET_GROUP
+    })
+    if (emails.has(receipt.proofId)) {
+      res.send({
+        status: "success"
+      });
+    } else {
+      emails.set(receipt.proofId, email);
+      res.send({
+        status: "error",
+        message: "proof already used to register another email"
+      });
+    }
+  } catch (e) {
+    res.send({
+        status: "error",
+        message: "proof not valid"
+    });
+  }
+})
+
+app.listen(8080)
 ```
 
 ## Documentation

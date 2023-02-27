@@ -1,4 +1,4 @@
-import { BigNumberish, Contract, Signer } from "ethers";
+import { BigNumberish, Contract } from "ethers";
 import { Provider } from "@ethersproject/abstract-provider";
 import ContractABI from "../commons/abis/AvailableRootsRegistry.json";
 import { AvailableRootsRegistry } from "../commons/typechain/AvailableRootsRegistry";
@@ -9,16 +9,16 @@ export class AvailableRootsRegistryContract {
   private contract: AvailableRootsRegistry;
 
   constructor({
-    signerOrProvider,
+    provider,
     address,
   }: {
-    signerOrProvider: Signer | Provider | undefined;
+    provider: Provider;
     address: string;
   }) {
     this.contract = new Contract(
       address,
       ContractABI,
-      signerOrProvider
+      provider
     ) as AvailableRootsRegistry;
   }
 

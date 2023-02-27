@@ -1,5 +1,6 @@
 import { Membership, PwsProof, PwsReceipt, TargetGroup } from "../types";
 import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
+import { Provider } from "@ethersproject/abstract-provider";
 
 export type VerifierOpts = {
     hydraS1?: HydraS1VerifierOpts
@@ -8,8 +9,8 @@ export type VerifierOpts = {
 export class Verifier {
     private hydraS1Verifier: HydraS1Verifier;
 
-    constructor(opts?: VerifierOpts) {
-        this.hydraS1Verifier = new HydraS1Verifier(opts?.hydraS1);
+    constructor(provider: Provider, opts?: VerifierOpts) {
+        this.hydraS1Verifier = new HydraS1Verifier(provider, opts?.hydraS1);
     }
 
     async verify (proof: PwsProof, targetGroup: TargetGroup): Promise<PwsReceipt> {
