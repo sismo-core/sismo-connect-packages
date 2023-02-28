@@ -6,7 +6,6 @@ import {
 import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./libs/contracts";
 import { Membership, TargetGroup } from "../types";
 import { Provider } from "@ethersproject/abstract-provider";
-import { ethers, Signer } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
@@ -30,7 +29,7 @@ export type VerifierParams = {
 }
 
 export type HydraS1VerifierOpts = {
-    signerOrProvider?: Signer | Provider,
+    provider?: Provider,
     commitmentMapperRegistryAddress?: string,
     availableRootsRegistryAddress?: string
 }
@@ -49,64 +48,31 @@ export class HydraS1Verifier extends BaseVerifier {
     private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
     private _availableRootsRegistry: AvailableRootsRegistryContract;
 
-    constructor(opts?: HydraS1VerifierOpts) {
+    constructor(provider: Provider, opts?: HydraS1VerifierOpts) {
         super();
 
-        //By default use public gnosis provider
-        const signerOrProvider = opts?.signerOrProvider || new ethers.providers.JsonRpcProvider(
-            "https://rpc.gnosis.gateway.fm",
-            100
-        );
         this._commitmentMapperRegistry = new CommitmentMapperRegistryContract({ 
             address: opts?.commitmentMapperRegistryAddress || GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
-            signerOrProvider
+            provider
         });
         this._availableRootsRegistry = new AvailableRootsRegistryContract({
             address: opts?.availableRootsRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
-            signerOrProvider
+            provider
         });
     }
 
-    async verify (params: VerifyParams): Promise<boolean> {
-       const { 
-            appId,
-            serviceName,
-            membership,
-            targetGroup,
-            snarkProof
-       } = this.sanitize(params);
+    async verify ({ appId, serviceName, membership, targetGroup }: VerifyParams): Promise<boolean> {
+        if (typeof targetGroup.additionalProperties === 'undefined') targetGroup.additionalProperties = {};
+        if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') targetGroup.additionalProperties.acceptHigherValue = true;
 
-       if (membership.version !== HYDRAS1_VERIFIER_VERSION) throw new Error(`on proofId "${membership.proofId}" proving scheme version "${membership.version}" must be "${HYDRAS1_VERIFIER_VERSION}"`);
+        if (membership.version !== HYDRAS1_VERIFIER_VERSION) throw new Error(`on proofId "${membership.proofId}" proving scheme version "${membership.version}" must be "${HYDRAS1_VERIFIER_VERSION}"`);
 
-       this.validateTargetGroup(membership, targetGroup);
+        this.validateTargetGroup(membership, targetGroup);
 
+        const snarkProof = membership.proof;
         await this.validateInput(snarkProof.input, membership, appId, serviceName, targetGroup);
 
         return await HydraS1VerifierPS.verifyProof(snarkProof.a, snarkProof.b, snarkProof.c, snarkProof.input);
-    }
-
-    private sanitize(params: VerifyParams): {
-        appId: string,
-        serviceName: string,
-        membership: Membership,
-        targetGroup: TargetGroup,
-        snarkProof: SnarkProof
-    } {
-        const { membership, appId, serviceName, targetGroup } = params;
-        const snarkProof = membership.proof;
-
-        if (typeof targetGroup.additionalProperties === 'undefined') targetGroup.additionalProperties = {};
-        if (typeof targetGroup.additionalProperties.acceptHigherValue === 'undefined') {
-            targetGroup.additionalProperties.acceptHigherValue = true;
-        }
-
-        return {
-            appId,
-            serviceName,
-            membership,
-            targetGroup,
-            snarkProof
-        }
     }
 
     private validateTargetGroup(membership: Membership, targetGroup: TargetGroup) {
@@ -122,16 +88,16 @@ export class HydraS1Verifier extends BaseVerifier {
     }
 
     private async validateInput(input: string[], membership: Membership, appId: string, serviceName: string, targetGroup: TargetGroup) {
-        // destination: input[0],
-        // chainId: input[1],
-        // commitmentMapperPubKeyX: input[2],
-        // commitmentMapperPubKeyY: input[3],
-        // registryTreeRoot: input[4],
-        // externalNullifier: input[5],
-        // nullifier: input[6],
-        // claimedValue: input[7],
-        // accountsTreeValue: input[8],
-        // isStrict: input[9],
+        // destination: input[0]
+        // chainId: input[1]
+        // commitmentMapperPubKeyX: input[2]
+        // commitmentMapperPubKeyY: input[3]
+        // registryTreeRoot: input[4]
+        // externalNullifier: input[5]
+        // nullifier: input[6]
+        // claimedValue: input[7]
+        // accountsTreeValue: input[8]
+        // isStrict: input[9]
 
         const proofAcceptHigherValue = BigNumber.from(input[9]).eq("0");
         if (proofAcceptHigherValue !== targetGroup.additionalProperties.acceptHigherValue) {

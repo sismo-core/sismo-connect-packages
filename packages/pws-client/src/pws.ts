@@ -8,7 +8,7 @@ export type PwsParams = {
     }
 }
 
-export type PwsProofRequestParams = {
+export type RequestProofParams = {
     targetGroup: TargetGroup | TargetComposedGroup;
     serviceName?: string;
     callbackPath?: string;
@@ -18,17 +18,17 @@ export class Pws {
     private _appId: string;
     private _vaultAppBaseUrl: string;
 
-    constructor(params: PwsParams) {
-        this._appId = params.appId;
-        this._vaultAppBaseUrl = params?.opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
+    constructor({ appId, opts }: PwsParams) {
+        this._appId = appId;
+        this._vaultAppBaseUrl = opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
     }
 
-    public requestProof = (params: PwsProofRequestParams)  => {
+    public requestProof = ({ targetGroup, serviceName, callbackPath }: RequestProofParams)  => {
         if (!window) throw new Error(`requestProof is not available outside of a browser`);
 
         let url = `${this._vaultAppBaseUrl}/pws?version=${VERSION}&appId=${this._appId}`;
-        if ((params.targetGroup as TargetGroup).groupId) {
-            let targetGroup: TargetGroup = (params.targetGroup as TargetGroup);
+        if ((targetGroup as TargetGroup).groupId) {
+            targetGroup = (targetGroup as TargetGroup);
             if (typeof targetGroup.timestamp === 'undefined') {
                 targetGroup.timestamp = `latest`;
             }
@@ -39,11 +39,11 @@ export class Pws {
         } else {
             throw new Error(`TargetComposedGroup is not already available in this version. Please notify us if you need it.`);
         }
-        if (typeof params.callbackPath !== 'undefined') {
-            url += `&callbackPath=${params.callbackPath}`
+        if (typeof callbackPath !== 'undefined') {
+            url += `&callbackPath=${callbackPath}`;
         }
-        if (typeof params.serviceName !== 'undefined') {
-            url += `&serviceName=${params.serviceName}`
+        if (typeof serviceName !== 'undefined') {
+            url += `&serviceName=${serviceName}`;
         }
 
         window.location.href = encodeURI(url);
