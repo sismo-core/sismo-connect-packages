@@ -1,3 +1,4 @@
+import { DataRequest } from './../../zk-connect-client/src/types';
 import { ZkConnectResponse, PwsReceipt, TargetComposedGroup, TargetGroup } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
 import { Verifier, VerifierOpts } from "./verifier";
@@ -12,9 +13,9 @@ export type PwsParams = {
 }
 
 export type VerifyParams = {
-    proof: ZkConnectResponse,
-    targetGroup: TargetGroup | TargetComposedGroup,
-    serviceName?: string,
+    zkConnectResponse: ZkConnectResponse,
+    dataRequest: DataRequest,
+    namespace?: string,
 }
 
 export const PWS_VERSION = `off-chain-1`;
@@ -35,15 +36,16 @@ export class Pws {
         this._verifier = new Verifier(provider, opts?.verifier);
     }
 
-    public verify = async ({ proof, targetGroup, serviceName }: VerifyParams): Promise<PwsReceipt>  => {
-        if ((targetGroup as TargetComposedGroup).operator) {
+    public verify = async ({ proof, dataRequest, namespace }: VerifyParams): Promise<PwsReceipt>  => {
+        if ((dataRequest as TargetComposedGroup).operator) {
             throw new Error(`TargetComposedGroup is not already available in this version. Please notify us if you need it.`);
         }
-        targetGroup = targetGroup as TargetGroup
+        dataRequest = dataRequest as TargetGroup
 
-        if (typeof targetGroup.timestamp  === 'undefined') targetGroup.timestamp = 'latest';
-        if (typeof targetGroup.value  === 'undefined') targetGroup.value = 1;
-        if (typeof serviceName  === 'undefined') serviceName = 'main';
+       const dataRequestTimesta 
+        if (typeof dataRequest.timestamp  === 'undefined') dataRequest.timestamp = 'latest';
+        if (typeof dataRequest.value  === 'undefined') dataRequest.value = 1;
+        if (typeof namespace  === 'undefined') namespace = 'main';
 
         if (proof.version !== PWS_VERSION) {
             throw new Error(`version of the proof "${proof.version}" not compatible with this version "${PWS_VERSION}"`);
@@ -51,10 +53,10 @@ export class Pws {
         if (proof.appId !== this._appId) {
             throw new Error(`proof appId "${proof.appId}" does not match with server appId "${this._appId}"`);
         }
-        if (proof.serviceName !== serviceName) {
-            throw new Error(`proof serviceName "${proof.serviceName}" does not match with server serverName "${serviceName}"`);
+        if (proof.serviceName !== namespace) {
+            throw new Error(`proof serviceName "${proof.serviceName}" does not match with server serverName "${namespace}"`);
         }
 
-        return this._verifier.verify(proof, targetGroup);
+        return this._verifier.verify(proof, dataRequest);
     }
 }

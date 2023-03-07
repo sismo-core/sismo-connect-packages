@@ -29,7 +29,7 @@ export class ZkConnect {
         let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
 
         if(dataRequest) {
-            url += `&dataRequest=${JSON.stringify(dataRequest)}`;
+            url += `&dataRequest=${JSON.stringify(dataRequest.toJSON)}`;
         }
 
         if (callbackPath) {

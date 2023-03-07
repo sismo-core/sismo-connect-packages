@@ -1,4 +1,4 @@
 export * from "./types";
 export * from "./verifier";
 export * from "./constants";
-export * from "./pws";
+export * from "./zk-connect";

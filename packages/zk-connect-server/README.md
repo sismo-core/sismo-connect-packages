@@ -40,7 +40,7 @@ const zkConnect = new ZkConnect({
 });
 
 //This target group should not be send by the front, it should be hard coded in the backend
-const TARGET_GROUP = { groupId: "your-group-id" };
+const DATA_REQUEST = new DataRequest({ groupId: "your-group-id" });
 
 const emails = new Map();
 

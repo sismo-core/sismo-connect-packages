@@ -55,6 +55,13 @@ export class DataRequest {
     }];
     this.operator = args.operator ?? null;
   }
+
+  public toJSON(){
+    return {
+      operator: this.operator,
+      statementRequests: this.statementRequests
+    }
+  }
 }
 
 export type StatementRequest = {
