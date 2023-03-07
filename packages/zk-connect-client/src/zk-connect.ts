@@ -35,9 +35,7 @@ export class ZkConnect {
         if (callbackPath) {
             url += `&callbackPath=${callbackPath}`;
         }
-        if (namespace) {
-            url += `&namespace=${namespace}`;
-        }
+        url += `&namespace=${ namespace ?? 'main'}`;
 
         window.location.href = encodeURI(url);
     }
