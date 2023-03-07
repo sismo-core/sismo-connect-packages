@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/zk-connect-client-private",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "zkConnect client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
