@@ -8,7 +8,7 @@ export type ZkConnectRequest = {
 
 
 export enum ProvingScheme {
-    HYDRA_S1 = "hydra-s1",
+    HYDRA_S1 = "hydra-s1.1",
 }
 
 export class DataRequest {
@@ -19,8 +19,8 @@ export class DataRequest {
     statementRequests?: StatementRequest[];
     operator?: LogicalOperator;
     groupId?: string;
-    groupTimestamp?: string;
-    requestedValue?: number | "MAX";
+    groupTimestamp?: number | "latest";
+    requestedValue?: number | "USER_SELECTED_VALUE";
     comparator?: StatementComparator;
     provingScheme?: ProvingScheme;
   }) {
@@ -50,31 +50,25 @@ export class DataRequest {
         groupId: args.groupId,
         groupTimestamp: args.groupTimestamp ?? 'latest',
         requestedValue: args.requestedValue ?? 1,
-        comparator: args.comparator ?? "HTE", 
+        comparator: args.comparator ?? "GTE",
         provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S1, 
     }];
     this.operator = args.operator ?? null;
   }
-
-  public toJSON(){
-    return {
-      operator: this.operator,
-      statementRequests: this.statementRequests
-    }
-  }
 }
 
+
 export type StatementRequest = {
-    groupId: string;
-    groupTimestamp?: string; // default to "latest"
-    requestedValue?: number | "MAX"; // If "MAX" the max value inside the group should be selected. The user can select what he wants to reveal 
-    comparator?: StatementComparator; // default to "HTE". , "EQ" . If requestedValue="MAX" comparator should be empty
-    provingScheme?: any; 
-  };
-export type StatementComparator = "HTE" | "EQ";
+  groupId: string;
+  groupTimestamp?: number | "latest"; // default to "latest"
+  requestedValue?: number | "USER_SELECTED_VALUE"; // If "MAX" the max value inside the group should be selected. The user can select what he wants to reveal 
+  comparator?: StatementComparator; // default to "GTE". , "EQ" If requestedValue="USER_SELECTED_VALUE" comparator "GTE"
+  provingScheme?: any; 
+};
 
+export type StatementComparator = "GTE" | "EQ";
 
-export type VerifiableStatement = StatementRequest & { selectedValue: number, proof: string };
+export type VerifiableStatement = StatementRequest & { value: number, proof: any };
 export type VerifiedStatement = VerifiableStatement & { proofId: string };
 
 export type LogicalOperator = "AND" | "OR";
@@ -85,5 +79,6 @@ export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
 
 export type ZkconnectVerifiedResult = ZkConnectResponse & {
   vaultId: string;
+  success: boolean;
   verifiedStatements: VerifiedStatement[];
 };
