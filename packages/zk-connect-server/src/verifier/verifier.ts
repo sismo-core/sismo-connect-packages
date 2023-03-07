@@ -1,4 +1,4 @@
-import { Membership, PwsProof, PwsReceipt, TargetGroup } from "../types";
+import { Membership, ZkConnectResponse, PwsReceipt, TargetGroup } from "../types";
 import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 
@@ -13,7 +13,7 @@ export class Verifier {
         this.hydraS1Verifier = new HydraS1Verifier(provider, opts?.hydraS1);
     }
 
-    async verify (proof: PwsProof, targetGroup: TargetGroup): Promise<PwsReceipt> {
+    async verify (proof: ZkConnectResponse, targetGroup: TargetGroup): Promise<PwsReceipt> {
         const provedMemberships: Membership[] = [];
 
         for (let membershipProof of proof.membershipProofs) {

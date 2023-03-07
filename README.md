@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    Prove with Sismo (PwS)
+    ZK Connect
   </h3>
 
   <p align="center">
@@ -20,12 +20,12 @@
   </p>
 </div>
 
-[Prove with Sismo presentation]
+[ZK Connect presentation]
 
 ## Packages
 
-- [`@sismo-core/pws-client`](./packages/pws-client)
-- [`@sismo-core/pws-server`](./packages/pws-server)
+- [`@sismo-core/zk-connect-client`](./packages/zk-connect-client)
+- [`@sismo-core/zk-connect-server`](./packages/zk-connect-server)
 
 ## License
 

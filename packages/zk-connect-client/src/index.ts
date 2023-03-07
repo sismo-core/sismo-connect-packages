@@ -1,3 +1,3 @@
-export * from "./pws";
+export * from "./zk-connect";
 export * from "./types";
 export * from "./constants";

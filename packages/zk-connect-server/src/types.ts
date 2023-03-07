@@ -4,27 +4,27 @@ export type TargetGroup = {
     value?: number | 'MAX';
     additionalProperties?: any;
 }
-  
+
 export type TargetComposedGroup = {
     groups: TargetGroup;
     operator: 'AND' | 'OR';
 }
-  
-export type PwsProofRequest = {
+
+export type ZkConnectResponseRequest = {
     appId: string;
     serviceName: string;
     targetGroup: TargetGroup | TargetComposedGroup;
     callbackPath?: string;
     version: string;
 }
-  
-export type PwsProof = { 
+
+export type ZkConnectResponse = { 
     appId: string;
     serviceName: string;
     membershipProofs: Membership[]; 
     version: string;
 };
-  
+
 export type Membership = {
     proofId: string;
     groupId: string;
@@ -35,12 +35,10 @@ export type Membership = {
     version: string;
     proof: any; 
 }
-  
+
 export type PwsReceipt = {
     proofId?: string;
     proofIds: string[];
     provedMembership?: Membership;
     provedMemberships: Membership[];
 };
-  
-  

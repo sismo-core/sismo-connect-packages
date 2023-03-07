@@ -1,7 +1,7 @@
 {
-  "name": "@sismo-core/pws-client-private",
-  "version": "1.0.7",
-  "description": "Prove with Sismo client package",
+  "name": "@sismo-core/zk-connect-client-private",
+  "version": "1.0.8",
+  "description": "zkConnect client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
@@ -30,7 +30,7 @@
   "engines": {
     "npm": "USE YARN INSTEAD OF NPM"
   },
-  "repository": "git@github.com:sismo-core/pws-packages.git",
+  "repository": "git@github.com:sismo-core/zk-connect-packages.git",
   "author": "gabin@sismo.io",
   "license": "MIT",
   "dependencies": {},
