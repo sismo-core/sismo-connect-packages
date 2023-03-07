@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    Prove with Sismo (PwS) Server
+    ZK Connect Server
   </h3>
 
   <p align="center">
@@ -20,22 +20,22 @@
   </p>
 </div>
 
-[Prove with Sismo presentation]
+[ZK Connect presentation]
 
 ## Installation
 
 ```
-$ yarn add @sismo-core/pws-server
-$ npm i @sismo-core/pws-server
+$ yarn add @sismo-core/zk-connect-server
+$ npm i @sismo-core/zk-connect-server
 ```
 
 ## Usage
 
 ```javascript
 import express from 'express';
-import { Pws } from "@sismo-core/pws-server-private"
+import { ZkConnect } from "@sismo-core/zk-connect-server-private"
 
-const pws = new Pws({ 
+const zkConnect = new ZkConnect({ 
   appId: "your-ap-id"
 });
 
@@ -48,10 +48,10 @@ const app = express();
 app.use(express.json());
 
 app.post('/subscribe-newsletter', async (req, res) => {
-  const { pwsProof, email } = req.body;
+  const { zkConnectResponse, email } = req.body;
   try {
-    const receipt = await pws.verify({
-      proof: pwsProof,
+    const receipt = await zkConnect.verify({
+      proof: zkConnectResponse,
       targetGroup: TARGET_GROUP
     })
     if (emails.has(receipt.proofId)) {

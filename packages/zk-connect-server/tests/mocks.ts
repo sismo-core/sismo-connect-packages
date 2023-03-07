@@ -1,5 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber"
-import { PwsProof } from "../src"
+import { ZkConnectResponse } from "../src"
 
 type ProofMock = {
     commitmentMapperPubKey: [BigNumberish, BigNumberish],
@@ -78,7 +78,7 @@ export const proofMock1: ProofMock = {
 }
 
 
-export const pwsProofMock = {
+export const zkConnectResponseMock = {
   "appId":"0xf68985adfc209fafebfb1a956913e7fa",
   "serviceName":"my-service-name",
   "membershipProofs":[{
@@ -119,4 +119,4 @@ export const pwsProofMock = {
       ]}
     }],
     "version":"off-chain-1"
-} as PwsProof
+} as ZkConnectResponse

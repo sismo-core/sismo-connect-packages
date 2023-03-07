@@ -1,4 +1,4 @@
-import { PwsProof, PwsReceipt, TargetComposedGroup, TargetGroup } from "./types";
+import { ZkConnectResponse, PwsReceipt, TargetComposedGroup, TargetGroup } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
 import { Verifier, VerifierOpts } from "./verifier";
 import { ethers } from "ethers";
@@ -12,7 +12,7 @@ export type PwsParams = {
 }
 
 export type VerifyParams = {
-    proof: PwsProof,
+    proof: ZkConnectResponse,
     targetGroup: TargetGroup | TargetComposedGroup,
     serviceName?: string,
 }
