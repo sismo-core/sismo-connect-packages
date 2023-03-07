@@ -1,7 +1,7 @@
 export type ZkConnectRequest = {
     claim: DataRequest;
     appId: string;
-    serviceName?: string;
+    namespace?: string;
     callbackPath?: string;
     version: string;
   };
@@ -75,10 +75,4 @@ export type LogicalOperator = "AND" | "OR";
 
 export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
   verifiableStatements: VerifiableStatement[];
-};
-
-export type ZkconnectVerifiedResult = ZkConnectResponse & {
-  vaultId: string;
-  success: boolean;
-  verifiedStatements: VerifiedStatement[];
 };
