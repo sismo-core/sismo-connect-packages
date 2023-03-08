@@ -3,7 +3,10 @@ import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
   GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
 } from "../constants";
-import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract } from "./libs/contracts";
+import {
+  AvailableRootsRegistryContract,
+  CommitmentMapperRegistryContract,
+} from "./libs/contracts";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
@@ -54,11 +57,15 @@ export class HydraS1Verifier extends BaseVerifier {
     super();
 
     this._commitmentMapperRegistry = new CommitmentMapperRegistryContract({
-      address: opts?.commitmentMapperRegistryAddress || GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+      address:
+        opts?.commitmentMapperRegistryAddress ||
+        GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
       provider,
     });
     this._availableRootsRegistry = new AvailableRootsRegistryContract({
-      address: opts?.availableRootsRegistryAddress || GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+      address:
+        opts?.availableRootsRegistryAddress ||
+        GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
       provider,
     });
   }
@@ -67,26 +74,22 @@ export class HydraS1Verifier extends BaseVerifier {
     appId,
     namespace,
     verifiableStatement,
-    vaultIdentifier,
   }: VerifyParams): Promise<boolean> {
     const snarkProof = verifiableStatement.proof;
-    if (await this.matchPublicInput({ appId, namespace, verifiableStatement, vaultIdentifier })) {
-      return HydraS1VerifierPS.verifyProof(
-        snarkProof.a,
-        snarkProof.b,
-        snarkProof.c,
-        snarkProof.input
-      );
-    }
-    return false;
+    await this._matchPublicInput({ appId, namespace, verifiableStatement });
+    return HydraS1VerifierPS.verifyProof(
+      snarkProof.a,
+      snarkProof.b,
+      snarkProof.c,
+      snarkProof.input
+    );
   }
 
-  public async matchPublicInput({
+  private async _matchPublicInput({
     verifiableStatement,
     appId,
     namespace,
-    vaultIdentifier,
-  }: Omit<VerifyParams, "dataRequest">): Promise<boolean> {
+  }: Omit<VerifyParams, "dataRequest">) {
     // destinationIdentifier: string; [0]
     // extraData: string; [1]
     // commitmentMapperPubKeyX: string; [2]
@@ -122,10 +125,17 @@ export class HydraS1Verifier extends BaseVerifier {
 
     const proofIdentifier = proofPublicInputs.proofIdentifier;
 
-    const proofAcceptHigherValue = BigNumber.from(proofPublicInputs.statementComparator).eq("0");
-    if (proofAcceptHigherValue !== (verifiableStatement.comparator === "GTE")) {
+    const statementComparatorFromInput = BigNumber.from(
+      proofPublicInputs.statementComparator
+    ).eq("1");
+    const statementComparatorFromVerifiableStatement =
+      verifiableStatement.comparator === "EQ";
+    if (
+      statementComparatorFromInput !==
+      statementComparatorFromVerifiableStatement
+    ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" statement comparator "${verifiableStatement.comparator}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`
+        `on proofId "${proofIdentifier}" statement comparator "${verifiableStatement.comparator}" mismatch with proof input statementComparator "${statementComparatorFromInput}"`
       );
     }
 
@@ -145,7 +155,9 @@ export class HydraS1Verifier extends BaseVerifier {
       verifiableStatement.groupTimestamp,
       namespace
     );
-    if (!BigNumber.from(proofPublicInputs.requestIdentifier).eq(requestIdentifier)) {
+    if (
+      !BigNumber.from(proofPublicInputs.requestIdentifier).eq(requestIdentifier)
+    ) {
       throw new Error(
         `on proofId "${proofIdentifier}" requestIdentifier "${BigNumber.from(
           requestIdentifier
@@ -157,7 +169,9 @@ export class HydraS1Verifier extends BaseVerifier {
 
     const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] =
       await this.getCommitmentMapperPubKey();
-    if (!commitmentMapperPubKeyX.eq(proofPublicInputs.commitmentMapperPubKeyX)) {
+    if (
+      !commitmentMapperPubKeyX.eq(proofPublicInputs.commitmentMapperPubKeyX)
+    ) {
       throw new Error(
         `on proofId "${proofIdentifier}" commitmentMapperPubKeyX "${BigNumber.from(
           commitmentMapperPubKeyX
@@ -166,7 +180,9 @@ export class HydraS1Verifier extends BaseVerifier {
         ).toHexString()}"`
       );
     }
-    if (!commitmentMapperPubKeyY.eq(proofPublicInputs.commitmentMapperPubKeyY)) {
+    if (
+      !commitmentMapperPubKeyY.eq(proofPublicInputs.commitmentMapperPubKeyY)
+    ) {
       throw new Error(
         `on proofId "${proofIdentifier}" commitmentMapperPubKeyY "${BigNumber.from(
           commitmentMapperPubKeyY
@@ -177,9 +193,13 @@ export class HydraS1Verifier extends BaseVerifier {
     }
 
     if (!BigNumber.from(proofPublicInputs.destinationIdentifier).eq("0")) {
-      throw new Error(`on proofId "${proofIdentifier}" proof input destination must be 0`);
+      throw new Error(
+        `on proofId "${proofIdentifier}" proof input destination must be 0`
+      );
     }
-    const isAvailable = await this.IsRootAvailable(proofPublicInputs.registryTreeRoot);
+    const isAvailable = await this.IsRootAvailable(
+      proofPublicInputs.registryTreeRoot
+    );
     if (!isAvailable) {
       throw new Error(
         `on proofId "${proofIdentifier}" registry root "${BigNumber.from(
@@ -191,7 +211,9 @@ export class HydraS1Verifier extends BaseVerifier {
       verifiableStatement.groupId,
       verifiableStatement.groupTimestamp
     );
-    if (!BigNumber.from(proofPublicInputs.accountsTreeValue).eq(groupSnapshotId)) {
+    if (
+      !BigNumber.from(proofPublicInputs.accountsTreeValue).eq(groupSnapshotId)
+    ) {
       throw new Error(
         `on proofId "${proofIdentifier}" groupId "${verifiableStatement.groupId}" or timestamp "${verifiableStatement.groupTimestamp}" incorrect`
       );
@@ -204,13 +226,6 @@ export class HydraS1Verifier extends BaseVerifier {
         }" mismatch with appId "${BigNumber.from(appId).toString()}"`
       );
     }
-
-    if (proofPublicInputs.vaultIdentifier !== vaultIdentifier) {
-      throw new Error(
-        `on proofId "${proofIdentifier}" vaultIdentifier "${vaultIdentifier}" mismatch with proof input vaultIdentifier "${proofPublicInputs.vaultIdentifier}"`
-      );
-    }
-    return true;
   }
 
   protected getCommitmentMapperPubKey = async () => {
