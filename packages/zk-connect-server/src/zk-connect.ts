@@ -1,10 +1,10 @@
 import { DataRequest } from './../../zk-connect-client/src/types';
-import { ZkConnectResponse, PwsReceipt, TargetComposedGroup, TargetGroup } from "./types";
+import { ZkConnectResponse, ZkConnectVerifiedResult } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
-import { Verifier, VerifierOpts } from "./verifier";
+import { ZkConnectVerifier, VerifierOpts } from "./verifier";
 import { ethers } from "ethers";
 
-export type PwsParams = {
+export type ZkConnectParams = {
     appId: string;
     opts?: {
         provider?: Provider,
@@ -18,13 +18,13 @@ export type VerifyParams = {
     namespace?: string,
 }
 
-export const PWS_VERSION = `off-chain-1`;
+export const ZK_CONNECT_VERSION = `off-chain-1`;
 
-export class Pws {
+export class ZkConnect {
     private _appId: string;
-    private _verifier: Verifier;
+    private _verifier: ZkConnectVerifier;
 
-    constructor({ appId, opts }: PwsParams) {
+    constructor({ appId, opts }: ZkConnectParams) {
         this._appId = appId;
 
         //By default use public gnosis provider
@@ -33,30 +33,22 @@ export class Pws {
             100
         );
         
-        this._verifier = new Verifier(provider, opts?.verifier);
+        this._verifier = new ZkConnectVerifier(provider, opts?.verifier);
     }
 
-    public verify = async ({ proof, dataRequest, namespace }: VerifyParams): Promise<PwsReceipt>  => {
-        if ((dataRequest as TargetComposedGroup).operator) {
-            throw new Error(`TargetComposedGroup is not already available in this version. Please notify us if you need it.`);
-        }
-        dataRequest = dataRequest as TargetGroup
+    public verify = async ({ zkConnectResponse, dataRequest, namespace }: VerifyParams): Promise<ZkConnectVerifiedResult>  => {
+        const requestedNamespace : string = namespace ?? 'main';
 
-       const dataRequestTimesta 
-        if (typeof dataRequest.timestamp  === 'undefined') dataRequest.timestamp = 'latest';
-        if (typeof dataRequest.value  === 'undefined') dataRequest.value = 1;
-        if (typeof namespace  === 'undefined') namespace = 'main';
-
-        if (proof.version !== PWS_VERSION) {
-            throw new Error(`version of the proof "${proof.version}" not compatible with this version "${PWS_VERSION}"`);
+        if (zkConnectResponse.version !== ZK_CONNECT_VERSION) {
+            throw new Error(`version of the zkConnectResponse "${zkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`);
         }
-        if (proof.appId !== this._appId) {
-            throw new Error(`proof appId "${proof.appId}" does not match with server appId "${this._appId}"`);
+        if (zkConnectResponse.appId !== this._appId) {
+            throw new Error(`zkConnectResponse appId "${zkConnectResponse.appId}" does not match with server appId "${this._appId}"`);
         }
-        if (proof.serviceName !== namespace) {
-            throw new Error(`proof serviceName "${proof.serviceName}" does not match with server serverName "${namespace}"`);
+        if (zkConnectResponse.namespace !== namespace) {
+            throw new Error(`zkConnectResponse namespace "${zkConnectResponse.namespace}" does not match with server namespace "${namespace}"`);
         }
 
-        return this._verifier.verify(proof, dataRequest);
+        return this._verifier.verify(zkConnectResponse, dataRequest);
     }
 }
