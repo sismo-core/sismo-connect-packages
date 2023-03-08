@@ -24,6 +24,7 @@ export class DataRequest {
     requestedValue?: number | "USER_SELECTED_VALUE";
     comparator?: StatementComparator;
     provingScheme?: ProvingScheme;
+    extraData?: any;
   }) {
     if (args.statementRequests) {
       if (args.groupId) {
@@ -41,6 +42,9 @@ export class DataRequest {
       if (args.provingScheme) {
         throw new Error("Cannot provide both statements and provingScheme");
       }
+      if (args.extraData) {
+        throw new Error("Cannot provide both statements and extraData");
+      }
     } else {
       if (!args.groupId) {
         throw new Error("Must provide groupId");
@@ -54,6 +58,7 @@ export class DataRequest {
         requestedValue: args.requestedValue ?? 1,
         comparator: args.comparator ?? "GTE",
         provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S1_V1,
+        extraData: args.extraData ?? null,
       },
     ];
     this.operator = args.operator ?? null;
@@ -66,6 +71,7 @@ export type StatementRequest = {
   requestedValue?: number | "USER_SELECTED_VALUE"; // If "MAX" the max value inside the group should be selected. The user can select what he wants to reveal
   comparator?: StatementComparator; // default to "GTE". , "EQ" . If requestedValue="MAX" comparator should be empty
   provingScheme?: any; // default to "hydra-s1.2"
+  extraData?: any;
 };
 
 export type StatementComparator = "GTE" | "EQ";
@@ -76,11 +82,11 @@ export type VerifiedStatement = VerifiableStatement & { proofId: string };
 export type LogicalOperator = "AND" | "OR";
 
 export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
+  vaultIdentifier: string;
   authProof?: SnarkProof;
   verifiableStatements: VerifiableStatement[];
 };
 
 export type ZkConnectVerifiedResult = ZkConnectResponse & {
-  vaultId: string;
   verifiedStatements: VerifiedStatement[];
 };

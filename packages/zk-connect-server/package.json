@@ -41,7 +41,8 @@
   "license": "MIT",
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@sismo-core/hydra-s1": "^2.0.0-beta4"
+    "@sismo-core/hydra-s1": "2.0.0-beta4",
+    "@types/node": "^18.14.6"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
