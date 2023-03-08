@@ -20,10 +20,7 @@ export class ZkConnectVerifier {
     this.hydraS1Verifier = new HydraS1Verifier(provider, opts?.hydraS1);
   }
 
-  async verify(
-    zkConnectResponse: ZkConnectResponse,
-    dataRequest: DataRequest
-  ): Promise<ZkConnectVerifiedResult> {
+  async verify(zkConnectResponse: ZkConnectResponse): Promise<ZkConnectVerifiedResult> {
     const verifiedStatements: VerifiedStatement[] = [];
     for (let verifiableStatement of zkConnectResponse.verifiableStatements) {
       const { proofIdentifier } = await this._verifyProof({
