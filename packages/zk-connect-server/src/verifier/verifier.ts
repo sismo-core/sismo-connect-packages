@@ -7,7 +7,7 @@ import {
 } from "../types";
 import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
-import { VerifyParams } from "packages/zk-connect-server/src/verifier/base-verifier";
+import { VerifyParams } from "../verifier/base-verifier";
 
 export type VerifierOpts = {
   hydraS1?: HydraS1VerifierOpts;

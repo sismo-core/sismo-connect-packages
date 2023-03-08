@@ -1,4 +1,4 @@
-import { SnarkProof } from "packages/zk-connect-server/src/verifier/hydras1-verifier";
+import { SnarkProof } from "./verifier/hydras1-verifier";
 
 export type ZkConnectRequest = {
   dataRequest: DataRequest;

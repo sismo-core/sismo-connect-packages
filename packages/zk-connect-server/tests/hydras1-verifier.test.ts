@@ -5,7 +5,7 @@ import { encodeRequestIdentifier } from "../src/verifier/utils/encodeRequestIden
 import { encodeAccountsTreeValue } from "../src/verifier/utils/encodeAccountsTreeValue";
 import { ProofPublicInputs } from "../src/verifier/hydras1-verifier";
 import { VerifiableStatement } from "../src";
-import { DataRequest, ProvingScheme } from "../../zk-connect-client/src/types";
+import { DataRequest, ProvingScheme } from "../src/types";
 
 describe("ZkConnect Verifier", () => {
   let zkConnectVerifier: ZkConnectVerifierMocked;
@@ -36,7 +36,7 @@ describe("ZkConnect Verifier", () => {
       groupTimestamp: "latest",
       requestedValue: 1,
       comparator: "GTE",
-      provingScheme: ProvingScheme.HYDRA_S1,
+      provingScheme: ProvingScheme.HYDRA_S1_V1,
     });
 
     proofPublicInputs = {
