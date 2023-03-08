@@ -1,7 +1,7 @@
 {
-  "name": "@sismo-core/pws-server-private",
+  "name": "@sismo-core/zk-connect-server-private",
   "version": "1.0.15",
-  "description": "Prove with Sismo server package",
+  "description": "zkConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
@@ -36,12 +36,12 @@
   "engines": {
     "npm": "USE YARN INSTEAD OF NPM"
   },
-  "repository": "git@github.com:sismo-core/pws-packages.git",
+  "repository": "git@github.com:sismo-core/zk-connect-packages.git",
   "author": "gabin@sismo.io",
   "license": "MIT",
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@sismo-core/hydra-s1": "^1.0.7"
+    "@sismo-core/hydra-s1": "^2.0.0-beta4"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",

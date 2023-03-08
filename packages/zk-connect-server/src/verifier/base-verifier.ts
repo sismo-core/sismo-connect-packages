@@ -1,12 +1,12 @@
-import { Membership, TargetGroup } from "../types"
+import { DataRequest, VerifiableStatement } from "../types";
 
 export type VerifyParams = {
-    membership: Membership, 
-    appId: string, 
-    serviceName: string, 
-    targetGroup: TargetGroup
-}
+  appId: string;
+  namespace: string;
+  verifiableStatement: VerifiableStatement;
+  dataRequest: DataRequest;
+};
 
 export abstract class BaseVerifier {
-    abstract verify (params: VerifyParams): Promise<boolean> 
+  abstract verify(params: VerifyParams): Promise<boolean>;
 }

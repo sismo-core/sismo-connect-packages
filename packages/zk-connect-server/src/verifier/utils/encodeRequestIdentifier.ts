@@ -6,7 +6,7 @@ export const encodeRequestIdentifier = (
     appId: string,
     groupId: string,
     timestamp: number | "latest",
-    serviceName: string,
+    namespace: string,
   ) => {
     const encodedTimestamp =
       timestamp === "latest"
@@ -18,7 +18,7 @@ export const encodeRequestIdentifier = (
       [groupId, encodedTimestamp]
     );
   
-    const serviceId = encodeServiceId(appId, serviceName);
+    const serviceId = encodeServiceId(appId, namespace);
   
     const requestIdentifier = BigNumber.from(
       ethers.utils.keccak256(
