@@ -34,7 +34,9 @@ export class ZkConnect {
     this._verifier = new ZkConnectVerifier(provider, opts?.verifier);
   }
 
-  public verify = async ({ zkConnectResponse }: VerifyParams): Promise<ZkConnectVerifiedResult> => {
+  public verify = async (
+    zkConnectResponse: ZkConnectResponse
+  ): Promise<ZkConnectVerifiedResult> => {
     if (zkConnectResponse.version !== ZK_CONNECT_VERSION) {
       throw new Error(
         `version of the zkConnectResponse "${zkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`
