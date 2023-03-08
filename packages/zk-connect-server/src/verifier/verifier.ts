@@ -1,7 +1,6 @@
 import {
   DataRequest,
   ProvingScheme,
-  VerifiableStatement,
   VerifiedStatement,
   ZkConnectResponse,
   ZkConnectVerifiedResult,
@@ -31,13 +30,13 @@ export class ZkConnectVerifier {
         appId: zkConnectResponse.appId,
         namespace: zkConnectResponse.namespace,
         verifiableStatement,
+        vaultIdentifier: zkConnectResponse.vaultIdentifier,
       });
       verifiedStatements.push({ ...verifiableStatement, proofId: proofIdentifier });
     }
 
     const zkConnectVerifiedResult: ZkConnectVerifiedResult = {
       ...zkConnectResponse,
-      vaultId: zkConnectResponse.verifiableStatements[0].proof.input[10],
       verifiedStatements,
     };
 
@@ -48,6 +47,7 @@ export class ZkConnectVerifier {
     verifiableStatement,
     appId,
     namespace,
+    vaultIdentifier,
   }: VerifyParams): Promise<{ proofIdentifier: string }> {
     switch (verifiableStatement.provingScheme) {
       case ProvingScheme.HYDRA_S1_V1:
@@ -55,8 +55,8 @@ export class ZkConnectVerifier {
           appId,
           namespace,
           verifiableStatement,
+          vaultIdentifier,
         });
-        console.log("isVerified", isVerified);
         if (isVerified) {
           return { proofIdentifier: verifiableStatement.proof.input[6] };
         } else {

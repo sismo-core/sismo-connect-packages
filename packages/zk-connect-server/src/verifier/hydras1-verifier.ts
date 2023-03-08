@@ -63,10 +63,14 @@ export class HydraS1Verifier extends BaseVerifier {
     });
   }
 
-  async verify({ appId, namespace, verifiableStatement }: VerifyParams): Promise<boolean> {
+  async verify({
+    appId,
+    namespace,
+    verifiableStatement,
+    vaultIdentifier,
+  }: VerifyParams): Promise<boolean> {
     const snarkProof = verifiableStatement.proof;
-    if (await this.matchPublicInput({ appId, namespace, verifiableStatement })) {
-      console.log("69");
+    if (await this.matchPublicInput({ appId, namespace, verifiableStatement, vaultIdentifier })) {
       return HydraS1VerifierPS.verifyProof(
         snarkProof.a,
         snarkProof.b,
@@ -74,7 +78,6 @@ export class HydraS1Verifier extends BaseVerifier {
         snarkProof.input
       );
     }
-    console.log("73");
     return false;
   }
 
@@ -82,6 +85,7 @@ export class HydraS1Verifier extends BaseVerifier {
     verifiableStatement,
     appId,
     namespace,
+    vaultIdentifier,
   }: Omit<VerifyParams, "dataRequest">): Promise<boolean> {
     // destinationIdentifier: string; [0]
     // extraData: string; [1]
@@ -115,11 +119,8 @@ export class HydraS1Verifier extends BaseVerifier {
       sourceVerificationEnabled: input[12],
       destinationVerificationEnabled: input[13],
     };
-    console.log("verifiableStatement", verifiableStatement);
-    console.log("proofPublicInputs", proofPublicInputs);
 
     const proofIdentifier = proofPublicInputs.proofIdentifier;
-    console.log("proofIdentifier", proofIdentifier);
 
     const proofAcceptHigherValue = BigNumber.from(proofPublicInputs.statementComparator).eq("0");
     if (proofAcceptHigherValue !== (verifiableStatement.comparator === "GTE")) {
@@ -128,14 +129,6 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    console.log(
-      "BigNumber.from(proofPublicInputs.statementValue)",
-      BigNumber.from(proofPublicInputs.statementValue)
-    );
-    console.log(
-      " BigNumber.from(verifiableStatement.value)",
-      BigNumber.from(verifiableStatement.value)
-    );
     if (
       !BigNumber.from(proofPublicInputs.statementValue).eq(
         BigNumber.from(verifiableStatement.value)
@@ -183,14 +176,8 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    if (
-      !BigNumber.from(proofPublicInputs.destinationIdentifier).eq(
-        "0x0000000000000000000000000000000000515110"
-      )
-    ) {
-      throw new Error(
-        `on proofId "${proofIdentifier}" proof input destination must be 0x0000000000000000000000000000000000515110`
-      );
+    if (!BigNumber.from(proofPublicInputs.destinationIdentifier).eq("0")) {
+      throw new Error(`on proofId "${proofIdentifier}" proof input destination must be 0`);
     }
     const isAvailable = await this.IsRootAvailable(proofPublicInputs.registryTreeRoot);
     if (!isAvailable) {
@@ -218,8 +205,11 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    console.log("220");
-
+    if (proofPublicInputs.vaultIdentifier !== vaultIdentifier) {
+      throw new Error(
+        `on proofId "${proofIdentifier}" vaultIdentifier "${vaultIdentifier}" mismatch with proof input vaultIdentifier "${proofPublicInputs.vaultIdentifier}"`
+      );
+    }
     return true;
   }
 

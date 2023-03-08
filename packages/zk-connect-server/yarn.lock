@@ -1002,7 +1002,7 @@
     ethers "^5.6.1"
     ffjavascript "^0.2.55"
 
-"@sismo-core/hydra-s1@^2.0.0-beta4":
+"@sismo-core/hydra-s1@2.0.0-beta4":
   version "2.0.0-beta4"
   resolved "https://registry.yarnpkg.com/@sismo-core/hydra-s1/-/hydra-s1-2.0.0-beta4.tgz#489696de87e9e0d153e305333cc4b164d08cd78d"
   integrity sha512-k/dCpzJnQoS0zTtdxGcPW+/AdhxOvgHwUPFbK83qpYP+Q/acpxsWNZ/jOklObD1uOVP7ePtPh7gCOswuod8cNA==
@@ -1116,6 +1116,11 @@
   version "18.13.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.13.0.tgz#0400d1e6ce87e9d3032c19eb6c58205b0d3f7850"
   integrity sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==
+
+"@types/node@^18.14.6":
+  version "18.14.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.14.6.tgz#ae1973dd2b1eeb1825695bb11ebfb746d27e3e93"
+  integrity sha512-93+VvleD3mXwlLI/xASjw0FzKcwzl3OdTCzm1LaRfqgS21gfFtK3zDXM5Op9TeeMsJVOaJ2VRDpT9q4Y3d0AvA==
 
 "@types/prettier@^2.1.5":
   version "2.7.2"

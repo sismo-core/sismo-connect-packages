@@ -19,9 +19,11 @@ describe("ZkConnect Verifier", () => {
   let groupId: string;
   let groupTimestamp: number | "latest";
   let proofIdentifier: string;
+  let vaultIdentifier: string;
 
   let expectVerifyToThrow: (
     verifiableStatement: VerifiableStatement,
+    vaultIdentifier: string,
     expectedError: string
   ) => Promise<void>;
 
@@ -56,8 +58,8 @@ describe("ZkConnect Verifier", () => {
 
     zkConnectVerifier = new ZkConnectVerifierMocked({
       commitmentMapperPubKey: [
-        BigNumber.from(proofMock1.commitmentMapperPubKey[0]),
-        BigNumber.from(proofMock1.commitmentMapperPubKey[1]),
+        BigNumber.from(proofMock1.snarkProof.input[2]),
+        BigNumber.from(proofMock1.snarkProof.input[3]),
       ],
     });
 
@@ -73,9 +75,11 @@ describe("ZkConnect Verifier", () => {
     groupId = dataRequest.statementRequests[0].groupId;
     groupTimestamp = dataRequest.statementRequests[0].groupTimestamp as number | "latest";
     proofIdentifier = proofPublicInputs.proofIdentifier;
+    vaultIdentifier = proofPublicInputs.vaultIdentifier;
 
     expectVerifyToThrow = async (
       verifiableStatement: VerifiableStatement,
+      vaultIdentifier: string,
       errorMessage: string
     ) => {
       await expect(
@@ -83,6 +87,7 @@ describe("ZkConnect Verifier", () => {
           namespace,
           appId,
           verifiableStatement,
+          vaultIdentifier,
         })
       ).rejects.toThrow(errorMessage);
     };
@@ -131,6 +136,7 @@ describe("ZkConnect Verifier", () => {
       const proofAcceptHigherValue = proofPublicInputs.statementComparator === "0";
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" statement comparator "${invalidStatement.comparator}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`
       );
     });
@@ -140,23 +146,10 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.value = 2;
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" value "${invalidStatement.value}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
       );
     });
-
-    // it("Should throw with incorrect input proofIdentifier", async () => {
-    //   const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
-    //   invalidStatement.proof.input[6] = proofIdentifier + "0";
-    //   await expect(
-    //     zkConnectVerifier.verify({
-    //       namespace,
-    //       appId,
-    //       verifiableStatement: invalidStatement,
-    //     })
-    //   ).rejects.toThrow(
-    //     `on proofId "${proofIdentifier}" invalid proof input nullifier "${proofPublicInputs.proofIdentifier}"`
-    //   );
-    // });
 
     it("Should throw with incorrect input requestIdentifier", async () => {
       const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
@@ -164,6 +157,7 @@ describe("ZkConnect Verifier", () => {
       const requestIdentifier = encodeRequestIdentifier(appId, groupId, groupTimestamp, namespace);
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" requestIdentifier "${BigNumber.from(
           requestIdentifier
         ).toHexString()}" mismatch with proof input requestIdentifier "${BigNumber.from(
@@ -177,6 +171,7 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.proof.input[2] = invalidStatement.proof.input[2] + "1";
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" commitmentMapperPubKeyX "${BigNumber.from(
           proofMock1.commitmentMapperPubKey[0]
         ).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(
@@ -190,6 +185,7 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.proof.input[3] = invalidStatement.proof.input[3] + "1";
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" commitmentMapperPubKeyY "${BigNumber.from(
           proofMock1.commitmentMapperPubKey[1]
         ).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(
@@ -203,7 +199,8 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.proof.input[0] = "0x123456789";
       await expectVerifyToThrow(
         invalidStatement,
-        `on proofId "${proofIdentifier}" proof input destination must be 0x0000000000000000000000000000000000515110`
+        vaultIdentifier,
+        `on proofId "${proofIdentifier}" proof input destination must be 0`
       );
     });
 
@@ -212,7 +209,17 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.proof.input[8] = "0x123456789";
       await expectVerifyToThrow(
         invalidStatement,
+        vaultIdentifier,
         `on proofId "${proofIdentifier}" groupId "${invalidStatement.groupId}" or timestamp "${invalidStatement.groupTimestamp}" incorrect`
+      );
+    });
+
+    it("Should throw with incorrect vaultIdentifier", async () => {
+      const invalidVaultIdentifier = "0x123456789";
+      await expectVerifyToThrow(
+        verifiableStatement,
+        invalidVaultIdentifier,
+        `on proofId "${proofIdentifier}" vaultIdentifier "${invalidVaultIdentifier}" mismatch with proof input vaultIdentifier "${proofPublicInputs.vaultIdentifier}"`
       );
     });
   });
@@ -228,6 +235,7 @@ describe("ZkConnect Verifier", () => {
       const isVerified = await zkConnectVerifier.verify({
         appId,
         namespace,
+        vaultIdentifier,
         verifiableStatement: invalidStatement,
       });
       expect(isVerified).toEqual(false);
@@ -237,9 +245,9 @@ describe("ZkConnect Verifier", () => {
       const isVerified = await zkConnectVerifier.verify({
         appId,
         namespace,
+        vaultIdentifier,
         verifiableStatement,
       });
-      console.log("isVerified", isVerified);
       expect(isVerified).toEqual(true);
     });
   });
