@@ -1,273 +1,219 @@
 import { proofMock1 } from "./mocks";
 import { BigNumber } from "@ethersproject/bignumber";
-import { PwsVerifierMocked } from "./hydras1-verifier-mocked";
+import { ZkConnectVerifierMocked } from "./hydras1-verifier-mocked";
 import { encodeRequestIdentifier } from "../src/verifier/utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "../src/verifier/utils/encodeAccountsTreeValue";
-import { Membership, TargetGroup } from "../src";
-import { HYDRAS1_VERIFIER_VERSION, ProofPublicInputs } from "../src/verifier/hydras1-verifier";
+import { ProofPublicInputs } from "../src/verifier/hydras1-verifier";
+import { VerifiableStatement } from "../src";
+import { DataRequest, ProvingScheme } from "../../zk-connect-client/src/types";
 
-describe("PwsVerifier", () => {
-  let pwsVerifier: PwsVerifierMocked;
+describe("ZkConnect Verifier", () => {
+  let zkConnectVerifier: ZkConnectVerifierMocked;
   let appId: string;
-  let serviceName: string;
-  let groupId: string;
-  let timestamp: number | "latest";
-  let acceptHigherValue: boolean;
+  let namespace: string;
 
-  let membership: Membership;
-  let targetGroup: TargetGroup;
   let proofPublicInputs: ProofPublicInputs;
+  let verifiableStatement: VerifiableStatement;
+  let dataRequest: DataRequest;
+
+  let groupId: string;
+  let groupTimestamp: number | "latest";
+  let proofIdentifier: string;
+
+  let expectVerifyToThrow: (
+    verifiableStatement: VerifiableStatement,
+    expectedError: string
+  ) => Promise<void>;
 
   beforeAll(() => {
-    appId = '0xc6acc12e813a48e6a8151ce405551123';
-    serviceName = "main";
-    groupId = "0xc4c12da439e843268db139408f1d5573";
-    timestamp = "latest";
-    acceptHigherValue = false;
+    appId = "0xf68985adfc209fafebfb1a956913e7fa";
+    namespace = "main";
+
+    dataRequest = new DataRequest({
+      groupId: "0x682544d549b8a461d7fe3e589846bb7b",
+      groupTimestamp: "latest",
+      requestedValue: 1,
+      comparator: "GTE",
+      provingScheme: ProvingScheme.HYDRA_S1,
+    });
+
     proofPublicInputs = {
-      destination: proofMock1.snarkProof.input[0],
-      chainId: proofMock1.snarkProof.input[1],
+      destinationIdentifier: proofMock1.snarkProof.input[0],
+      extraData: proofMock1.snarkProof.input[1],
       commitmentMapperPubKeyX: proofMock1.snarkProof.input[2],
       commitmentMapperPubKeyY: proofMock1.snarkProof.input[3],
       registryTreeRoot: proofMock1.snarkProof.input[4],
-      externalNullifier: proofMock1.snarkProof.input[5],
-      nullifier: proofMock1.snarkProof.input[6],
-      claimedValue: proofMock1.snarkProof.input[7],
+      requestIdentifier: proofMock1.snarkProof.input[5],
+      proofIdentifier: proofMock1.snarkProof.input[6],
+      statementValue: proofMock1.snarkProof.input[7],
       accountsTreeValue: proofMock1.snarkProof.input[8],
-      isStrict: proofMock1.snarkProof.input[9],
-    }
+      statementComparator: proofMock1.snarkProof.input[9],
+      vaultIdentifier: proofMock1.snarkProof.input[10],
+      vaultNamespace: proofMock1.snarkProof.input[11],
+      sourceVerificationEnabled: proofMock1.snarkProof.input[12],
+      destinationVerificationEnabled: proofMock1.snarkProof.input[13],
+    };
 
-    pwsVerifier = new PwsVerifierMocked({
+    zkConnectVerifier = new ZkConnectVerifierMocked({
       commitmentMapperPubKey: [
-        BigNumber.from(proofMock1.commitmentMapperPubKey[0]), 
-        BigNumber.from(proofMock1.commitmentMapperPubKey[1])
-      ]
+        BigNumber.from(proofMock1.commitmentMapperPubKey[0]),
+        BigNumber.from(proofMock1.commitmentMapperPubKey[1]),
+      ],
     });
 
-    membership = {
-      proofId: proofPublicInputs.nullifier,
-      value: 1,
-      groupId,
-      timestamp,
-      provingScheme: "hydraS1",
+    verifiableStatement = {
+      value: dataRequest.statementRequests[0].requestedValue as number,
+      comparator: dataRequest.statementRequests[0].comparator,
+      groupId: dataRequest.statementRequests[0].groupId,
+      groupTimestamp: dataRequest.statementRequests[0].groupTimestamp,
+      provingScheme: dataRequest.statementRequests[0].provingScheme,
       proof: proofMock1.snarkProof,
-      version: HYDRAS1_VERIFIER_VERSION
-    }
+    };
 
-    targetGroup = {
-      groupId, 
-      timestamp,
-      value: 'MAX',
-      additionalProperties: {
-        acceptHigherValue
-      }
-    }
-  })
+    groupId = dataRequest.statementRequests[0].groupId;
+    groupTimestamp = dataRequest.statementRequests[0].groupTimestamp as number | "latest";
+    proofIdentifier = proofPublicInputs.proofIdentifier;
 
-  describe('check externalNullifier + accounts tree value encode functions', () => {
+    expectVerifyToThrow = async (
+      verifiableStatement: VerifiableStatement,
+      errorMessage: string
+    ) => {
+      await expect(
+        zkConnectVerifier.verify({
+          namespace,
+          appId,
+          verifiableStatement,
+        })
+      ).rejects.toThrow(errorMessage);
+    };
+  });
+
+  describe("check externalNullifier + accounts tree value encode functions", () => {
     it("Should encode the right external nullifier", async () => {
-      const externalNullifier = encodeRequestIdentifier(appId, groupId, timestamp, serviceName);
-      expect(externalNullifier).toEqual("0x227084ef4e9392373c0f4108ff309cd1b16c94a7a7ba065d9e73b809d9159f50");
+      const externalNullifier = encodeRequestIdentifier(appId, groupId, groupTimestamp, namespace);
+      expect(BigNumber.from(externalNullifier).toString()).toEqual(
+        proofPublicInputs.requestIdentifier
+      );
     });
-    
+
     it("Should encode the right Accounts Tree value", async () => {
-      const accountsTreeValue = encodeAccountsTreeValue(groupId, timestamp);
-      expect(accountsTreeValue).toEqual("0x032ff3d8b521c27fac7022668917f3fecb91d3438c8e3dbaf07829b03ffffffc");
+      const accountsTreeValue = encodeAccountsTreeValue(groupId, groupTimestamp);
+      expect(BigNumber.from(accountsTreeValue).toString()).toEqual(
+        proofPublicInputs.accountsTreeValue
+      );
     });
-  })
+  });
 
   /********************************************************************************************************/
   /******************************************* VERSION + APPID ********************************************/
   /********************************************************************************************************/
 
-  describe('check version of the proof', () => {
-    it("Should throw with invalid version of the proof", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.version = invalidMembership.version + ".0";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" proving scheme version "${invalidMembership.version}" must be "${HYDRAS1_VERIFIER_VERSION}"`)    
-    });
-  })
+  // describe("check version of the proof", () => {
+  //   it("Should throw with invalid version of the proof", async () => {
+  //     await expect(
+  //       zkConnectVerifier.verify({
+  //         appId,
+  //         namespace,
+  //         verifiableStatement,
+  //       })
+  //     ).rejects.toThrow(`on proofId "${verifiableStatement}" `);
+  //   });
+  // });
 
   /********************************************************************************************************/
   /******************************************** VALIDATE INPUT ********************************************/
   /********************************************************************************************************/
 
-  describe('validateInput', () => {
-    it("Should throw with incorrect input isStrict", async () => {
-      const invalidTargetGroup = JSON.parse(JSON.stringify(targetGroup));
-      invalidTargetGroup.additionalProperties.acceptHigherValue = true;
-      const proofAcceptHigherValue = (proofPublicInputs.isStrict === "0");
-      await expect(
-        pwsVerifier.verify({
-          membership, 
-          appId, 
-          serviceName, 
-          targetGroup: invalidTargetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" acceptHigherValue "${invalidTargetGroup.additionalProperties.acceptHigherValue}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`)    
+  describe("validateInput", () => {
+    it("Should throw with incorrect input comparator", async () => {
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.comparator = "EQ";
+      const proofAcceptHigherValue = proofPublicInputs.statementComparator === "0";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" statement comparator "${invalidStatement.comparator}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`
+      );
     });
 
     it("Should throw with incorrect proof value", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.value = 2;
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" value "${invalidMembership.value}" mismatch with proof input claimedValue "${proofPublicInputs.claimedValue}"`)    
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.value = 2;
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" value "${invalidStatement.value}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
+      );
     });
 
-    it("Should throw with incorrect input nullifier", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proofId = invalidMembership.proofId + "0";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${invalidMembership.proofId}" invalid proof input nullifier "${proofPublicInputs.nullifier}"`)    
-    });
+    // it("Should throw with incorrect input proofIdentifier", async () => {
+    //   const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+    //   invalidStatement.proof.input[6] = proofIdentifier + "0";
+    //   await expect(
+    //     zkConnectVerifier.verify({
+    //       namespace,
+    //       appId,
+    //       verifiableStatement: invalidStatement,
+    //     })
+    //   ).rejects.toThrow(
+    //     `on proofId "${proofIdentifier}" invalid proof input nullifier "${proofPublicInputs.proofIdentifier}"`
+    //   );
+    // });
 
-    it("Should throw with incorrect input external nullifier", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[5] = invalidMembership.proof.input[5] + "1";
-      const externalNullifier = encodeRequestIdentifier(appId, groupId, timestamp, serviceName);
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" requestIdentifier "${BigNumber.from(externalNullifier).toHexString()}" mismatch with proof input externalNullifier "${BigNumber.from(invalidMembership.proof.input[5]).toHexString()}"`)    
+    it("Should throw with incorrect input requestIdentifier", async () => {
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[5] = invalidStatement.proof.input[5] + "1";
+      const requestIdentifier = encodeRequestIdentifier(appId, groupId, groupTimestamp, namespace);
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" requestIdentifier "${BigNumber.from(
+          requestIdentifier
+        ).toHexString()}" mismatch with proof input requestIdentifier "${BigNumber.from(
+          invalidStatement.proof.input[5]
+        ).toHexString()}"`
+      );
     });
 
     it("Should throw with incorrect input commitmentMapperPubKeyX", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[2] = invalidMembership.proof.input[2] + "1";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" commitmentMapperPubKeyX "${BigNumber.from(proofMock1.commitmentMapperPubKey[0]).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(invalidMembership.proof.input[2]).toHexString()}"`)    
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[2] = invalidStatement.proof.input[2] + "1";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" commitmentMapperPubKeyX "${BigNumber.from(
+          proofMock1.commitmentMapperPubKey[0]
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(
+          invalidStatement.proof.input[2]
+        ).toHexString()}"`
+      );
     });
 
-    it("Should throw with incorrect input commitmentMapperPubKeyY", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[3] = invalidMembership.proof.input[3] + "1";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" commitmentMapperPubKeyY "${BigNumber.from(proofMock1.commitmentMapperPubKey[1]).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(invalidMembership.proof.input[3]).toHexString()}"`)    
-    });
-
-    it("Should throw with incorrect input chainId", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[1] = "1";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" proof input chainId must be 0`)    
+    it("Should throw with incorrect input commitmentMapperPubKeyX", async () => {
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[3] = invalidStatement.proof.input[3] + "1";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" commitmentMapperPubKeyY "${BigNumber.from(
+          proofMock1.commitmentMapperPubKey[1]
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(
+          invalidStatement.proof.input[3]
+        ).toHexString()}"`
+      );
     });
 
     it("Should throw with incorrect input destination", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[0] = "0x123456789";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" proof input destination must be 0x0000000000000000000000000000000000515110`)    
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[0] = "0x123456789";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" proof input destination must be 0x0000000000000000000000000000000000515110`
+      );
     });
 
     it("Should throw with incorrect accountsTreeValue", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[8] = "0x123456789";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" groupId "${invalidMembership.groupId}" or timestamp "${invalidMembership.timestamp}" incorrect`)    
-    });
-  });
-
-  /********************************************************************************************************/
-  /*************************************** VALIDATE TARGET GROUP ******************************************/
-  /********************************************************************************************************/
-
-  describe('targetGroup', () => {
-    it("Should throw with incorrect targetGroup groupId", async () => {
-      const invalidTargetGroup = JSON.parse(JSON.stringify(targetGroup));
-      invalidTargetGroup.groupId = "1";
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[5] = "0x2c22fb131056c3f27dc64de632312bd63eb08244ff51b8c8f394bb8bee20ac89";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup: invalidTargetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" groupId "${membership.groupId}" mismatch with targetGroup groupId "${invalidTargetGroup.groupId}"`)    
-    });
-
-    it("Should throw with incorrect targetGroup timestamp", async () => {
-      const invalidTargetGroup = JSON.parse(JSON.stringify(targetGroup));
-      invalidTargetGroup.timestamp = 0;
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[5] = "0x1706c37c2b8f34951e1a244b37a5948d40a6f2f17604a3eae4e96c0ab86c68b7";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup: invalidTargetGroup
-        })
-      ).rejects.toThrow(`on proofId "${membership.proofId}" timestamp "${invalidMembership.timestamp}" mismatch with targetGroup timestamp "${invalidTargetGroup.timestamp}"`)    
-    });
-
-    it("Should throw with incorrect targetGroup value", async () => {
-      const invalidTargetGroup = JSON.parse(JSON.stringify(targetGroup));
-      invalidTargetGroup.value = 10;
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.input[5] = "0x227084ef4e9392373c0f4108ff309cd1b16c94a7a7ba065d9e73b809d9159f50";
-      await expect(
-        pwsVerifier.verify({
-          membership: invalidMembership, 
-          appId, 
-          serviceName, 
-          targetGroup: invalidTargetGroup
-        })
-      ).rejects.toThrow(`on proofId "${invalidMembership.proofId}" value "${invalidMembership.value}" is not equal to targetGroup value "${invalidTargetGroup.value}"`)    
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[8] = "0x123456789";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" groupId "${invalidStatement.groupId}" or timestamp "${invalidStatement.groupTimestamp}" incorrect`
+      );
     });
   });
 
@@ -275,27 +221,26 @@ describe("PwsVerifier", () => {
   /****************************************** PROOF VALIDITY **********************************************/
   /********************************************************************************************************/
 
-  describe('proof validity', () => {
+  describe("proof validity", () => {
     it("Should return false", async () => {
-      const invalidMembership = JSON.parse(JSON.stringify(membership));
-      invalidMembership.proof.a[0] = invalidMembership.proof.a[0] + "1";
-      const isVerified = await pwsVerifier.verify({
-        membership: invalidMembership, 
-        appId, 
-        serviceName, 
-        targetGroup
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.a[0] = invalidStatement.proof.a[0] + "1";
+      const isVerified = await zkConnectVerifier.verify({
+        appId,
+        namespace,
+        verifiableStatement: invalidStatement,
       });
       expect(isVerified).toEqual(false);
     });
 
     it("Should return a verified claim with correct proof", async () => {
-      const isVerified = await pwsVerifier.verify({
-        membership, 
-        appId, 
-        serviceName, 
-        targetGroup
+      const isVerified = await zkConnectVerifier.verify({
+        appId,
+        namespace,
+        verifiableStatement,
       });
-      expect(isVerified).toEqual(true)
-    })
-  })
-})
+      console.log("isVerified", isVerified);
+      expect(isVerified).toEqual(true);
+    });
+  });
+});

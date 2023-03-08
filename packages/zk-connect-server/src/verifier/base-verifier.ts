@@ -4,7 +4,6 @@ export type VerifyParams = {
   appId: string;
   namespace: string;
   verifiableStatement: VerifiableStatement;
-  dataRequest: DataRequest;
 };
 
 export abstract class BaseVerifier {
