@@ -73,13 +73,14 @@ describe("ZkConnect Verifier", () => {
     };
 
     groupId = dataRequest.statementRequests[0].groupId;
-    groupTimestamp = dataRequest.statementRequests[0].groupTimestamp as number | "latest";
+    groupTimestamp = dataRequest.statementRequests[0].groupTimestamp as
+      | number
+      | "latest";
     proofIdentifier = proofPublicInputs.proofIdentifier;
     vaultIdentifier = proofPublicInputs.vaultIdentifier;
 
     expectVerifyToThrow = async (
       verifiableStatement: VerifiableStatement,
-      vaultIdentifier: string,
       errorMessage: string
     ) => {
       await expect(
@@ -87,7 +88,6 @@ describe("ZkConnect Verifier", () => {
           namespace,
           appId,
           verifiableStatement,
-          vaultIdentifier,
         })
       ).rejects.toThrow(errorMessage);
     };
@@ -95,14 +95,22 @@ describe("ZkConnect Verifier", () => {
 
   describe("check externalNullifier + accounts tree value encode functions", () => {
     it("Should encode the right external nullifier", async () => {
-      const externalNullifier = encodeRequestIdentifier(appId, groupId, groupTimestamp, namespace);
+      const externalNullifier = encodeRequestIdentifier(
+        appId,
+        groupId,
+        groupTimestamp,
+        namespace
+      );
       expect(BigNumber.from(externalNullifier).toString()).toEqual(
         proofPublicInputs.requestIdentifier
       );
     });
 
     it("Should encode the right Accounts Tree value", async () => {
-      const accountsTreeValue = encodeAccountsTreeValue(groupId, groupTimestamp);
+      const accountsTreeValue = encodeAccountsTreeValue(
+        groupId,
+        groupTimestamp
+      );
       expect(BigNumber.from(accountsTreeValue).toString()).toEqual(
         proofPublicInputs.accountsTreeValue
       );
@@ -133,11 +141,12 @@ describe("ZkConnect Verifier", () => {
     it("Should throw with incorrect input comparator", async () => {
       const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
       invalidStatement.comparator = "EQ";
-      const proofAcceptHigherValue = proofPublicInputs.statementComparator === "0";
+      const proofAcceptHigherValue =
+        proofPublicInputs.statementComparator === "0";
       await expectVerifyToThrow(
         invalidStatement,
         vaultIdentifier,
-        `on proofId "${proofIdentifier}" statement comparator "${invalidStatement.comparator}" mismatch with proof input acceptHigherValue "${proofAcceptHigherValue}"`
+        `on proofId "${proofIdentifier}" statement comparator "${invalidStatement.comparator}" mismatch with proof input statementComparator "${proofAcceptHigherValue}"`
       );
     });
 
@@ -154,7 +163,12 @@ describe("ZkConnect Verifier", () => {
     it("Should throw with incorrect input requestIdentifier", async () => {
       const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
       invalidStatement.proof.input[5] = invalidStatement.proof.input[5] + "1";
-      const requestIdentifier = encodeRequestIdentifier(appId, groupId, groupTimestamp, namespace);
+      const requestIdentifier = encodeRequestIdentifier(
+        appId,
+        groupId,
+        groupTimestamp,
+        namespace
+      );
       await expectVerifyToThrow(
         invalidStatement,
         vaultIdentifier,
@@ -235,7 +249,6 @@ describe("ZkConnect Verifier", () => {
       const isVerified = await zkConnectVerifier.verify({
         appId,
         namespace,
-        vaultIdentifier,
         verifiableStatement: invalidStatement,
       });
       expect(isVerified).toEqual(false);
@@ -245,7 +258,6 @@ describe("ZkConnect Verifier", () => {
       const isVerified = await zkConnectVerifier.verify({
         appId,
         namespace,
-        vaultIdentifier,
         verifiableStatement,
       });
       expect(isVerified).toEqual(true);

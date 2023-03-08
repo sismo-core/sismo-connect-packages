@@ -76,17 +76,20 @@ export type StatementRequest = {
 
 export type StatementComparator = "GTE" | "EQ";
 
-export type VerifiableStatement = StatementRequest & { value: number; proof: SnarkProof };
+export type VerifiableStatement = StatementRequest & {
+  value: number;
+  proof: SnarkProof;
+};
 export type VerifiedStatement = VerifiableStatement & { proofId: string };
 
 export type LogicalOperator = "AND" | "OR";
 
 export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
-  vaultIdentifier: string;
   authProof?: SnarkProof;
   verifiableStatements: VerifiableStatement[];
 };
 
 export type ZkConnectVerifiedResult = ZkConnectResponse & {
+  vaultId: string;
   verifiedStatements: VerifiedStatement[];
 };
