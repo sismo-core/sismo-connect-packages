@@ -23,7 +23,7 @@ export class ZkConnect {
         this._vaultAppBaseUrl = opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
     }
 
-    public request = ({ dataRequest, namespace, callbackPath }: RequestParams)  => {
+    public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {})  => {
         if (!window) throw new Error(`requestProof is not available outside of a browser`);
 
         let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
