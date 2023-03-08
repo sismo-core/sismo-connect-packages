@@ -9,11 +9,10 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
 import { BaseVerifier, VerifyParams } from "./base-verifier";
-import { DataRequest, VerifiableStatement } from "packages/zk-connect-server/src/types";
 
 export type ProofPublicInputs = {
   destinationIdentifier: string;
-  chainId: string;
+  extraData: string;
   commitmentMapperPubKeyX: string;
   commitmentMapperPubKeyY: string;
   registryTreeRoot: string;
@@ -26,7 +25,6 @@ export type ProofPublicInputs = {
   vaultNamespace: string;
   sourceVerificationEnabled: string;
   destinationVerificationEnabled: string;
-  randomBeacon: string;
 };
 
 export type VerifierParams = {
@@ -65,21 +63,19 @@ export class HydraS1Verifier extends BaseVerifier {
     });
   }
 
-  async verify({
-    appId,
-    namespace,
-    verifiableStatement,
-    dataRequest,
-  }: VerifyParams): Promise<boolean> {
+  async verify({ appId, namespace, verifiableStatement }: VerifyParams): Promise<boolean> {
     const snarkProof = verifiableStatement.proof;
     if (await this.matchPublicInput({ appId, namespace, verifiableStatement })) {
-      return await HydraS1VerifierPS.verifyProof(
+      console.log("69");
+      return HydraS1VerifierPS.verifyProof(
         snarkProof.a,
         snarkProof.b,
         snarkProof.c,
         snarkProof.input
       );
     }
+    console.log("73");
+    return false;
   }
 
   public async matchPublicInput({
@@ -88,7 +84,7 @@ export class HydraS1Verifier extends BaseVerifier {
     namespace,
   }: Omit<VerifyParams, "dataRequest">): Promise<boolean> {
     // destinationIdentifier: string; [0]
-    // chainId: string; [1]
+    // extraData: string; [1]
     // commitmentMapperPubKeyX: string; [2]
     // commitmentMapperPubKeyY: string; [3]
     // registryTreeRoot: string; [4]
@@ -101,12 +97,11 @@ export class HydraS1Verifier extends BaseVerifier {
     // vaultNamespace: string; [11]
     // sourceVerificationEnabled: string; [12]
     // destinationVerificationEnabled: string; [13]
-    // randomBeacon: string; [14]
 
     const input = verifiableStatement.proof.input;
     const proofPublicInputs: ProofPublicInputs = {
       destinationIdentifier: input[0],
-      chainId: input[1],
+      extraData: input[1],
       commitmentMapperPubKeyX: input[2],
       commitmentMapperPubKeyY: input[3],
       registryTreeRoot: input[4],
@@ -119,10 +114,12 @@ export class HydraS1Verifier extends BaseVerifier {
       vaultNamespace: input[11],
       sourceVerificationEnabled: input[12],
       destinationVerificationEnabled: input[13],
-      randomBeacon: input[14],
     };
+    console.log("verifiableStatement", verifiableStatement);
+    console.log("proofPublicInputs", proofPublicInputs);
 
     const proofIdentifier = proofPublicInputs.proofIdentifier;
+    console.log("proofIdentifier", proofIdentifier);
 
     const proofAcceptHigherValue = BigNumber.from(proofPublicInputs.statementComparator).eq("0");
     if (proofAcceptHigherValue !== (verifiableStatement.comparator === "GTE")) {
@@ -131,13 +128,21 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
+    console.log(
+      "BigNumber.from(proofPublicInputs.statementValue)",
+      BigNumber.from(proofPublicInputs.statementValue)
+    );
+    console.log(
+      " BigNumber.from(verifiableStatement.value)",
+      BigNumber.from(verifiableStatement.value)
+    );
     if (
       !BigNumber.from(proofPublicInputs.statementValue).eq(
-        BigNumber.from(verifiableStatement.selectedValue)
+        BigNumber.from(verifiableStatement.value)
       )
     ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" value "${verifiableStatement.selectedValue}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
+        `on proofId "${proofIdentifier}" value "${verifiableStatement.value}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
       );
     }
 
@@ -151,7 +156,7 @@ export class HydraS1Verifier extends BaseVerifier {
       throw new Error(
         `on proofId "${proofIdentifier}" requestIdentifier "${BigNumber.from(
           requestIdentifier
-        ).toHexString()}" mismatch with proof input externalNullifier "${BigNumber.from(
+        ).toHexString()}" mismatch with proof input requestIdentifier "${BigNumber.from(
           proofPublicInputs.requestIdentifier
         ).toHexString()}"`
       );
@@ -178,9 +183,6 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    if (!BigNumber.from(proofPublicInputs.chainId).eq("0")) {
-      throw new Error(`on proofId "${proofIdentifier}" proof input chainId must be 0`);
-    }
     if (
       !BigNumber.from(proofPublicInputs.destinationIdentifier).eq(
         "0x0000000000000000000000000000000000515110"
@@ -208,11 +210,15 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    if (proofPublicInputs.vaultNamespace !== appId) {
+    if (proofPublicInputs.vaultNamespace !== BigNumber.from(appId).toString()) {
       throw new Error(
-        `on proofId "${proofIdentifier}" vaultNamespace "${proofPublicInputs.vaultNamespace}" mismatch with appId "${appId}"`
+        `on proofId "${proofIdentifier}" vaultNamespace "${
+          proofPublicInputs.vaultNamespace
+        }" mismatch with appId "${BigNumber.from(appId).toString()}"`
       );
     }
+
+    console.log("220");
 
     return true;
   }

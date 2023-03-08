@@ -26,19 +26,18 @@ export class ZkConnectVerifier {
     dataRequest: DataRequest
   ): Promise<ZkConnectVerifiedResult> {
     const verifiedStatements: VerifiedStatement[] = [];
-
     for (let verifiableStatement of zkConnectResponse.verifiableStatements) {
-      this._verifyProof({
+      const { proofIdentifier } = await this._verifyProof({
         appId: zkConnectResponse.appId,
         namespace: zkConnectResponse.namespace,
         verifiableStatement,
-        dataRequest,
       });
+      verifiedStatements.push({ ...verifiableStatement, proofId: proofIdentifier });
     }
 
     const zkConnectVerifiedResult: ZkConnectVerifiedResult = {
       ...zkConnectResponse,
-      vaultId,
+      vaultId: zkConnectResponse.verifiableStatements[0].proof.input[10],
       verifiedStatements,
     };
 
@@ -47,18 +46,24 @@ export class ZkConnectVerifier {
 
   private async _verifyProof({
     verifiableStatement,
-    dataRequest,
     appId,
     namespace,
-  }: VerifyParams): Promise<boolean> {
+  }: VerifyParams): Promise<{ proofIdentifier: string }> {
     switch (verifiableStatement.provingScheme) {
       case ProvingScheme.HYDRA_S1_V1:
-        return this.hydraS1Verifier.verify({
+        const isVerified = await this.hydraS1Verifier.verify({
           appId,
           namespace,
           verifiableStatement,
-          dataRequest: dataRequest,
         });
+        console.log("isVerified", isVerified);
+        if (isVerified) {
+          return { proofIdentifier: verifiableStatement.proof.input[6] };
+        } else {
+          throw new Error(
+            `verifiableStatement with proof "${verifiableStatement.proof}" could not be verified `
+          );
+        }
       default:
         throw new Error(
           `verifiableStatement proving scheme "${verifiableStatement.provingScheme}" not supported in this version`
