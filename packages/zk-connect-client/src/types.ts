@@ -8,7 +8,7 @@ export type ZkConnectRequest = {
 
 
 export enum ProvingScheme {
-    HYDRA_S1 = "hydra-s1.1",
+    HYDRA_S1 = "hydra-s1.2",
 }
 
 export class DataRequest {
