@@ -29,6 +29,13 @@ export class ZkConnect {
   constructor({ appId, opts }: ZkConnectParams) {
     this._appId = appId;
 
+    this._isDevMode = opts?.isDevMode ?? false;
+    if (this._isDevMode) {
+      console.warn(
+        "zkConnect launch in DevMode! Never use this mode in production!"
+      );
+    }
+
     //By default use public gnosis provider
     const provider =
       opts?.provider ||
@@ -36,17 +43,11 @@ export class ZkConnect {
         "https://rpc.gnosis.gateway.fm",
         100
       );
+
     this._verifier = new ZkConnectVerifier(provider, {
       ...opts?.verifier,
       isDevMode: this._isDevMode,
     });
-
-    this._isDevMode = opts?.isDevMode ?? false;
-    if (this._isDevMode) {
-      console.warn(
-        "zkConnect launch in DevMode! Never use this mode in production!"
-      );
-    }
   }
 
   public verify = async ({
@@ -54,6 +55,7 @@ export class ZkConnect {
     dataRequest,
     namespace,
   }: VerifyParamsZkConnect): Promise<ZkConnectVerifiedResult> => {
+    namespace = namespace ?? "main";
     if (zkConnectResponse.version !== ZK_CONNECT_VERSION) {
       throw new Error(
         `version of the zkConnectResponse "${zkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`

@@ -45,10 +45,6 @@ export class ZkConnect {
       for (const statementRequest of dataRequest.statementRequests) {
         const devModeOverrideEligibleGroupData =
           statementRequest.extraData?.devModeOverrideEligibleGroupData;
-        console.log(
-          "devModeOverrideEligibleGroupData",
-          devModeOverrideEligibleGroupData
-        );
         if (devModeOverrideEligibleGroupData) {
           if (!this._isDevMode) {
             console.error(`

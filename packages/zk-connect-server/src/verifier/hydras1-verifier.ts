@@ -247,6 +247,7 @@ export class HydraS1Verifier extends BaseVerifier {
     const isAvailable = await this.IsRootAvailable(
       proofPublicInputs.registryTreeRoot
     );
+
     // We don't check the root if we are in dev mode
     if (!isAvailable && !this._isDevMode) {
       throw new Error(
