@@ -13,16 +13,18 @@ describe("ZkConnect", () => {
   let zkConnect: ZkConnect;
   let zkConnectResponse: ZkConnectResponse;
   let appId: string;
-  let dataRequest: DataRequest;
+  let groupId: string;
   let namespace: string;
+  let dataRequest: DataRequest;
 
   beforeAll(() => {
     appId = "0x112a692a2005259c25f6094161007967";
+    groupId = "0xe9ed316946d3d98dfcd829a53ec9822e"
     namespace = "main";
     zkConnectResponse = zkConnectResponseMock;
     const _provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth_goerli", 5);
 
-    dataRequest = new DataRequest({ groupId: "0xe9ed316946d3d98dfcd829a53ec9822e" });
+    dataRequest = new DataRequest({ groupId });
     zkConnect = new ZkConnect({
       appId,
       opts: {
@@ -151,7 +153,7 @@ describe("ZkConnect", () => {
           namespace: "main",
           verifiableStatements: [
             {
-              groupId: "0xe9ed316946d3d98dfcd829a53ec9822e",
+              groupId,
               value: 1,
               groupTimestamp: "latest",
               comparator: "GTE",
@@ -164,7 +166,7 @@ describe("ZkConnect", () => {
           vaultId: "0x0be05f26254c541fb4f0d48db44cd17a5fb108d10faa7915625d37f8af46da45",
           verifiedStatements: [
             {
-              groupId: "0xe9ed316946d3d98dfcd829a53ec9822e",
+              groupId,
               value: 1,
               groupTimestamp: "latest",
               comparator: "GTE",
@@ -265,7 +267,7 @@ describe("ZkConnect", () => {
           version: "off-chain-1",
           vaultId: "0x0be05f26254c541fb4f0d48db44cd17a5fb108d10faa7915625d37f8af46da45",
           verifiedStatements: [],
-        });
+        } as ZkConnectVerifiedResult);
       });
     });
   });
