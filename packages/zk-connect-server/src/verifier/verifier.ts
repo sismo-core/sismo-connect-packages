@@ -6,12 +6,17 @@ import {
   ZkConnectResponse,
   ZkConnectVerifiedResult,
 } from "../types";
-import { HydraS1Verifier, HydraS1VerifierOpts, SnarkProof } from "./hydras1-verifier";
+import {
+  HydraS1Verifier,
+  HydraS1VerifierOpts,
+  SnarkProof,
+} from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 
 export type VerifierOpts = {
   hydraS1?: HydraS1VerifierOpts;
+  isDevMode?: boolean;
 };
 
 export type VerifyParams = {
@@ -24,7 +29,10 @@ export class ZkConnectVerifier {
   private hydraS1Verifier: HydraS1Verifier;
 
   constructor(provider: Provider, opts?: VerifierOpts) {
-    this.hydraS1Verifier = new HydraS1Verifier(provider, opts?.hydraS1);
+    this.hydraS1Verifier = new HydraS1Verifier(provider, {
+      ...opts?.hydraS1,
+      isDevMode: opts.isDevMode,
+    });
   }
 
   async verify({
@@ -158,12 +166,14 @@ export class ZkConnectVerifier {
 
   private async _verifyAuthProof(
     appId: string,
-    authProof : { provingScheme: string, proof: SnarkProof }
+    authProof: { provingScheme: string; proof: SnarkProof }
   ): Promise<{
     vaultIdentifier: string;
   }> {
     if (!authProof) {
-      throw new Error("The authProof is required when no verifiableStatements are provided");
+      throw new Error(
+        "The authProof is required when no verifiableStatements are provided"
+      );
     }
     switch (authProof.provingScheme) {
       case ProvingScheme.HYDRA_S1_V1:
