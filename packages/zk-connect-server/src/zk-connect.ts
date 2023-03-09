@@ -1,8 +1,8 @@
+import { ethers } from "ethers";
 import { DataRequest } from "./types";
 import { ZkConnectResponse, ZkConnectVerifiedResult } from "./types";
 import { Provider } from "@ethersproject/abstract-provider";
 import { ZkConnectVerifier, VerifierOpts } from "./verifier";
-import { ethers } from "ethers";
 
 export type ZkConnectParams = {
   appId: string;
@@ -39,11 +39,10 @@ export class ZkConnect {
     //By default use public gnosis provider
     const provider =
       opts?.provider ||
-      new ethers.providers.JsonRpcProvider(
-        "https://rpc.gnosis.gateway.fm",
-        100
-      );
-
+      new ethers.providers.JsonRpcProvider({
+        url: "https://rpc.gnosis.gateway.fm",
+        skipFetchSetup: true,
+      });
     this._verifier = new ZkConnectVerifier(provider, {
       ...opts?.verifier,
       isDevMode: this._isDevMode,
