@@ -33,7 +33,7 @@ export class ZkConnect {
       new ethers.providers.JsonRpcProvider(
         "https://rpc.gnosis.gateway.fm",
         100
-      )
+      );
     this._verifier = new ZkConnectVerifier(provider, opts?.verifier);
   }
 
@@ -57,6 +57,11 @@ export class ZkConnect {
         `zkConnectResponse namespace "${zkConnectResponse.namespace}" does not match with server namespace "${zkConnectResponse.namespace}"`
       );
     }
+
+    dataRequest = dataRequest ?? {
+      statementRequests: [],
+      operator: null,
+    };
 
     return this._verifier.verify({ zkConnectResponse, dataRequest, namespace });
   };

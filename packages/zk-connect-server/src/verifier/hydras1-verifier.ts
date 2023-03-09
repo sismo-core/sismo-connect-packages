@@ -85,6 +85,35 @@ export class HydraS1Verifier extends BaseVerifier {
     );
   }
 
+  async verifyAuthProof({
+    appId,
+    authProof,
+  }: {
+    appId: string;
+    authProof: { proof: SnarkProof };
+  }): Promise<{ vaultIdentifier: string }> {
+    const vaultIdentifier = BigNumber.from(authProof.proof.input[10]);
+    const vaultNamespace = BigNumber.from(authProof.proof.input[11]);
+    if (!vaultNamespace.eq(BigNumber.from(appId))) {
+      throw new Error(
+        `vaultNamespace "${vaultNamespace}" mismatch with appId "${BigNumber.from(
+          appId
+        ).toString()}"`
+      );
+    }
+    if (
+      !(await HydraS1VerifierPS.verifyProof(
+        authProof.proof.a,
+        authProof.proof.b,
+        authProof.proof.c,
+        authProof.proof.input
+      ))
+    ) {
+      throw new Error("Snark Proof Invalid!");
+    }
+    return { vaultIdentifier: vaultIdentifier.toHexString() };
+  }
+
   private async _matchPublicInput({
     verifiableStatement,
     appId,

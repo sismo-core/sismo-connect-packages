@@ -33,6 +33,28 @@ export class ZkConnectVerifier {
   }: VerifyParams): Promise<ZkConnectVerifiedResult> {
     const verifiedStatements: VerifiedStatement[] = [];
 
+    if (
+      zkConnectResponse.verifiableStatements.length === 0 &&
+      dataRequest.statementRequests.length === 0
+    ) {
+      const verifiedProof = await this._verifyAuthProof(
+        zkConnectResponse.appId,
+        zkConnectResponse.authProof
+      );
+      return {
+        ...zkConnectResponse,
+        vaultId: verifiedProof.vaultIdentifier,
+        verifiedStatements: [],
+      };
+    }
+    if (
+      zkConnectResponse.verifiableStatements.length <
+      dataRequest.statementRequests.length
+    ) {
+      throw new Error(
+        "zkConnectResponse has less verifiableStatements than requested statements!"
+      );
+    }
     // vaultIdentifier
     let vaultIdentifier: string;
     for (let verifiableStatement of zkConnectResponse.verifiableStatements) {
@@ -127,5 +149,17 @@ export class ZkConnectVerifier {
           `verifiableStatement proving scheme "${verifiableStatement.provingScheme}" not supported in this version`
         );
     }
+  }
+
+  private async _verifyAuthProof(
+    appId: string,
+    authProof
+  ): Promise<{
+    vaultIdentifier: string;
+  }> {
+    return this.hydraS1Verifier.verifyAuthProof({
+      appId,
+      authProof,
+    });
   }
 }
