@@ -226,6 +226,19 @@ export class HydraS1Verifier extends BaseVerifier {
         `on proofId "${proofIdentifier}" proof input destination must be 0`
       );
     }
+
+    if(!BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("0")){
+      throw new Error(
+        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 0`
+      );
+    }
+
+    if(!BigNumber.from(proofPublicInputs.sourceVerificationEnabled).eq("1")){
+      throw new Error(
+        `on proofId "${proofIdentifier}" proof input sourceVerificationEnabled must be 1`
+      );
+    }
+
     const isAvailable = await this.IsRootAvailable(
       proofPublicInputs.registryTreeRoot
     );

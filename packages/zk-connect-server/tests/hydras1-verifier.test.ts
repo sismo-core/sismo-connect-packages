@@ -118,22 +118,6 @@ describe("ZkConnect Verifier", () => {
   });
 
   /********************************************************************************************************/
-  /******************************************* VERSION + APPID ********************************************/
-  /********************************************************************************************************/
-
-  // describe("check version of the proof", () => {
-  //   it("Should throw with invalid version of the proof", async () => {
-  //     await expect(
-  //       hydraS1VerifierMocked.verify({
-  //         appId,
-  //         namespace,
-  //         verifiableStatement,
-  //       })
-  //     ).rejects.toThrow(`on proofId "${verifiableStatement}" `);
-  //   });
-  // });
-
-  /********************************************************************************************************/
   /******************************************** VALIDATE INPUT ********************************************/
   /********************************************************************************************************/
 
@@ -213,6 +197,24 @@ describe("ZkConnect Verifier", () => {
         `on proofId "${proofIdentifier}" proof input destination must be 0`
       );
     });
+
+    it("should throw with incorrect input destinationVerificationEnabled", async ()=> {
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[13] = "0x123456789";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 0`
+      );
+    })
+
+    it("should throw with incorrect input sourceVerificationEnabled", async ()=> {
+      const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
+      invalidStatement.proof.input[12] = "0x123456789";
+      await expectVerifyToThrow(
+        invalidStatement,
+        `on proofId "${proofIdentifier}" proof input sourceVerificationEnabled must be 1`
+      );
+    })
 
     it("Should throw with incorrect accountsTreeValue", async () => {
       const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));

@@ -84,7 +84,7 @@ export type VerifiedStatement = VerifiableStatement & { proofId: string };
 
 export type LogicalOperator = "AND" | "OR";
 
-export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
+export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath" | "dataRequest"> & {
   authProof?: {
     provingScheme: string;
     proof: SnarkProof;
