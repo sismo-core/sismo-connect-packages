@@ -9,6 +9,7 @@ export type ZkConnectParams = {
   opts?: {
     provider?: Provider;
     verifier?: VerifierOpts;
+    isDevMode?: boolean;
   };
 };
 
@@ -23,14 +24,29 @@ export const ZK_CONNECT_VERSION = `off-chain-1`;
 export class ZkConnect {
   private _appId: string;
   private _verifier: ZkConnectVerifier;
+  private _isDevMode: boolean;
 
   constructor({ appId, opts }: ZkConnectParams) {
     this._appId = appId;
 
     //By default use public gnosis provider
     const provider =
-      opts?.provider || new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm", 100);
-    this._verifier = new ZkConnectVerifier(provider, opts?.verifier);
+      opts?.provider ||
+      new ethers.providers.JsonRpcProvider(
+        "https://rpc.gnosis.gateway.fm",
+        100
+      );
+    this._verifier = new ZkConnectVerifier(provider, {
+      ...opts?.verifier,
+      isDevMode: this._isDevMode,
+    });
+
+    this._isDevMode = opts?.isDevMode ?? false;
+    if (this._isDevMode) {
+      console.warn(
+        "zkConnect launch in DevMode! Never use this mode in production!"
+      );
+    }
   }
 
   public verify = async ({

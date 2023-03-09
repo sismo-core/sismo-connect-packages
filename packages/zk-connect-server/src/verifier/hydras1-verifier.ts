@@ -38,6 +38,7 @@ export type HydraS1VerifierOpts = {
   provider?: Provider;
   commitmentMapperRegistryAddress?: string;
   availableRootsRegistryAddress?: string;
+  isDevMode?: boolean;
 };
 
 export type SnarkProof = {
@@ -52,6 +53,7 @@ export const HYDRAS1_VERIFIER_VERSION = "2.0.0-beta4";
 export class HydraS1Verifier extends BaseVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
   private _availableRootsRegistry: AvailableRootsRegistryContract;
+  private _isDevMode: boolean;
 
   constructor(provider: Provider, opts?: HydraS1VerifierOpts) {
     super();
@@ -68,6 +70,7 @@ export class HydraS1Verifier extends BaseVerifier {
         GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
       provider,
     });
+    this._isDevMode = opts.isDevMode;
   }
 
   async verify({
@@ -227,13 +230,15 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
 
-    if(!BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("0")){
+    if (
+      !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("0")
+    ) {
       throw new Error(
         `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 0`
       );
     }
 
-    if(!BigNumber.from(proofPublicInputs.sourceVerificationEnabled).eq("1")){
+    if (!BigNumber.from(proofPublicInputs.sourceVerificationEnabled).eq("1")) {
       throw new Error(
         `on proofId "${proofIdentifier}" proof input sourceVerificationEnabled must be 1`
       );
@@ -242,13 +247,15 @@ export class HydraS1Verifier extends BaseVerifier {
     const isAvailable = await this.IsRootAvailable(
       proofPublicInputs.registryTreeRoot
     );
-    if (!isAvailable) {
+    // We don't check the root if we are in dev mode
+    if (!isAvailable && !this._isDevMode) {
       throw new Error(
         `on proofId "${proofIdentifier}" registry root "${BigNumber.from(
           proofPublicInputs.registryTreeRoot
         ).toHexString()}" not available`
       );
     }
+
     const groupSnapshotId = encodeAccountsTreeValue(
       verifiableStatement.groupId,
       verifiableStatement.groupTimestamp
