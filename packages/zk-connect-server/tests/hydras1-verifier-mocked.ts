@@ -6,7 +6,7 @@ type VerifierMockedParams = {
   commitmentMapperPubKey: [BigNumber, BigNumber];
 };
 
-export class ZkConnectVerifierMocked extends HydraS1Verifier {
+export class HydraS1VerifierMocked extends HydraS1Verifier {
   private commitmentMapperPubKey: [BigNumber, BigNumber];
 
   constructor(mockedParams: VerifierMockedParams, opts?: HydraS1VerifierOpts) {

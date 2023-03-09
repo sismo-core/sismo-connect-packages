@@ -12,7 +12,7 @@ export type ZkConnectParams = {
   };
 };
 
-export type VerifyParams = {
+export type VerifyParamsZkConnect = {
   zkConnectResponse: ZkConnectResponse;
   dataRequest?: DataRequest;
   namespace?: string;
@@ -29,11 +29,7 @@ export class ZkConnect {
 
     //By default use public gnosis provider
     const provider =
-      opts?.provider ||
-      new ethers.providers.JsonRpcProvider(
-        "https://rpc.gnosis.gateway.fm",
-        100
-      );
+      opts?.provider || new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm", 100);
     this._verifier = new ZkConnectVerifier(provider, opts?.verifier);
   }
 
@@ -41,7 +37,7 @@ export class ZkConnect {
     zkConnectResponse,
     dataRequest,
     namespace,
-  }: VerifyParams): Promise<ZkConnectVerifiedResult> => {
+  }: VerifyParamsZkConnect): Promise<ZkConnectVerifiedResult> => {
     if (zkConnectResponse.version !== ZK_CONNECT_VERSION) {
       throw new Error(
         `version of the zkConnectResponse "${zkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`
@@ -52,9 +48,9 @@ export class ZkConnect {
         `zkConnectResponse appId "${zkConnectResponse.appId}" does not match with server appId "${this._appId}"`
       );
     }
-    if (zkConnectResponse.namespace !== zkConnectResponse.namespace) {
+    if (zkConnectResponse.namespace !== namespace) {
       throw new Error(
-        `zkConnectResponse namespace "${zkConnectResponse.namespace}" does not match with server namespace "${zkConnectResponse.namespace}"`
+        `zkConnectResponse namespace "${zkConnectResponse.namespace}" does not match with server namespace "${namespace}"`
       );
     }
 

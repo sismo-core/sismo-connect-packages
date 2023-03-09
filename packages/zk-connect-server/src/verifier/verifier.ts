@@ -6,7 +6,7 @@ import {
   ZkConnectResponse,
   ZkConnectVerifiedResult,
 } from "../types";
-import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
+import { HydraS1Verifier, HydraS1VerifierOpts, SnarkProof } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 
@@ -52,10 +52,15 @@ export class ZkConnectVerifier {
       dataRequest.statementRequests.length
     ) {
       throw new Error(
-        "zkConnectResponse has less verifiableStatements than requested statements!"
+        "The zkConnectResponse contains less verifiableStatements than requested statements."
       );
     }
-    // vaultIdentifier
+
+    if (zkConnectResponse.verifiableStatements.length > 1) {
+      throw new Error(
+        "The zkConnectResponse contains more than one verifiableStatement, this is not supported yet."
+      );
+    }
     let vaultIdentifier: string;
     for (let verifiableStatement of zkConnectResponse.verifiableStatements) {
       await this._checkVerifiableStatementMatchDataRequest(
@@ -153,13 +158,23 @@ export class ZkConnectVerifier {
 
   private async _verifyAuthProof(
     appId: string,
-    authProof
+    authProof : { provingScheme: string, proof: SnarkProof }
   ): Promise<{
     vaultIdentifier: string;
   }> {
-    return this.hydraS1Verifier.verifyAuthProof({
-      appId,
-      authProof,
-    });
+    if (!authProof) {
+      throw new Error("The authProof is required when no verifiableStatements are provided");
+    }
+    switch (authProof.provingScheme) {
+      case ProvingScheme.HYDRA_S1_V1:
+        return this.hydraS1Verifier.verifyAuthProof({
+          appId,
+          authProof,
+        });
+      default:
+        throw new Error(
+          `authProof proving scheme "${authProof.provingScheme}" not supported in this version`
+        );
+    }
   }
 }
