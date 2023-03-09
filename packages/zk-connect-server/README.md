@@ -20,26 +20,34 @@
   </p>
 </div>
 
-[ZK Connect presentation]
+ZK Connect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+
+The ZK Connect Server is a backend package to easily verify ZKPs from users of Sismo.
+
+You can see the GitHub repository [here](https://github.com/sismo-core/zk-connect-packages) and the frontend package [here](https://github.com/sismo-core/zk-connect-packages/tree/main/packages/zk-connect-client).
+
+In order to use ZK Connect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
+
+You can see this guide for a full example of how to integrate ZK Connect in your application: [ZK Connect Guide](https://docs.sismo.io/docs/zk-connect-guide).
 
 ## Installation
 
 ```
-$ yarn add @sismo-core/zk-connect-server
-$ npm i @sismo-core/zk-connect-server
+# with npm
+npm i @sismo-core/zk-connect-server
+# with yarn
+yarn add @sismo-core/zk-connect-server
 ```
 
 ## Usage
 
-```javascript
-import express from 'express';
-import { ZkConnect } from "@sismo-core/zk-connect-server-private"
+```typescript
+import { ZkConnect } from "@sismo-core/zk-connect-server"
 
 const zkConnect = new ZkConnect({ 
-  appId: "your-ap-id"
+  appId: "your-app-id"
 });
 
-//This target group should not be send by the front, it should be hard coded in the backend
 const DATA_REQUEST = new DataRequest({ groupId: "your-group-id" });
 
 const emails = new Map();
@@ -50,26 +58,18 @@ app.use(express.json());
 app.post('/subscribe-newsletter', async (req, res) => {
   const { zkConnectResponse, email } = req.body;
   try {
-    const receipt = await zkConnect.verify({
-      proof: zkConnectResponse,
-      targetGroup: TARGET_GROUP
+    const { vaultId } = await zkConnect.verify({
+      zkConnectResponse,
+      dataRequest: DATA_REQUEST,
     })
-    if (emails.has(receipt.proofId)) {
-      res.send({
-        status: "success"
-      });
+    if (emails.has(vaultId)) {
+      res.send({ status: "error", message: "proof already used" });
     } else {
-      emails.set(receipt.proofId, email);
-      res.send({
-        status: "error",
-        message: "proof already used to register another email"
-      });
+      emails.set(vaultId, email);
+      res.send({ status: "subscribed" });
     }
   } catch (e) {
-    res.send({
-        status: "error",
-        message: "proof not valid"
-    });
+    res.send({ status: "error", message: "proof not valid" });
   }
 })
 
@@ -80,35 +80,29 @@ app.listen(8080)
 
 ### verify
 
-```javascript
-export type PwsReceipt = {
-    proofId?: string;
-    provedMembership?: Membership;
-    proofIds: string[];
-    provedMemberships: Membership[];
+```typescript
+export type ZkConnectVerifiedResult = ZkConnectResponse & {
+  vaultId: string;
+  verifiedStatements: VerifiedStatement[];
 };
 
-async function verify({ proof, targetGroup, serviceName }: VerifyParams): Promise<PwsReceipt[]>
+async function verify({ zkConnectResponse, dataRequest, namespace }: VerifyParamsZkConnect): Promise<ZkConnectVerifiedResult>
 ```
 
-| Params | Type | Description |
-|---|---|---|
-| proof |  | |
-| targetGroup |  |  |
-| serviceName |  |  |
+| Params | Type | Required | Default | Description |
+|---|---|---|---|---|
+| zkConnectResponse | ZKConnectResponse | true | - | Object sent from the front containing the verifiable statements and their ZKPs |
+| dataRequest | DataRequest | false | undefined | Contains the statements from which proofs are created |
+| namespace | string | false | "main" | service from which the proof is ask |
 
-If the proof is valid, the function should return a `PwsReceipt`, otherwise, it should return an error.
+If the proof contained in the zkConnectResponse is valid, the function should return a `ZkConnectVerifiedResult`, otherwise, it should return an error.
 
-In a `PwsReceipt`, you can find a proofId, which is a unique number that identifies a proof.
+In a `ZkConnectVerifiedResult`, you can find a vaultId, which is a unique identifier that identifies a Data Vault from Sismo. 
 
-The proofId is deterministically generated based on the following elements:
-- The source account used to generate the proof
-- The group your user is proving membership in
-- The appId
-- An optional serviceName, which represents the specific service of the app that requested the proof
+It is worth noting that the vaultIt is deterministically generated based on the user vault secret and the appId with a poseidon hash. This means that if a user has already used your app, the vaultId will be the same but the vaultId is different for each app. This is useful if you want to store the vaultId in your database to link it to a user while preserving the privacy of this same user between apps.
 
-By storing the proofId, you can determine if a source account has already been used in your app for a specific source account and group.
-
+You can also find a proofId in the `verifiedStatements` of the `ZkConnectVerifiedResult`. This proofId is a unique identifier that identifies a proof from Sismo. 
+This proofId is also deterministically generated based on the appId, the namespace, the groupId and the groupTimestamp. This proofId will allow to know if a user already proved something to your app for a specific namespace and group.
 
 ## License
 
