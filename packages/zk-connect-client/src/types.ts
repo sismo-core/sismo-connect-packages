@@ -1,5 +1,5 @@
 export type ZkConnectRequest = {
-  claim: DataRequest;
+  dataRequest?: DataRequest;
   appId: string;
   namespace?: string;
   callbackPath?: string;
