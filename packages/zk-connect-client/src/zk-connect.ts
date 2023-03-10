@@ -6,7 +6,7 @@ import { BigNumberish } from "@ethersproject/bignumber";
 
 export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
   return new ZkConnectClient(config);
-}
+};
 
 export class ZkConnectClient {
   private _appId: string;
@@ -17,22 +17,21 @@ export class ZkConnectClient {
   constructor({ appId, devMode, vaultAppBaseUrl }: ZkConnectClientConfig) {
     this._appId = appId;
     this._devModeEnabled = devMode?.enabled ?? false;
-    this._vaultAppBaseUrl = vaultAppBaseUrl ?? (this._devModeEnabled ? DEV_VAULT_APP_BASE_URL :  PROD_VAULT_APP_BASE_URL);
+    this._vaultAppBaseUrl =
+      vaultAppBaseUrl ?? (this._devModeEnabled ? DEV_VAULT_APP_BASE_URL : PROD_VAULT_APP_BASE_URL);
     if (this._devModeEnabled) {
-      console.warn(
-        "zkConnect launch in DevMode! Never use this mode in production!"
-      );
+      console.warn("zkConnect launch in DevMode! Never use this mode in production!");
     }
     if (devMode?.devAddresses) {
       console.warn(
         `These Eligibles addresses will be used in data groups. Never use this in production!`
       );
-      if(Array.isArray(devMode.devAddresses)) {
+      if (Array.isArray(devMode.devAddresses)) {
         this._devAddresses = devMode.devAddresses.reduce((acc, address) => {
           acc[address] = 1;
           return acc;
         }, {});
-      } else if (typeof devMode.devAddresses === 'object') {
+      } else if (typeof devMode.devAddresses === "object") {
         this._devAddresses = devMode.devAddresses;
       } else {
         throw new Error(`devAddresses must be of type Record<string, Number | BigNumberish>`);
@@ -40,30 +39,27 @@ export class ZkConnectClient {
     }
   }
 
-  public request = ({
-    dataRequest,
-    namespace,
-    callbackPath,
-  }: RequestParams = {}) => {
-    if (!window)
-      throw new Error(`requestProof is not available outside of a browser`);
+  public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {}) => {
+    if (!window) throw new Error(`requestProof is not available outside of a browser`);
 
     let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
 
     if (dataRequest) {
-      const statementRequestsWithDevAddresses = dataRequest.statementRequests.map((statementRequest) => {
-        if (this._devAddresses) {
-          console.info(
-            `Eligible group data for groupId ${statementRequest.groupId} is overridden with:`,
-            this._devAddresses
-          );
-          statementRequest.extraData = {
-            ...statementRequest.extraData,
-            devAddresses: this._devAddresses,
-          };
+      const statementRequestsWithDevAddresses = dataRequest.statementRequests.map(
+        (statementRequest) => {
+          if (this._devAddresses) {
+            console.info(
+              `Eligible group data for groupId ${statementRequest.groupId} is overridden with:`,
+              this._devAddresses
+            );
+            statementRequest.extraData = {
+              ...statementRequest.extraData,
+              devAddresses: this._devAddresses,
+            };
+          }
+          return statementRequest;
         }
-        return statementRequest;
-      });
+      );
       url += `&dataRequest=${JSON.stringify({
         ...dataRequest,
         statementRequests: statementRequestsWithDevAddresses,
@@ -79,13 +75,10 @@ export class ZkConnectClient {
   };
 
   public getResponse = (): ZkConnectResponse | null => {
-    if (!window)
-      throw new Error(`getResponse is not available outside of a browser`);
+    if (!window) throw new Error(`getResponse is not available outside of a browser`);
     const url = new URL(window.location.href);
     if (url.searchParams.has("zkConnectResponse")) {
-      return JSON.parse(
-        url.searchParams.get("zkConnectResponse") as string
-      ) as ZkConnectResponse;
+      return JSON.parse(url.searchParams.get("zkConnectResponse") as string) as ZkConnectResponse;
     }
     return null;
   };
