@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    ZK Connect Server
+    zkConnect Server
   </h3>
 
   <p align="center">
@@ -20,15 +20,15 @@
   </p>
 </div>
 
-ZK Connect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+zkConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-The ZK Connect Server is a backend package to easily verify ZKPs from users of Sismo.
+The zkConnect Server is a backend package to easily verify ZKPs from users of Sismo.
 
 You can see the GitHub repository [here](https://github.com/sismo-core/zk-connect-packages) and the frontend package [here](https://github.com/sismo-core/zk-connect-packages/tree/main/packages/zk-connect-client).
 
-In order to use ZK Connect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
+In order to use zkConnect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
 
-You can see this guide for a full example of how to integrate ZK Connect in your application: [ZK Connect Guide](https://docs.sismo.io/docs/zk-connect-guide).
+You can see this guide for a full example of how to integrate zkConnect in your application: [zkConnect Guide](https://zk-connect-guide.sismo.io/).
 
 ## Installation
 

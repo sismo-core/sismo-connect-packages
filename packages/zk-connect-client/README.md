@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    ZK Connect Client
+    zkConnect Client
   </h3>
 
   <p align="center">
@@ -20,20 +20,20 @@
   </p>
 </div>
 
-ZK Connect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+zkConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-The ZK Connect Client is a frontend package to easily request ZKPs from users of Sismo in a privacy-preserving manner.
+The zkConnect Client is a frontend package to easily request ZKPs from users of Sismo in a privacy-preserving manner.
 
 You can see the GitHub repository [here](https://github.com/sismo-core/zk-connect-packages) and the backend package [here](https://github.com/sismo-core/zk-connect-packages/tree/main/packages/zk-connect-server).
 
-In order to use ZK Connect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
+In order to use zkConnect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
 
-You can see this guide for a full example of how to integrate ZK Connect in your application: [ZK Connect Guide](https://docs.sismo.io/docs/zk-connect-guide).
+You can see this guide for a full example of how to integrate zkConnect in your application: [zkConnect Guide](https://zk-connect-guide.sismo.io/).
 
 
 ## Installation
 
-Install ZK Connect client package with npm:
+Install zkConnect client package with npm:
 ```
 # with npm
 npm install @sismo-core/zk-connect-client

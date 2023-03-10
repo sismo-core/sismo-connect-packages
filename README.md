@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    ZK Connect
+    zkConnect
   </h3>
 
   <p align="center">
@@ -20,15 +20,15 @@
   </p>
 </div>
 
-ZK Connect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+zkConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-ZK Connect features two packages: 
+zkConnect features two packages: 
 - [`@sismo-core/zk-connect-client`](./packages/zk-connect-client): the frontend package to easily request ZKPs from users of Sismo in a privacy-preserving manner (the prover).
 - [`@sismo-core/zk-connect-server`](./packages/zk-connect-server): the backend package to easily verify these ZKPs (the verifier).
 
-In order to use ZK Connect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
+In order to use zkConnect, you will need to have an `appId` registered in the Sismo Factory. You can register your appId [here](https://factory.sismo.io/apps-explorer).
 
-You can see this guide for a full example of how to integrate ZK Connect in your application: [ZK Connect Guide](https://docs.sismo.io/docs/zk-connect-guide).
+You can see this guide for a full example of how to integrate zkConnect in your application: [zkConnect Guide](https://zk-connect-guide.sismo.io/).
 
 ## Frontend
 ### Installation
@@ -43,7 +43,7 @@ yarn add @sismo-core/zk-connect-client
 
 ### Usage
 
-Create a new instance of the ZK Connect client:
+Create a new instance of the zkConnect client:
 
 ```typescript
 import { ZKConnect } from '@sismo-core/zk-connect-client'
@@ -95,7 +95,7 @@ yarn add @sismo-core/zk-connect-server
 
 ### Usage
 
-Create a new instance of the ZK Connect server:
+Create a new instance of the zkConnect server:
 
 ```typescript
 import { ZKConnect } from '@sismo-core/zk-connect-server'

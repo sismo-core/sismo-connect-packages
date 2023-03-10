@@ -1,4 +1,4 @@
-import { VerifiableStatement } from "./../types";
+import { SnarkProof, VerifiableStatement } from "./../types";
 import {
   DataRequest,
   ProvingScheme,
@@ -9,7 +9,6 @@ import {
 import {
   HydraS1Verifier,
   HydraS1VerifierOpts,
-  SnarkProof,
 } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -137,7 +136,7 @@ export class ZkConnectVerifier {
     vaultIdentifier: string;
   }> {
     switch (verifiableStatement.provingScheme) {
-      case ProvingScheme.HYDRA_S1_V1:
+      case ProvingScheme.HYDRA_S1:
         const isVerified = await this.hydraS1Verifier.verify({
           appId,
           namespace,
@@ -176,7 +175,7 @@ export class ZkConnectVerifier {
       );
     }
     switch (authProof.provingScheme) {
-      case ProvingScheme.HYDRA_S1_V1:
+      case ProvingScheme.HYDRA_S1:
         return this.hydraS1Verifier.verifyAuthProof({
           appId,
           authProof,

@@ -1,15 +1,13 @@
-import { SnarkProof } from "./verifier/hydras1-verifier";
-
 export type ZkConnectRequest = {
-  dataRequest: DataRequest;
   appId: string;
+  dataRequest?: DataRequest;
   namespace?: string;
   callbackPath?: string;
   version: string;
 };
 
 export enum ProvingScheme {
-  HYDRA_S1_V1 = "hydra-s1.2",
+  HYDRA_S1 = "hydra-s1.2",
 }
 
 export class DataRequest {
@@ -57,7 +55,7 @@ export class DataRequest {
         groupTimestamp: args.groupTimestamp ?? "latest",
         requestedValue: args.requestedValue ?? 1,
         comparator: args.comparator ?? "GTE",
-        provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S1_V1,
+        provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S1,
         extraData: args.extraData ?? null,
       },
     ];
@@ -68,10 +66,14 @@ export class DataRequest {
 export type StatementRequest = {
   groupId: string;
   groupTimestamp?: number | "latest"; // default to "latest"
-  requestedValue?: number | "USER_SELECTED_VALUE"; // If "MAX" the max value inside the group should be selected. The user can select what he wants to reveal
-  comparator?: StatementComparator; // default to "GTE". , "EQ" . If requestedValue="MAX" comparator should be empty
+  requestedValue?: number | "USER_SELECTED_VALUE"; // default to 1
+  comparator?: StatementComparator; // default to "GTE". "EQ" If requestedValue="USER_SELECTED_VALUE"
   provingScheme?: any; // default to "hydra-s1.2"
-  extraData?: any;
+  extraData?: StatementRequestExtraData;
+};
+
+export type StatementRequestExtraData = {
+  devModeOverrideEligibleGroupData?: { [accountIdentifier: string]: number };
 };
 
 export type StatementComparator = "GTE" | "EQ";
@@ -96,3 +98,11 @@ export type ZkConnectVerifiedResult = ZkConnectResponse & {
   vaultId: string;
   verifiedStatements: VerifiedStatement[];
 };
+
+export type SnarkProof = {
+  a: string[];
+  b: string[][];
+  c: string[];
+  input: string[];
+};
+
