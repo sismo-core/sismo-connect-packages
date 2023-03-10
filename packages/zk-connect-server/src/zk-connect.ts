@@ -1,25 +1,7 @@
+import { VerifyParamsZkConnect, ZkConnectParams } from "./types";
 import { ethers } from "ethers";
-import { DataRequest } from "./types";
-import { ZkConnectResponse, ZkConnectVerifiedResult } from "./types";
-import { Provider } from "@ethersproject/abstract-provider";
-import { ZkConnectVerifier, VerifierOpts } from "./verifier";
-
-export type ZkConnectParams = {
-  appId: string;
-  opts?: {
-    provider?: Provider;
-    verifier?: VerifierOpts;
-    isDevMode?: boolean;
-  };
-};
-
-export type VerifyParamsZkConnect = {
-  zkConnectResponse: ZkConnectResponse;
-  dataRequest?: DataRequest;
-  namespace?: string;
-};
-
-export const ZK_CONNECT_VERSION = `off-chain-1`;
+import { ZkConnectVerifiedResult, ZK_CONNECT_VERSION } from "./common-types";
+import { ZkConnectVerifier } from "./verifier";
 
 export class ZkConnect {
   private _appId: string;

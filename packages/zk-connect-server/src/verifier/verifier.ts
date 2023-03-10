@@ -1,15 +1,13 @@
-import { SnarkProof, VerifiableStatement } from "./../types";
 import {
   DataRequest,
   ProvingScheme,
   VerifiedStatement,
   ZkConnectResponse,
   ZkConnectVerifiedResult,
-} from "../types";
-import {
-  HydraS1Verifier,
-  HydraS1VerifierOpts,
-} from "./hydras1-verifier";
+  VerifiableStatement,
+  AuthProof,
+} from "../common-types";
+import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 
@@ -165,7 +163,7 @@ export class ZkConnectVerifier {
 
   private async _verifyAuthProof(
     appId: string,
-    authProof: { provingScheme: string; proof: SnarkProof }
+    authProof: AuthProof
   ): Promise<{
     vaultIdentifier: string;
   }> {

@@ -1,4 +1,4 @@
-import { VerifiableStatement } from "../types";
+import { VerifiableStatement } from "../common-types";
 
 export type VerifyParams = {
   appId: string;

@@ -12,7 +12,13 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
 import { BaseVerifier, VerifyParams } from "./base-verifier";
-import { SnarkProof } from "../../src/types";
+
+export type SnarkProof = {
+  a: string[];
+  b: string[][];
+  c: string[];
+  input: string[];
+};
 
 export type ProofPublicInputs = {
   destinationIdentifier: string;
