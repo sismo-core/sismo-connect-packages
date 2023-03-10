@@ -12,6 +12,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
 import { BaseVerifier, VerifyParams } from "./base-verifier";
+import { SnarkProof } from "../../src/types";
 
 export type ProofPublicInputs = {
   destinationIdentifier: string;
@@ -41,13 +42,6 @@ export type HydraS1VerifierOpts = {
   isDevMode?: boolean;
 };
 
-export type SnarkProof = {
-  a: string[];
-  b: string[][];
-  c: string[];
-  input: string[];
-};
-
 export const HYDRAS1_VERIFIER_VERSION = "2.0.0-beta4";
 
 export class HydraS1Verifier extends BaseVerifier {
@@ -70,7 +64,7 @@ export class HydraS1Verifier extends BaseVerifier {
         GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
       provider,
     });
-    this._isDevMode = opts.isDevMode;
+    this._isDevMode = opts?.isDevMode;
   }
 
   async verify({
@@ -177,7 +171,7 @@ export class HydraS1Verifier extends BaseVerifier {
       )
     ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" value "${verifiableStatement.value}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
+        `on proofId "${proofIdentifier}" value "${verifiableStatement.value}" mismatch with proof input statementValue "${proofPublicInputs.statementValue}"`
       );
     }
 

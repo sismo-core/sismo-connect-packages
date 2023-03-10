@@ -1,6 +1,6 @@
 export type ZkConnectRequest = {
-  claim: DataRequest;
   appId: string;
+  dataRequest?: DataRequest;
   namespace?: string;
   callbackPath?: string;
   version: string;
@@ -63,9 +63,9 @@ export class DataRequest {
 export type StatementRequest = {
   groupId: string;
   groupTimestamp?: number | "latest"; // default to "latest"
-  requestedValue?: number | "USER_SELECTED_VALUE"; // If "MAX" the max value inside the group should be selected. The user can select what he wants to reveal
-  comparator?: StatementComparator; // default to "GTE". , "EQ" If requestedValue="USER_SELECTED_VALUE" comparator "GTE"
-  provingScheme?: any;
+  requestedValue?: number | "USER_SELECTED_VALUE"; // default to 1
+  comparator?: StatementComparator; // default to "GTE". "EQ" If requestedValue="USER_SELECTED_VALUE"
+  provingScheme?: any; // default to "hydra-s1.2"
   extraData?: StatementRequestExtraData;
 };
 
@@ -77,12 +77,23 @@ export type StatementComparator = "GTE" | "EQ";
 
 export type VerifiableStatement = StatementRequest & {
   value: number;
-  proof: any;
+  proof: SnarkProof;
 };
 export type VerifiedStatement = VerifiableStatement & { proofId: string };
 
 export type LogicalOperator = "AND" | "OR";
 
-export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath"> & {
+export type ZkConnectResponse = Omit<ZkConnectRequest, "callbackPath" | "dataRequest"> & {
+  authProof?: {
+    provingScheme: string;
+    proof: SnarkProof;
+  };
   verifiableStatements: VerifiableStatement[];
+};
+
+export type SnarkProof = {
+  a: string[];
+  b: string[][];
+  c: string[];
+  input: string[];
 };

@@ -36,7 +36,7 @@ describe("ZkConnect Verifier", () => {
       groupTimestamp: "latest",
       requestedValue: 1,
       comparator: "GTE",
-      provingScheme: ProvingScheme.HYDRA_S1_V1,
+      provingScheme: ProvingScheme.HYDRA_S1,
     });
 
     proofPublicInputs = {
@@ -138,7 +138,7 @@ describe("ZkConnect Verifier", () => {
       invalidStatement.value = 2;
       await expectVerifyToThrow(
         invalidStatement,
-        `on proofId "${proofIdentifier}" value "${invalidStatement.value}" mismatch with proof input claimedValue "${proofPublicInputs.statementValue}"`
+        `on proofId "${proofIdentifier}" value "${invalidStatement.value}" mismatch with proof input statementValue "${proofPublicInputs.statementValue}"`
       );
     });
 
@@ -243,7 +243,7 @@ describe("ZkConnect Verifier", () => {
       expect(isVerified).toEqual(false);
     });
 
-    it("Should return a verified claim with correct proof", async () => {
+    it("Should return true", async () => {
       const isVerified = await hydraS1VerifierMocked.verify({
         appId,
         namespace,

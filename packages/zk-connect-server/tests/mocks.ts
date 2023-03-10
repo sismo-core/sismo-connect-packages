@@ -1,6 +1,6 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { ZkConnectResponse } from "../src";
-import { SnarkProof } from "../src/verifier/hydras1-verifier";
+import { SnarkProof } from "../src/types";
 
 type ProofMock = {
   commitmentMapperPubKey: [BigNumberish, BigNumberish];
@@ -83,7 +83,6 @@ export const zkConnectResponseMock: ZkConnectResponse = {
       value: 1,
       groupTimestamp: "latest",
       comparator: "GTE",
-      extraData: null,
       provingScheme: "hydra-s1.2",
       proof: {
         input: [
