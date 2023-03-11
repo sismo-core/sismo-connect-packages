@@ -1,16 +1,14 @@
 import { ApiFetcher, SupportedEnvs } from "../api";
-import { getGroupFromIdQuery, getGroupFromNameQuery, GetGroupQueryOutput } from "./queries";
-
-type GroupParams = { id?: string; name?: string; timestamp?: string };
-export type FetchedData = Record<string, number>;
+import { getGroupFromIdQuery, getGroupFromNameQuery } from "./queries";
+import { FetchedData, GetGroupQueryOutput, GroupParams } from "./types";
 
 export class Sdk {
-  private apiFetcher: ApiFetcher;
+  private _apiFetcher: ApiFetcher;
 
   constructor(env?: SupportedEnvs) {
-    this.apiFetcher = new ApiFetcher(env);
+    this._apiFetcher = new ApiFetcher(env);
   }
-
+ks
   public async getGroup({ id, name, timestamp }: GroupParams) {
     if (!id && !name) {
       throw new Error(
@@ -20,13 +18,13 @@ export class Sdk {
 
     const group: GetGroupQueryOutput = id
       ? (
-          await this.apiFetcher.getWithQuery<{ group: GetGroupQueryOutput }>({
+          await this._apiFetcher.getWithQuery<{ group: GetGroupQueryOutput }>({
             query: getGroupFromIdQuery,
             variables: { id },
           })
         ).group
       : (
-          await this.apiFetcher.getWithQuery<{ group: GetGroupQueryOutput }>({
+          await this._apiFetcher.getWithQuery<{ group: GetGroupQueryOutput }>({
             query: getGroupFromNameQuery,
             variables: { name },
           })
@@ -46,6 +44,6 @@ export class Sdk {
     }
 
     const data: FetchedData = await fetch(dataUrl).then((res) => res.json());
-    return { ...group, data };
+    return { ...group, data } as GetGroupQueryOutput & { data: FetchedData };
   }
 }

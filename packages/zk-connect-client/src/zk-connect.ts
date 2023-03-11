@@ -1,5 +1,6 @@
 import { RequestParams, ZkConnectClientConfig } from "./types";
 import { ZkConnectResponse } from "./common-types";
+import { Sdk, GroupParams } from "./sdk";
 
 import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL, VERSION } from "./constants";
 import { BigNumberish } from "@ethersproject/bignumber";
@@ -13,8 +14,9 @@ export class ZkConnectClient {
   private _vaultAppBaseUrl: string;
   private _devModeEnabled: boolean;
   private _devAddresses: Record<string, Number | BigNumberish> | null;
+  private _sdk: Sdk;
 
-  constructor({ appId, devMode, vaultAppBaseUrl }: ZkConnectClientConfig) {
+  constructor({ appId, devMode, vaultAppBaseUrl, env }: ZkConnectClientConfig) {
     this._appId = appId;
     this._devModeEnabled = devMode?.enabled ?? false;
     this._vaultAppBaseUrl =
@@ -37,6 +39,7 @@ export class ZkConnectClient {
         throw new Error(`devAddresses must be of type Record<string, Number | BigNumberish>`);
       }
     }
+    this._sdk = new Sdk(env ?? "prod");
   }
 
   public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {}) => {
@@ -82,4 +85,8 @@ export class ZkConnectClient {
     }
     return null;
   };
+
+  public async getGroup({ id, name, timestamp }: GroupParams) {
+    return this._sdk.getGroup({ id, name, timestamp });
+  }
 }

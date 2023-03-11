@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/react": "^18.0.28",
@@ -32,15 +33,15 @@
   "repository": "git@github.com:sismo-core/zk-connect-packages.git",
   "author": "leo@sismo.io",
   "license": "MIT",
+  "dependencies": {
+    "@apollo/client": "^3.7.10",
+    "graphql": "^16.6.0",
+    "@ethersproject/bignumber": "5.7.0"
+  },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
     "src/**/*.{ts,tsx,js,jsx}": [
       "eslint --max-warnings=0"
     ]
-  },
-  "dependencies": {
-    "@apollo/client": "^3.7.10",
-    "graphql": "^16.6.0",
-    "@ethersproject/bignumber": "5.7.0"
   }
 }

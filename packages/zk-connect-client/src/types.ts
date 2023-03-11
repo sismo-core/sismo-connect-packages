@@ -1,4 +1,5 @@
 import { BigNumberish } from '@ethersproject/bignumber';
+import { SupportedEnvs } from "./api/types";
 import { DataRequest, DataRequestType } from "./common-types";
 
 export type ZkConnectParams = {
@@ -6,6 +7,7 @@ export type ZkConnectParams = {
   opts?: {
     isDevMode?: boolean;
     vaultAppBaseUrl?: string;
+    env?: SupportedEnvs;
   };
 };
 
@@ -22,4 +24,5 @@ export type ZkConnectClientConfig = {
     devAddresses?: string[] | Record<string, Number | BigNumberish> // Will insert this addresses in data groups 
   },
   vaultAppBaseUrl?: string
+  env?: SupportedEnvs
 }
