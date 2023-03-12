@@ -1,3 +1,6 @@
+import { BigNumberish } from "@ethersproject/bignumber";
+
+
 export const ZK_CONNECT_VERSION = `off-chain-1`;
 export type ZkConnectRequest = {
   appId: string;
@@ -7,24 +10,11 @@ export type ZkConnectRequest = {
   version: string;
 };
 
-export enum ProvingScheme {
-  HYDRA_S1 = "hydra-s1.2",
-}
-
 export class DataRequest {
   public statementRequests: StatementRequest[];
   public operator: LogicalOperator | null;
 
-  constructor(args: {
-    statementRequests?: StatementRequest[];
-    operator?: LogicalOperator;
-    groupId?: string;
-    groupTimestamp?: number | "latest";
-    requestedValue?: number | "USER_SELECTED_VALUE";
-    comparator?: StatementComparator;
-    provingScheme?: ProvingScheme;
-    extraData?: any;
-  }) {
+  constructor(args: DataRequestArgs) {
     if (args.statementRequests) {
       if (args.groupId) {
         throw new Error("Cannot provide both statements and groupId");
@@ -64,23 +54,30 @@ export class DataRequest {
   }
 }
 
+export type DataRequestArgs =  Partial<DataRequestType> & Partial<StatementRequest>;
+
+export type DataRequestType = {
+  statementRequests: StatementRequest[];
+  operator: LogicalOperator | null;
+}
+
 export type StatementRequest = {
   groupId: string;
   groupTimestamp?: number | "latest"; // default to "latest"
-  requestedValue?: number | "USER_SELECTED_VALUE"; // default to 1
+  requestedValue?: number | BigNumberish | "USER_SELECTED_VALUE"; // default to 1
   comparator?: StatementComparator; // default to "GTE". "EQ" If requestedValue="USER_SELECTED_VALUE"
   provingScheme?: "hydra-s1.2"; // default to "hydra-s1.2"
-  extraData?: StatementRequestExtraData;
+  extraData?: any;
 };
 
-export type StatementRequestExtraData = {
-  devModeOverrideEligibleGroupData?: { [accountIdentifier: string]: number };
-};
+export enum ProvingScheme {
+  HYDRA_S1 = "hydra-s1.2",
+}
 
 export type StatementComparator = "GTE" | "EQ";
 
 export type VerifiableStatement = StatementRequest & {
-  value: number;
+  value: number | BigNumberish;
   proof: any;
 };
 export type VerifiedStatement = VerifiableStatement & { proofId: string };

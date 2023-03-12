@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/zk-connect-client",
-  "version": "0.0.0-beta.3",
+  "version": "0.0.0-beta.6",
   "description": "zkConnect client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -33,7 +33,9 @@
   "repository": "git@github.com:sismo-core/zk-connect-packages.git",
   "author": "leo@sismo.io",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@ethersproject/bignumber": "5.7.0"
+  },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
     "src/**/*.{ts,tsx,js,jsx}": [
