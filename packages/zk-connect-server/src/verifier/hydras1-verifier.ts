@@ -1,3 +1,4 @@
+import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment-mapper-registry/dev';
 import { HydraS1Verifier as HydraS1VerifierPS } from "@sismo-core/hydra-s1";
 import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
@@ -6,6 +7,7 @@ import {
 import {
   AvailableRootsRegistryContract,
   CommitmentMapperRegistryContract,
+  CommitmentMapperRegistryContractProd,
 } from "./libs/contracts";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -58,7 +60,9 @@ export class HydraS1Verifier extends BaseVerifier {
   constructor(provider: Provider, opts?: HydraS1VerifierOpts) {
     super();
 
-    this._commitmentMapperRegistry = new CommitmentMapperRegistryContract({
+    this._commitmentMapperRegistry = opts?.isDevMode ? 
+    new CommitmentMapperRegistryContractDev() : 
+    new CommitmentMapperRegistryContractProd({
       address:
         opts?.commitmentMapperRegistryAddress ||
         GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,

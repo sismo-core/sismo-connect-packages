@@ -1,38 +1,41 @@
-import { VerifyParamsZkConnect, ZkConnectParams } from "./types";
+import { VerifyParamsZkConnect, ZkConnectServerConfig } from "./types";
 import { ethers } from "ethers";
-import { ZkConnectVerifiedResult, ZK_CONNECT_VERSION } from "./common-types";
+import { ZkConnectResponse, ZkConnectVerifiedResult, ZK_CONNECT_VERSION } from "./common-types";
 import { ZkConnectVerifier } from "./verifier";
 
-export class ZkConnect {
+
+export const ZkConnect = (config: ZkConnectServerConfig): ZkConnectServer => {
+  return new ZkConnectServer(config);
+}
+
+export class ZkConnectServer {
   private _appId: string;
   private _verifier: ZkConnectVerifier;
-  private _isDevMode: boolean;
+  private _devModeEnabled: boolean;
 
-  constructor({ appId, opts }: ZkConnectParams) {
+  constructor({ appId, devMode, options }: ZkConnectServerConfig) {
     this._appId = appId;
 
-    this._isDevMode = opts?.isDevMode ?? false;
-    if (this._isDevMode) {
+    this._devModeEnabled = devMode?.enabled ?? false;
+    if (this._devModeEnabled) {
       console.warn(
         "zkConnect launch in DevMode! Never use this mode in production!"
       );
     }
 
     //By default use public gnosis provider
-    const provider =
-      opts?.provider ||
+    const verifierProvider = options?.provider ??
       new ethers.providers.JsonRpcProvider({
         url: "https://rpc.gnosis.gateway.fm",
         skipFetchSetup: true,
       });
-    this._verifier = new ZkConnectVerifier(provider, {
-      ...opts?.verifier,
-      isDevMode: this._isDevMode,
+    this._verifier = new ZkConnectVerifier(verifierProvider, {
+      ...(options?.verifier ?? {}),
+      isDevMode: this._devModeEnabled,
     });
   }
 
-  public verify = async ({
-    zkConnectResponse,
+  public verify = async (zkConnectResponse: ZkConnectResponse, {
     dataRequest,
     namespace,
   }: VerifyParamsZkConnect): Promise<ZkConnectVerifiedResult> => {
