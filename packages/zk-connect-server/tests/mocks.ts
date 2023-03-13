@@ -1,6 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { ZkConnectResponse } from "../src";
-import { SnarkProof } from "../src/types";
 
 type ProofMock = {
   commitmentMapperPubKey: [BigNumberish, BigNumberish];
@@ -12,7 +11,7 @@ type ProofMock = {
     secret: string;
     commitmentReceipt: [BigNumberish, BigNumberish, BigNumberish];
   };
-  snarkProof: SnarkProof;
+  snarkProof: any;
 };
 
 export const proofMock1: ProofMock = {

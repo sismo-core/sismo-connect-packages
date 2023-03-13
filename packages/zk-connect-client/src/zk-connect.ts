@@ -1,21 +1,42 @@
-import { RequestParams, ZkConnectParams } from "./types";
+import { RequestParams, ZkConnectClientConfig } from "./types";
 import { ZkConnectResponse } from "./common-types";
 
-import { DEFAULT_BASE_URL, VERSION } from "./constants";
+import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL, VERSION } from "./constants";
+import { BigNumberish } from "@ethersproject/bignumber";
 
-export class ZkConnect {
+export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
+  return new ZkConnectClient(config);
+}
+
+export class ZkConnectClient {
   private _appId: string;
   private _vaultAppBaseUrl: string;
-  private _isDevMode: boolean;
+  private _devModeEnabled: boolean;
+  private _devAddresses: Record<string, Number | BigNumberish> | null;
 
-  constructor({ appId, opts }: ZkConnectParams) {
+  constructor({ appId, devMode, vaultAppBaseUrl }: ZkConnectClientConfig) {
     this._appId = appId;
-    this._vaultAppBaseUrl = opts?.vaultAppBaseUrl || DEFAULT_BASE_URL;
-    this._isDevMode = opts?.isDevMode ?? false;
-    if (this._isDevMode) {
+    this._devModeEnabled = devMode?.enabled ?? false;
+    this._vaultAppBaseUrl = vaultAppBaseUrl ?? (this._devModeEnabled ? DEV_VAULT_APP_BASE_URL :  PROD_VAULT_APP_BASE_URL);
+    if (this._devModeEnabled) {
       console.warn(
         "zkConnect launch in DevMode! Never use this mode in production!"
       );
+    }
+    if (devMode?.devAddresses) {
+      console.warn(
+        `These Eligibles addresses will be used in data groups. Never use this in production!`
+      );
+      if(Array.isArray(devMode.devAddresses)) {
+        this._devAddresses = devMode.devAddresses.reduce((acc, address) => {
+          acc[address] = 1;
+          return acc;
+        }, {});
+      } else if (typeof devMode.devAddresses === 'object') {
+        this._devAddresses = devMode.devAddresses;
+      } else {
+        throw new Error(`devAddresses must be of type Record<string, Number | BigNumberish>`);
+      }
     }
   }
 
@@ -30,32 +51,23 @@ export class ZkConnect {
     let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
 
     if (dataRequest) {
-      for (const statementRequest of dataRequest.statementRequests) {
-        const devModeOverrideEligibleGroupData =
-          statementRequest.extraData?.devModeOverrideEligibleGroupData;
-        if (devModeOverrideEligibleGroupData) {
-          if (!this._isDevMode) {
-            console.error(`
-devModeOverrideEligibleGroupData can only be used in DevMode!
-
-Use this option to enable it: 
-
-const zkConnect = new ZkConnect({
-    appId: YOUR_APP_ID,
-    opts: {
-      isDevMode: true, // <<--------  Here
-    }
-});
-`);
-            return;
-          }
+      const statementRequestsWithDevAddresses = dataRequest.statementRequests.map((statementRequest) => {
+        if (this._devAddresses) {
           console.info(
             `Eligible group data for groupId ${statementRequest.groupId} is overridden with:`,
-            devModeOverrideEligibleGroupData
+            this._devAddresses
           );
+          statementRequest.extraData = {
+            ...statementRequest.extraData,
+            devAddresses: this._devAddresses,
+          };
         }
-      }
-      url += `&dataRequest=${JSON.stringify(dataRequest)}`;
+        return statementRequest;
+      });
+      url += `&dataRequest=${JSON.stringify({
+        ...dataRequest,
+        statementRequests: statementRequestsWithDevAddresses,
+      })}`;
     }
 
     if (callbackPath) {

@@ -4,8 +4,8 @@ import { HydraS1VerifierMocked } from "./hydras1-verifier-mocked";
 import { encodeRequestIdentifier } from "../src/verifier/utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "../src/verifier/utils/encodeAccountsTreeValue";
 import { ProofPublicInputs } from "../src/verifier/hydras1-verifier";
-import { VerifiableStatement, ZkConnectVerifier } from "../src";
-import { DataRequest, ProvingScheme } from "../src/types";
+import { DataRequestType, VerifiableStatement, ZkConnectVerifier } from "../src";
+import { DataRequest, ProvingScheme } from "../src";
 
 describe("ZkConnect Verifier", () => {
   let hydraS1VerifierMocked: HydraS1VerifierMocked;
@@ -15,7 +15,7 @@ describe("ZkConnect Verifier", () => {
 
   let proofPublicInputs: ProofPublicInputs;
   let verifiableStatement: VerifiableStatement;
-  let dataRequest: DataRequest;
+  let dataRequest: DataRequestType;
 
   let groupId: string;
   let groupTimestamp: number | "latest";
@@ -31,7 +31,7 @@ describe("ZkConnect Verifier", () => {
     appId = "0xf68985adfc209fafebfb1a956913e7fa";
     namespace = "main";
 
-    dataRequest = new DataRequest({
+    dataRequest = DataRequest({
       groupId: "0x682544d549b8a461d7fe3e589846bb7b",
       groupTimestamp: "latest",
       requestedValue: 1,

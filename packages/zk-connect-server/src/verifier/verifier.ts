@@ -6,6 +6,7 @@ import {
   ZkConnectVerifiedResult,
   VerifiableStatement,
   AuthProof,
+  DataRequestType,
 } from "../common-types";
 import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
@@ -18,7 +19,7 @@ export type VerifierOpts = {
 
 export type VerifyParams = {
   zkConnectResponse: ZkConnectResponse;
-  dataRequest?: DataRequest;
+  dataRequest?: DataRequestType;
   namespace?: string;
 };
 
@@ -95,7 +96,7 @@ export class ZkConnectVerifier {
 
   private async _checkVerifiableStatementMatchDataRequest(
     verifiableStatement: VerifiableStatement,
-    dataRequest: DataRequest
+    dataRequest: DataRequestType
   ) {
     const groupId = verifiableStatement.groupId;
     const groupTimestamp = verifiableStatement.groupTimestamp;
