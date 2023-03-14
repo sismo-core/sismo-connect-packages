@@ -1,5 +1,5 @@
 import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment-mapper-registry/dev';
-import { HydraS1Verifier as HydraS1VerifierPS } from "@sismo-core/hydra-s1";
+import { HydraS2Verifier as HydraS2VerifierPS } from "@sismo-core/hydra-s2";
 import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
   GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
@@ -43,21 +43,19 @@ export type VerifierParams = {
   appId: string;
 };
 
-export type HydraS1VerifierOpts = {
+export type HydraS2VerifierOpts = {
   provider?: Provider;
   commitmentMapperRegistryAddress?: string;
   availableRootsRegistryAddress?: string;
   isDevMode?: boolean;
 };
 
-export const HYDRAS1_VERIFIER_VERSION = "2.0.0-beta4";
-
-export class HydraS1Verifier extends BaseVerifier {
+export class HydraS2Verifier extends BaseVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
   private _availableRootsRegistry: AvailableRootsRegistryContract;
   private _isDevMode: boolean;
 
-  constructor(provider: Provider, opts?: HydraS1VerifierOpts) {
+  constructor(provider: Provider, opts?: HydraS2VerifierOpts) {
     super();
 
     this._commitmentMapperRegistry = opts?.isDevMode ? 
@@ -84,7 +82,7 @@ export class HydraS1Verifier extends BaseVerifier {
   }: VerifyParams): Promise<boolean> {
     const snarkProof = verifiableStatement.proof;
     await this._matchPublicInput({ appId, namespace, verifiableStatement });
-    return HydraS1VerifierPS.verifyProof(
+    return HydraS2VerifierPS.verifyProof(
       snarkProof.a,
       snarkProof.b,
       snarkProof.c,
@@ -109,7 +107,7 @@ export class HydraS1Verifier extends BaseVerifier {
       );
     }
     if (
-      !(await HydraS1VerifierPS.verifyProof(
+      !(await HydraS2VerifierPS.verifyProof(
         authProof.proof.a,
         authProof.proof.b,
         authProof.proof.c,

@@ -1,7 +1,7 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 
 
-export const ZK_CONNECT_VERSION = `off-chain-1`;
+export const ZK_CONNECT_VERSION = `zk-connect-v1`;
 export type ZkConnectRequest = {
   appId: string;
   dataRequest?: DataRequestType;
@@ -47,7 +47,7 @@ export const DataRequest = (args: DataRequestArgs): DataRequestType => {
       groupTimestamp: args.groupTimestamp ?? "latest",
       requestedValue: args.requestedValue ?? 1,
       comparator: args.comparator ?? "GTE",
-      provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S1,
+      provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S2,
       extraData: args.extraData ?? null,
     } as StatementRequest],
     operator: args.operator ?? null
@@ -59,12 +59,12 @@ export type StatementRequest = {
   groupTimestamp?: number | "latest"; // default to "latest"
   requestedValue?: number | BigNumberish | "USER_SELECTED_VALUE"; // default to 1
   comparator?: StatementComparator; // default to "GTE". "EQ" If requestedValue="USER_SELECTED_VALUE"
-  provingScheme?: "hydra-s1.2"; // default to "hydra-s1.2"
+  provingScheme?: "hydra-s2.1"; // default to "hydra-s2.1"
   extraData?: any;
 };
 
 export enum ProvingScheme {
-  HYDRA_S1 = "hydra-s1.2",
+  HYDRA_S2 = "hydra-s2.1",
 }
 
 export type StatementComparator = "GTE" | "EQ";

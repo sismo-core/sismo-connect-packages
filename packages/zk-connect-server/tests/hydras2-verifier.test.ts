@@ -1,14 +1,14 @@
 import { proofMock1 } from "./mocks";
 import { BigNumber } from "@ethersproject/bignumber";
-import { HydraS1VerifierMocked } from "./hydras1-verifier-mocked";
+import { HydraS2VerifierMocked } from "./hydras2-verifier-mocked";
 import { encodeRequestIdentifier } from "../src/verifier/utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "../src/verifier/utils/encodeAccountsTreeValue";
-import { ProofPublicInputs } from "../src/verifier/hydras1-verifier";
+import { ProofPublicInputs } from "../src/verifier/hydras2-verifier";
 import { DataRequestType, VerifiableStatement, ZkConnectVerifier } from "../src";
 import { DataRequest, ProvingScheme } from "../src";
 
 describe("ZkConnect Verifier", () => {
-  let hydraS1VerifierMocked: HydraS1VerifierMocked;
+  let hydraS2VerifierMocked: HydraS2VerifierMocked;
   let zkConnectVerifier: ZkConnectVerifier;
   let appId: string;
   let namespace: string;
@@ -36,7 +36,7 @@ describe("ZkConnect Verifier", () => {
       groupTimestamp: "latest",
       requestedValue: 1,
       comparator: "GTE",
-      provingScheme: ProvingScheme.HYDRA_S1,
+      provingScheme: ProvingScheme.HYDRA_S2,
     });
 
     proofPublicInputs = {
@@ -56,7 +56,7 @@ describe("ZkConnect Verifier", () => {
       destinationVerificationEnabled: proofMock1.snarkProof.input[13],
     };
 
-    hydraS1VerifierMocked = new HydraS1VerifierMocked({
+    hydraS2VerifierMocked = new HydraS2VerifierMocked({
       commitmentMapperPubKey: [
         BigNumber.from(proofMock1.snarkProof.input[2]),
         BigNumber.from(proofMock1.snarkProof.input[3]),
@@ -84,7 +84,7 @@ describe("ZkConnect Verifier", () => {
       errorMessage: string
     ) => {
       await expect(
-        hydraS1VerifierMocked.verify({
+        hydraS2VerifierMocked.verify({
           namespace,
           appId,
           verifiableStatement,
@@ -235,7 +235,7 @@ describe("ZkConnect Verifier", () => {
     it("Should return false", async () => {
       const invalidStatement = JSON.parse(JSON.stringify(verifiableStatement));
       invalidStatement.proof.a[0] = invalidStatement.proof.a[0] + "1";
-      const isVerified = await hydraS1VerifierMocked.verify({
+      const isVerified = await hydraS2VerifierMocked.verify({
         appId,
         namespace,
         verifiableStatement: invalidStatement,
@@ -244,7 +244,7 @@ describe("ZkConnect Verifier", () => {
     });
 
     it("Should return true", async () => {
-      const isVerified = await hydraS1VerifierMocked.verify({
+      const isVerified = await hydraS2VerifierMocked.verify({
         appId,
         namespace,
         verifiableStatement,

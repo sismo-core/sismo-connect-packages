@@ -1,5 +1,4 @@
 import {
-  DataRequest,
   ProvingScheme,
   VerifiedStatement,
   ZkConnectResponse,
@@ -8,12 +7,12 @@ import {
   AuthProof,
   DataRequestType,
 } from "../common-types";
-import { HydraS1Verifier, HydraS1VerifierOpts } from "./hydras1-verifier";
+import { HydraS2Verifier, HydraS2VerifierOpts } from "./hydras2-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 
 export type VerifierOpts = {
-  hydraS1?: HydraS1VerifierOpts;
+  hydraS2?: HydraS2VerifierOpts;
   isDevMode?: boolean;
 };
 
@@ -24,11 +23,11 @@ export type VerifyParams = {
 };
 
 export class ZkConnectVerifier {
-  private hydraS1Verifier: HydraS1Verifier;
+  private hydraS2Verifier: HydraS2Verifier;
 
   constructor(provider: Provider, opts?: VerifierOpts) {
-    this.hydraS1Verifier = new HydraS1Verifier(provider, {
-      ...opts?.hydraS1,
+    this.hydraS2Verifier = new HydraS2Verifier(provider, {
+      ...opts?.hydraS2,
       isDevMode: opts.isDevMode,
     });
   }
@@ -135,8 +134,8 @@ export class ZkConnectVerifier {
     vaultIdentifier: string;
   }> {
     switch (verifiableStatement.provingScheme) {
-      case ProvingScheme.HYDRA_S1:
-        const isVerified = await this.hydraS1Verifier.verify({
+      case ProvingScheme.HYDRA_S2:
+        const isVerified = await this.hydraS2Verifier.verify({
           appId,
           namespace,
           verifiableStatement,
@@ -174,8 +173,8 @@ export class ZkConnectVerifier {
       );
     }
     switch (authProof.provingScheme) {
-      case ProvingScheme.HYDRA_S1:
-        return this.hydraS1Verifier.verifyAuthProof({
+      case ProvingScheme.HYDRA_S2:
+        return this.hydraS2Verifier.verifyAuthProof({
           appId,
           authProof,
         });

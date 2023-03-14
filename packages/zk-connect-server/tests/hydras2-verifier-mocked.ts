@@ -1,15 +1,15 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { HydraS1Verifier, HydraS1VerifierOpts } from "../src/verifier/hydras1-verifier";
+import { HydraS2Verifier, HydraS2VerifierOpts } from "../src/verifier/hydras2-verifier";
 import { ethers } from "ethers";
 
 type VerifierMockedParams = {
   commitmentMapperPubKey: [BigNumber, BigNumber];
 };
 
-export class HydraS1VerifierMocked extends HydraS1Verifier {
+export class HydraS2VerifierMocked extends HydraS2Verifier {
   private commitmentMapperPubKey: [BigNumber, BigNumber];
 
-  constructor(mockedParams: VerifierMockedParams, opts?: HydraS1VerifierOpts) {
+  constructor(mockedParams: VerifierMockedParams, opts?: HydraS2VerifierOpts) {
     const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm", 100);
     super(provider, opts);
     this.commitmentMapperPubKey = mockedParams.commitmentMapperPubKey;

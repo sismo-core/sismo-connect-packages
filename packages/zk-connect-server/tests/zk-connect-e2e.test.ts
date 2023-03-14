@@ -20,8 +20,8 @@ describe("ZkConnect", () => {
   let dataRequest: DataRequestType;
 
   beforeAll(() => {
-    appId = "0x112a692a2005259c25f6094161007967";
-    groupId = "0xe9ed316946d3d98dfcd829a53ec9822e"
+    appId = "0xf68985adfc209fafebfb1a956913e7fa";
+    groupId = "0x682544d549b8a461d7fe3e589846bb7b"
     namespace = "main";
     zkConnectResponse = zkConnectResponseMock;
     const _provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth_goerli", 5);
@@ -32,7 +32,7 @@ describe("ZkConnect", () => {
       options: {
         provider: _provider,
         verifier: {
-          hydraS1: {
+          hydraS2: {
             commitmentMapperRegistryAddress: "0x0844662f25817B735BC9B6d9D11995F1A6c4dCB1",
             availableRootsRegistryAddress: "0xdDa4c8d2933dAA21Aac75B88fF59725725ba813F",
           },
@@ -42,7 +42,7 @@ describe("ZkConnect", () => {
 
     // Mocking the IsRootAvailable method to return true even if the root is no longer available
     const isRootAvailableMock = jest.spyOn(
-      zkConnect["_verifier"]["hydraS1Verifier"] as any,
+      zkConnect["_verifier"]["hydraS2Verifier"] as any,
       "IsRootAvailable"
     );
     isRootAvailableMock.mockImplementation(async () => {
@@ -52,9 +52,10 @@ describe("ZkConnect", () => {
 
   describe("zkConnect server", () => {
     describe("verify with statements", () => {
+
       it("should throw with an invalid version", async () => {
         const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.version = "off-chain-2";
+        invalidZkConnectResponse.version = "invalid-version";
         await expect(
           zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
         ).rejects.toThrow(
@@ -158,20 +159,20 @@ describe("ZkConnect", () => {
               value: 1,
               groupTimestamp: "latest",
               comparator: "GTE",
-              provingScheme: "hydra-s1.2",
+              provingScheme: "hydra-s2.1",
               proof: zkConnectResponseMock.verifiableStatements[0].proof,
             },
           ],
-          version: "off-chain-1",
-          vaultId: "0x0be05f26254c541fb4f0d48db44cd17a5fb108d10faa7915625d37f8af46da45",
+          version: "zk-connect-v1",
+          vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
           verifiedStatements: [
             {
               groupId,
               value: 1,
               groupTimestamp: "latest",
               comparator: "GTE",
-              provingScheme: "hydra-s1.2",
-              proofId: "0x2267c2a2b36ab22fd6348e41d513b16cae9732e3422ffe37e432c1aa2e9e7e94",
+              provingScheme: "hydra-s2.1",
+              proofId: "0x088258589a7b8fb0ec1ebc559f41f87bc7036af62800caf3cbce2ad1c14aab78",
               proof: zkConnectResponseMock.verifiableStatements[0].proof,
             },
           ],
@@ -256,11 +257,11 @@ describe("ZkConnect", () => {
           namespace: "main",
           verifiableStatements: [],
           authProof: {
-            provingScheme: 'hydra-s1.2',
+            provingScheme: 'hydra-s2.1',
             proof: zkConnectResponseMock.verifiableStatements[0].proof,
           },
-          version: "off-chain-1",
-          vaultId: "0x0be05f26254c541fb4f0d48db44cd17a5fb108d10faa7915625d37f8af46da45",
+          version: "zk-connect-v1",
+          vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
           verifiedStatements: [],
         } as ZkConnectVerifiedResult);
       });
