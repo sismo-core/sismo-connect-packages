@@ -52,6 +52,23 @@ describe("ZkConnect", () => {
 
   describe("zkConnect server", () => {
     describe("verify with statements", () => {
+      it("should throw with an invalid zkConnectResponse", async () => {
+        const invalidZkConnectResponse = null;
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse as any, { dataRequest, namespace })
+        ).rejects.toThrow(
+          `zkConnectResponse provided is undefined`
+        );
+      });
+
+      it("should throw with an invalid zkConnectResponse", async () => {
+        const invalidZkConnectResponse = {};
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse as any, { dataRequest, namespace })
+        ).rejects.toThrow(
+          `no version provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
+        );
+      });
 
       it("should throw with an invalid version", async () => {
         const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
