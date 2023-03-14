@@ -38,7 +38,29 @@ export class ZkConnectServer {
   public verify = async (zkConnectResponse: ZkConnectResponse, {
     dataRequest,
     namespace,
-  }: VerifyParamsZkConnect): Promise<ZkConnectVerifiedResult> => {
+  }: VerifyParamsZkConnect = {}): Promise<ZkConnectVerifiedResult> => {
+    if (!zkConnectResponse) {
+      throw new Error(
+        `zkConnectResponse provided is undefined`
+      );
+    }
+
+    if (!zkConnectResponse.version) {
+      throw new Error(
+        `no version provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
+      );
+    }
+    if (!zkConnectResponse.appId) {
+      throw new Error(
+        `no appId provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
+      );
+    }
+    if (!zkConnectResponse.namespace) {
+      throw new Error(
+        `no namespace provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
+      );
+    }
+
     namespace = namespace ?? "main";
     if (zkConnectResponse.version !== ZK_CONNECT_VERSION) {
       throw new Error(
