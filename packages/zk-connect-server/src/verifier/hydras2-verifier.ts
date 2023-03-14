@@ -50,8 +50,6 @@ export type HydraS2VerifierOpts = {
   isDevMode?: boolean;
 };
 
-export const HYDRAS2_VERIFIER_VERSION = "2.0.0-beta4";
-
 export class HydraS2Verifier extends BaseVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
   private _availableRootsRegistry: AvailableRootsRegistryContract;
