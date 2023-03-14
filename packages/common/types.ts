@@ -1,7 +1,7 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 
 
-export const ZK_CONNECT_VERSION = `off-chain-1`;
+export const ZK_CONNECT_VERSION = `zk-connect-v1`;
 export type ZkConnectRequest = {
   appId: string;
   dataRequest?: DataRequestType;
