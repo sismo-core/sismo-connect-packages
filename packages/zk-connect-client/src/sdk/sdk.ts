@@ -8,7 +8,7 @@ export class Sdk {
   constructor(sismoApiUrl?: string) {
     this._apiFetcher = new ApiFetcher(sismoApiUrl ?? sismoApiUrls.prod);
   }
-ks
+  
   public async getGroup({ id, name, timestamp }: GroupParams) {
     if (!id && !name) {
       throw new Error(
