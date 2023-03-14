@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "module": "esnext",
+      "moduleResolution": "node",
+      "jsx": "react",
+      "strict": false,
+      "esModuleInterop": true,
+      "declaration": true,
+      "skipLibCheck": true,
+      "noImplicitAny": false,
+      "resolveJsonModule": true,
+      "sourceMap": true,
+      "baseUrl": ".",
+    },
+    "include": [
+      "src",
+      "./rollup.config.js"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+}

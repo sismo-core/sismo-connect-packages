@@ -1,0 +1,44 @@
+{
+  "name": "zk-connect-sdk",
+  "version": "1.0.8",
+  "description": "zkConnect package",
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "yarn && yarn build:zk-connect-client && yarn build:zk-connect-server && yarn build:zk-connect-react",
+    "build:zk-connect-client": "cd packages/zk-connect-client && yarn && yarn build",
+    "build:zk-connect-server": "cd packages/zk-connect-server && yarn && yarn build",
+    "build:zk-connect-react": "cd packages/zk-connect-react && yarn && yarn build",
+    "prepare": "husky install",
+    "eslint": "eslint --max-warnings=0"
+  },
+  "devDependencies": {
+    "eslint": "^8.34.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.2",
+    "prettier": "^2.8.4",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "engines": {
+    "npm": "USE YARN INSTEAD OF NPM"
+  },
+  "repository": "git@github.com:sismo-core/zk-connect-packages.git",
+  "author": "gabin@sismo.io",
+  "license": "MIT",
+  "dependencies": {},
+  "lint-staged": {
+    "src/**/*": "prettier --write --ignore-unknown",
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings=0"
+    ]
+  }
+}
