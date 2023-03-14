@@ -1,12 +1,12 @@
-import { ApiFetcher, SupportedEnvs } from "../api";
+import { ApiFetcher, sismoApiUrls } from "../api";
 import { getGroupFromIdQuery, getGroupFromNameQuery } from "./queries";
 import { FetchedData, GetGroupQueryOutput, GroupParams } from "./types";
 
 export class Sdk {
   private _apiFetcher: ApiFetcher;
 
-  constructor(env?: SupportedEnvs) {
-    this._apiFetcher = new ApiFetcher(env);
+  constructor(sismoApiUrl?: string) {
+    this._apiFetcher = new ApiFetcher(sismoApiUrl ?? sismoApiUrls.prod);
   }
 ks
   public async getGroup({ id, name, timestamp }: GroupParams) {

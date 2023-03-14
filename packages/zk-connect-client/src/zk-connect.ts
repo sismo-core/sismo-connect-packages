@@ -1,7 +1,6 @@
 import { RequestParams, ZkConnectClientConfig } from "./types";
 import { ZkConnectResponse } from "./common-types";
 import { Sdk, GroupParams } from "./sdk";
-
 import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL, VERSION } from "./constants";
 import { BigNumberish } from "@ethersproject/bignumber";
 
@@ -16,7 +15,7 @@ export class ZkConnectClient {
   private _devAddresses: Record<string, Number | BigNumberish> | null;
   private _sdk: Sdk;
 
-  constructor({ appId, devMode, vaultAppBaseUrl, env }: ZkConnectClientConfig) {
+  constructor({ appId, devMode, vaultAppBaseUrl, sismoApiUrl }: ZkConnectClientConfig) {
     this._appId = appId;
     this._devModeEnabled = devMode?.enabled ?? false;
     this._vaultAppBaseUrl =
@@ -39,7 +38,7 @@ export class ZkConnectClient {
         throw new Error(`devAddresses must be of type Record<string, Number | BigNumberish>`);
       }
     }
-    this._sdk = new Sdk(env ?? "prod");
+    this._sdk = new Sdk(sismoApiUrl);
   }
 
   public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {}) => {
