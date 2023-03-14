@@ -102,5 +102,5 @@ export const zkConnectResponseMock: ZkConnectResponse = {
       },
     },
   ],
-  version: "off-chain-1",
+  version: "zk-connect-v1",
 } as ZkConnectResponse;

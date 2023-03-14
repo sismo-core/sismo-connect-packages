@@ -55,7 +55,7 @@ describe("ZkConnect", () => {
 
       it("should throw with an invalid version", async () => {
         const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.version = "off-chain-2";
+        invalidZkConnectResponse.version = "invalid-version";
         await expect(
           zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
         ).rejects.toThrow(
@@ -163,7 +163,7 @@ describe("ZkConnect", () => {
               proof: zkConnectResponseMock.verifiableStatements[0].proof,
             },
           ],
-          version: "off-chain-1",
+          version: "zk-connect-v1",
           vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
           verifiedStatements: [
             {
@@ -260,7 +260,7 @@ describe("ZkConnect", () => {
             provingScheme: 'hydra-s2.1',
             proof: zkConnectResponseMock.verifiableStatements[0].proof,
           },
-          version: "off-chain-1",
+          version: "zk-connect-v1",
           vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
           verifiedStatements: [],
         } as ZkConnectVerifiedResult);
