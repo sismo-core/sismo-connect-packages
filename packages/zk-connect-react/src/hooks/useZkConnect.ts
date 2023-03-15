@@ -1,7 +1,7 @@
 import { ZkConnect, ZkConnectClient, ZkConnectClientConfig, ZkConnectResponse } from "@sismo-core/zk-connect-client";
 import { useEffect, useMemo, useState } from "react";
 
-export type ZkConnect = {
+export type ZkConnectHook = {
     response: ZkConnectResponse | null,
     zkConnect: ZkConnectClient
 };
@@ -11,7 +11,7 @@ export type ZkConnectProps = {
     config?: Omit<ZkConnectClientConfig, "appId">
 };
 
-export const useZkConnect = ({ appId, config }: ZkConnectProps): ZkConnect => {
+export const useZkConnect = ({ appId, config }: ZkConnectProps): ZkConnectHook => {
     const [response, setResponse] = useState(null);
 
     const zkConnect = useMemo(() => ZkConnect({
