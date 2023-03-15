@@ -7,17 +7,15 @@ export type ZkConnectHook = {
 };
 
 export type ZkConnectProps = {
-    appId: string,
-    config?: Omit<ZkConnectClientConfig, "appId">
+    config: ZkConnectClientConfig
 };
 
-export const useZkConnect = ({ appId, config }: ZkConnectProps): ZkConnectHook => {
+export const useZkConnect = ({ config }: ZkConnectProps): ZkConnectHook => {
     const [response, setResponse] = useState(null);
-
-    const zkConnect = useMemo(() => ZkConnect({
-        appId,
-        ...config
-    }), [appId, config]);
+    
+    const zkConnect = useMemo(() => {
+        return ZkConnect(config)
+    }, [config]);
 
     useEffect(() => {
         const zkConnectResponse = zkConnect.getResponse();

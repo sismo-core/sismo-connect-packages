@@ -6,10 +6,10 @@ import { DataRequest, ZkConnectResponse, DataRequestType, ZkConnectClientConfig,
 import { useZkConnect } from "../../hooks/useZkConnect";
 
 type ButtonProps = {
-  appId: string;
+  appId?: string;
   dataRequest?: Partial<DataRequestType> & Partial<StatementRequest>;
   onResponse?: (response: ZkConnectResponse) => void;
-  config?: Omit<ZkConnectClientConfig, "appId">;
+  config?: ZkConnectClientConfig;
   callbackPath?: string;
   namespace?: string;
   verifying?: boolean;
@@ -26,9 +26,17 @@ export const ZkConnectButton = ({
   verifying,
   overrideStyle,
 }: ButtonProps) => {
+  if (!appId && !config) {
+    throw new Error("please add at least one appId or a config props in ZkConnectButton")
+  }
+  if (appId && config && appId !== config.appId) {
+    throw new Error("the 'appId' props of your ZkConnectButton is different from the 'appId' in your configuration. Please add the same 'appId' props as in your configuration or remove the 'appId' prop")
+  }
+
   const { zkConnect, response } = useZkConnect({ 
-    appId, 
-    config 
+    config: config || {
+      appId
+    }
   });
 
   useEffect(() => {
