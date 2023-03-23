@@ -26,7 +26,9 @@ describe("ZkConnect", () => {
       dataRequest,
       namespace
     })
-    console.log("link", link)
+    expect(
+      link
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v1&appId=0xf68985adfc209fafebfb1a956913e7fa&dataRequest={"statementRequests":[{"groupId":"0x682544d549b8a461d7fe3e589846bb7b","groupTimestamp":"latest","requestedValue":1,"comparator":"GTE","provingScheme":"hydra-s2.1","extraData":null}],"operator":null}&namespace=main`)
   });
 });
   
