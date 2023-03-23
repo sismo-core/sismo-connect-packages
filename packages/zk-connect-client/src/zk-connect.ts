@@ -43,9 +43,12 @@ export class ZkConnectClient {
 
   public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {}) => {
     if (!window) throw new Error(`requestProof is not available outside of a browser`);
+    const url = this.getRequestLink({ dataRequest, namespace, callbackPath })
+    window.location.href = encodeURI(url);
+  };
 
+  public getRequestLink = ({ dataRequest, namespace, callbackPath }: RequestParams = {}): string => {
     let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
-
     if (dataRequest) {
       const statementRequestsWithDevAddresses = dataRequest.statementRequests.map(
         (statementRequest) => {
@@ -72,9 +75,8 @@ export class ZkConnectClient {
       url += `&callbackPath=${callbackPath}`;
     }
     url += `&namespace=${namespace ?? "main"}`;
-
-    window.location.href = encodeURI(url);
-  };
+    return url;
+  }
 
   public getResponse = (): ZkConnectResponse | null => {
     if (!window) throw new Error(`getResponse is not available outside of a browser`);

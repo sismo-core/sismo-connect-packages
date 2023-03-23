@@ -1,6 +1,4 @@
-import { gql } from "@apollo/client";
-
-export const getGroupFromIdQuery = gql`
+export const getGroupFromIdQuery = `
   query getGroup($id: ID!) {
     group(id: $id) {
       id
@@ -16,7 +14,7 @@ export const getGroupFromIdQuery = gql`
   }
 `;
 
-export const getGroupFromNameQuery = gql`
+export const getGroupFromNameQuery = `
   query getGroup($name: String!) {
     group(name: $name) {
       id
