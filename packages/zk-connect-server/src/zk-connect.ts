@@ -36,7 +36,7 @@ export class ZkConnectServer {
   }
 
   public verify = async (zkConnectResponse: ZkConnectResponse, {
-    dataRequest,
+    requestContent,
     namespace,
   }: VerifyParamsZkConnect = {}): Promise<ZkConnectVerifiedResult> => {
     if (!zkConnectResponse) {
@@ -78,11 +78,6 @@ export class ZkConnectServer {
       );
     }
 
-    dataRequest = dataRequest ?? {
-      statementRequests: [],
-      operator: null,
-    };
-
-    return this._verifier.verify({ zkConnectResponse, dataRequest, namespace });
+    return this._verifier.verify({ zkConnectResponse, requestContent, namespace });
   };
 }

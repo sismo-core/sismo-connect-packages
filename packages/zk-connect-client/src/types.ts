@@ -1,8 +1,8 @@
 import { BigNumberish } from '@ethersproject/bignumber';
-import { DataRequestType } from "./common-types";
+import { ZkConnectRequestContent } from "./common-types";
 
 export type RequestParams = {
-  dataRequest?: DataRequestType;
+  requestContent: ZkConnectRequestContent;
   namespace?: string;
   callbackPath?: string;
 };

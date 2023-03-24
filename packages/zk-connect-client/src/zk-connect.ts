@@ -1,7 +1,7 @@
 import { RequestParams, ZkConnectClientConfig } from "./types";
-import { ZkConnectResponse } from "./common-types";
+import { ZkConnectResponse, ZK_CONNECT_VERSION } from "./common-types";
 import { Sdk, GroupParams } from "./sdk";
-import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL, VERSION } from "./constants";
+import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL } from "./constants";
 import { BigNumberish } from "@ethersproject/bignumber";
 
 export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
@@ -41,40 +41,40 @@ export class ZkConnectClient {
     this._sdk = new Sdk(sismoApiUrl);
   }
 
-  public request = ({ dataRequest, namespace, callbackPath }: RequestParams = {}) => {
+  public request = ({ requestContent, namespace, callbackPath }: RequestParams) => {
     if (!window) throw new Error(`requestProof is not available outside of a browser`);
-    const url = this.getRequestLink({ dataRequest, namespace, callbackPath })
+    const url = this.getRequestLink({ requestContent, namespace, callbackPath })
     window.location.href = encodeURI(url);
   };
 
-  public getRequestLink = ({ dataRequest, namespace, callbackPath }: RequestParams = {}): string => {
-    let url = `${this._vaultAppBaseUrl}/connect?version=${VERSION}&appId=${this._appId}`;
-    if (dataRequest) {
-      const statementRequestsWithDevAddresses = dataRequest.statementRequests.map(
-        (statementRequest) => {
-          if (this._devAddresses) {
-            console.info(
-              `Eligible group data for groupId ${statementRequest.groupId} is overridden with:`,
-              this._devAddresses
-            );
-            statementRequest.extraData = {
-              ...statementRequest.extraData,
-              devAddresses: this._devAddresses,
-            };
-          }
-          return statementRequest;
+  public getRequestLink = ({ requestContent, namespace, callbackPath }: RequestParams): string => {
+    if (requestContent.operators && requestContent.operators.length > 0) {
+      if (requestContent.operators.length > requestContent.dataRequests.length -1) {
+        throw new Error(`too much operators, please add dataRequests.length - 1 operators`);
+      }
+      if (requestContent.operators.length < requestContent.dataRequests.length -1) {
+        throw new Error(`not enough operators, please add dataRequests.length - 1 operators`);
+      }
+      let firstOperator = requestContent.operators[0];
+      for (let operator of requestContent.operators) {
+        if (operator !== firstOperator) {
+          throw new Error(`all operators must be equals`);
         }
-      );
-      url += `&dataRequest=${JSON.stringify({
-        ...dataRequest,
-        statementRequests: statementRequestsWithDevAddresses,
-      })}`;
+      }
+    } 
+    let url = `${this._vaultAppBaseUrl}/connect?version=${ZK_CONNECT_VERSION}&appId=${this._appId}&requestContent=${JSON.stringify(requestContent)}`;
+    if (this._devAddresses) {
+      const devConfig = {
+        devAddresses: this._devAddresses
+      }
+      url += `&devConfig=${JSON.stringify(devConfig)}`;
     }
-
     if (callbackPath) {
       url += `&callbackPath=${callbackPath}`;
     }
-    url += `&namespace=${namespace ?? "main"}`;
+    if (namespace) {
+      url += `&namespace=${namespace}`;
+    }
     return url;
   }
 

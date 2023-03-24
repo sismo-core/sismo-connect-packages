@@ -1,9 +1,9 @@
 import { VerifierOpts } from "./verifier";
-import { DataRequestType } from "./common-types";
+import { ZkConnectRequestContent } from "./common-types";
 import { Provider } from "@ethersproject/abstract-provider";
 
 export type VerifyParamsZkConnect = {
-  dataRequest?: DataRequestType;
+  requestContent?: ZkConnectRequestContent;
   namespace?: string;
 };
 

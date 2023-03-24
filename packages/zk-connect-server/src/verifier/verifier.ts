@@ -1,15 +1,16 @@
 import {
-  ProvingScheme,
-  VerifiedStatement,
   ZkConnectResponse,
   ZkConnectVerifiedResult,
-  VerifiableStatement,
-  AuthProof,
-  DataRequestType,
+  ZkConnectRequestContent,
+  ZkConnectProof,
+  ClaimType,
+  VerifiedClaim,
+  VerifiedAuth,
+  ProvingScheme,
+  AuthType,
 } from "../common-types";
 import { HydraS2Verifier, HydraS2VerifierOpts } from "./hydras2-verifier";
 import { Provider } from "@ethersproject/abstract-provider";
-import { BigNumber } from "@ethersproject/bignumber";
 
 export type VerifierOpts = {
   hydraS2?: HydraS2VerifierOpts;
@@ -18,7 +19,7 @@ export type VerifierOpts = {
 
 export type VerifyParams = {
   zkConnectResponse: ZkConnectResponse;
-  dataRequest?: DataRequestType;
+  requestContent?: ZkConnectRequestContent;
   namespace?: string;
 };
 
@@ -34,153 +35,202 @@ export class ZkConnectVerifier {
 
   async verify({
     zkConnectResponse,
-    dataRequest,
+    requestContent,
   }: VerifyParams): Promise<ZkConnectVerifiedResult> {
-    const verifiedStatements: VerifiedStatement[] = [];
+    const signedMessages: string[] = [];
+    const verifiedClaims: VerifiedClaim[] = [];
+    const verifiedAuths: VerifiedAuth[] = [];
+  
+    await this._checkOperators(
+      zkConnectResponse,
+      requestContent
+    );
 
-    if (
-      zkConnectResponse.verifiableStatements.length === 0 &&
-      dataRequest.statementRequests.length === 0
-    ) {
-      const verifiedProof = await this._verifyAuthProof(
-        zkConnectResponse.appId,
-        zkConnectResponse.authProof
+    for (let proof of zkConnectResponse.proofs) {
+      await this._checkProofMatchContentRequest(
+        proof,
+        requestContent
       );
-      return {
-        ...zkConnectResponse,
-        vaultId: verifiedProof.vaultIdentifier,
-        verifiedStatements: [],
-      };
-    }
-    if (
-      zkConnectResponse.verifiableStatements.length <
-      dataRequest.statementRequests.length
-    ) {
-      throw new Error(
-        "The zkConnectResponse contains less verifiableStatements than requested statements."
-      );
-    }
 
-    if (zkConnectResponse.verifiableStatements.length > 1) {
-      throw new Error(
-        "The zkConnectResponse contains more than one verifiableStatement, this is not supported yet."
-      );
-    }
-    let vaultIdentifier: string;
-    for (let verifiableStatement of zkConnectResponse.verifiableStatements) {
-      await this._checkVerifiableStatementMatchDataRequest(
-        verifiableStatement,
-        dataRequest
-      );
-      const verifiedProof = await this._verifyProof(
-        zkConnectResponse.appId,
-        zkConnectResponse.namespace,
-        verifiableStatement
-      );
-      vaultIdentifier = verifiedProof.vaultIdentifier;
-      verifiedStatements.push({
-        ...verifiableStatement,
-        proofId: verifiedProof.proofIdentifier,
-      });
+      if (proof.auth && proof.auth.authType !== AuthType.NONE) {
+        const verifiedAuth = await this._verifyAuthProof(
+          proof
+        )
+        verifiedAuths.push(verifiedAuth);
+      }
+      if (proof.claim && proof.claim.claimType !== ClaimType.NONE) {
+        const verifiedAuth = await this._verifyClaimProof(
+          zkConnectResponse.appId,
+          zkConnectResponse.namespace,
+          proof
+        )
+        verifiedClaims.push(verifiedAuth);
+      }
+      if (proof.signedMessage) {
+        const signedMessage = await this._verifySignedMessageProof(
+          proof
+        )
+        signedMessages.push(signedMessage);
+      }
     }
 
     const zkConnectVerifiedResult: ZkConnectVerifiedResult = {
       ...zkConnectResponse,
-      vaultId: vaultIdentifier,
-      verifiedStatements,
+      verifiedClaims,
+      verifiedAuths,
+      signedMessages,
     };
 
     return zkConnectVerifiedResult;
   }
 
-  private async _checkVerifiableStatementMatchDataRequest(
-    verifiableStatement: VerifiableStatement,
-    dataRequest: DataRequestType
+  private async _checkOperators(
+    zkConnectResponse: ZkConnectResponse,
+    requestContent: ZkConnectRequestContent,
   ) {
-    const groupId = verifiableStatement.groupId;
-    const groupTimestamp = verifiableStatement.groupTimestamp;
-    const statementRequest = dataRequest.statementRequests.find(
-      (statementRequest) =>
-        statementRequest.groupId === groupId &&
-        statementRequest.groupTimestamp === groupTimestamp
-    );
-    if (!statementRequest) {
-      throw new Error(
-        `No statementRequest found for verifiableStatement groupId ${groupId} and groupTimestamp ${groupTimestamp}`
-      );
-    }
-    const requestedComparator = statementRequest.comparator;
-    if (requestedComparator !== verifiableStatement.comparator) {
-      throw new Error(
-        `The verifiableStatement comparator ${verifiableStatement.comparator} does not match the statementRequest comparator ${requestedComparator}`
-      );
-    }
-    const requestedValue = statementRequest.requestedValue;
-    if (requestedValue !== verifiableStatement.value) {
-      if (requestedValue !== "USER_SELECTED_VALUE") {
+    if (requestContent.operators[0] === "AND") {
+      if (zkConnectResponse.proofs.length !== requestContent.dataRequests.length) {
         throw new Error(
-          `The verifiableStatement value ${verifiableStatement.value} does not match the statementRequest requestedValue ${requestedValue}`
+          `With AND operator the number of proof in the zkConnectResponse should be equal to the number of dataRequest`
+        );
+      }
+    }
+    if (requestContent.operators[0] === "OR") {
+      if (zkConnectResponse.proofs.length !== 1) {
+        throw new Error(
+          `With OR operator you should have only one proof in the zkConnectResponse`
         );
       }
     }
   }
 
-  private async _verifyProof(
-    appId: string,
-    namespace: string,
-    verifiableStatement: VerifiableStatement
-  ): Promise<{
-    proofIdentifier: string;
-    vaultIdentifier: string;
-  }> {
-    switch (verifiableStatement.provingScheme) {
-      case ProvingScheme.HYDRA_S2:
-        const isVerified = await this.hydraS2Verifier.verify({
-          appId,
-          namespace,
-          verifiableStatement,
-        });
-        if (isVerified) {
-          return {
-            proofIdentifier: BigNumber.from(
-              verifiableStatement.proof.input[6]
-            ).toHexString(),
-            vaultIdentifier: BigNumber.from(
-              verifiableStatement.proof.input[10]
-            ).toHexString(),
-          };
-        } else {
+  private async _checkProofMatchContentRequest(
+    proof: ZkConnectProof,
+    requestContent: ZkConnectRequestContent,
+  ) {
+    const groupId = proof.claim?.groupId;
+    const groupTimestamp = proof.claim?.groupTimestamp;
+    const authType = proof.auth?.authType;
+    const anonMode = proof.auth?.anonMode;
+    const signedMessage = proof.signedMessage;
+
+    if (!proof.claim || proof.claim.claimType === ClaimType.NONE) {
+      if (!proof.auth || proof.auth.authType === AuthType.NONE) {
+        if (!proof.signedMessage) {
           throw new Error(
-            `verifiableStatement with proof "${verifiableStatement.proof}" is not valid `
+            `No claim, no auth and no signed message in the proof, please provide at least one`
           );
         }
+      }
+    }
+
+    const dataRequest = requestContent.dataRequests.find(
+      (dataRequest) => {
+        if (dataRequest.claimRequest && proof.claim.claimType !== ClaimType.NONE) {
+          if (dataRequest.claimRequest.groupId !== groupId || dataRequest.claimRequest.groupTimestamp !== groupTimestamp) {
+            return false;
+          }
+        }
+        if (dataRequest.authRequest && proof.auth.authType !== AuthType.NONE) {
+          if (dataRequest.authRequest.authType !== authType || dataRequest.authRequest.anonMode !== anonMode) {
+            return false;
+          }
+        }
+        if (dataRequest.messageSignatureRequest) {
+          if (dataRequest.messageSignatureRequest !== signedMessage) {
+            return false;
+          }
+        }
+        return true;
+      }
+    );
+
+    if (!dataRequest) {
+      throw new Error(
+        `No dataRequest found for claimRequest groupId ${groupId} and groupTimestamp ${groupTimestamp} 
+        ${
+          signedMessage && `, authRequest authType ${authType} and anonMode ${anonMode}`
+        }
+        ${
+          signedMessage && `, signedMessage ${signedMessage}`
+        }`
+      );
+    }
+
+    if (proof.claim) {
+      const requestedClaimType = dataRequest.claimRequest.claimType;
+      if (requestedClaimType !== proof.claim.claimType) {
+        throw new Error(
+          `The proof claimType ${proof.claim.claimType} does not match the requestContent claimType ${requestedClaimType}`
+        );
+      }
+      const requestedValue = dataRequest.claimRequest.value;
+      if (requestedValue !== proof.claim.value) {
+        if (dataRequest.claimRequest.claimType !== ClaimType.EQ &&  dataRequest.claimRequest.claimType !== ClaimType.USER_SELECT) {
+          throw new Error(
+            `The proof value ${proof.claim.value} does not match the requestContent value ${requestedValue}`
+          );
+        }
+      }
+    }
+
+    if (proof.auth) {
+      const requestedUserId = dataRequest.authRequest.userId;
+      if (requestedUserId !== "0") {
+        if (proof.auth.userId !== requestedUserId) {
+          throw new Error(
+            `The proof auth userId ${proof.auth.userId} does not match the requestContent auth userId ${requestedUserId}`
+          );
+        }
+      }
+    }
+  }
+
+  private async _verifySignedMessageProof(
+    proof: ZkConnectProof
+  ): Promise<string> {
+    switch (proof.provingScheme) {
+      case ProvingScheme.HYDRA_S2:
+        return this.hydraS2Verifier.verifySignedMessageProof({
+          proof
+        });
       default:
         throw new Error(
-          `verifiableStatement proving scheme "${verifiableStatement.provingScheme}" not supported in this version`
+          `proof proving scheme "${proof.provingScheme}" not supported in this version`
         );
     }
   }
 
   private async _verifyAuthProof(
-    appId: string,
-    authProof: AuthProof
-  ): Promise<{
-    vaultIdentifier: string;
-  }> {
-    if (!authProof) {
-      throw new Error(
-        "The authProof is required when no verifiableStatements are provided"
-      );
-    }
-    switch (authProof.provingScheme) {
+    proof: ZkConnectProof
+  ): Promise<VerifiedAuth> {
+    switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
         return this.hydraS2Verifier.verifyAuthProof({
-          appId,
-          authProof,
+          proof
         });
       default:
         throw new Error(
-          `authProof proving scheme "${authProof.provingScheme}" not supported in this version`
+          `proof proving scheme "${proof.provingScheme}" not supported in this version`
+        );
+    }
+  }
+
+  private async _verifyClaimProof(
+    appId: string,
+    namespace: string,
+    proof: ZkConnectProof
+  ): Promise<VerifiedClaim> {
+    switch (proof.provingScheme) {
+      case ProvingScheme.HYDRA_S2:
+        return await this.hydraS2Verifier.verifyClaimProof({
+          appId,
+          namespace,
+          proof,
+        });
+      default:
+        throw new Error(
+          `proof proving scheme "${proof.provingScheme}" not supported in this version`
         );
     }
   }

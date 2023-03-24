@@ -1,7 +1,11 @@
 import {
-  DataRequest,
-  DataRequestType,
+    AuthType,
+    Claim,
+  ClaimType,
+  RequestContentLib,
+  VerifiedClaim,
   ZkConnect,
+  ZkConnectRequestContent,
   ZkConnectResponse,
   ZkConnectServer,
   ZkConnectVerifiedResult,
@@ -10,23 +14,38 @@ import {
 import { zkConnectResponseMock } from "./mocks";
 import { ethers } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
+import { decodeProofData, encodeProofData } from "../src/verifier/utils/proofData";
 
 describe("ZkConnect", () => {
+  let verifiedClaim: VerifiedClaim;
   let zkConnect: ZkConnectServer;
   let zkConnectResponse: ZkConnectResponse;
   let appId: string;
   let groupId: string;
   let namespace: string;
-  let dataRequest: DataRequestType;
+  let requestContent: ZkConnectRequestContent;
+  let groupTimestamp: number | "latest";
+  let value: number;
+  let claimType: ClaimType;
 
   beforeAll(() => {
     appId = "0xf68985adfc209fafebfb1a956913e7fa";
     groupId = "0x682544d549b8a461d7fe3e589846bb7b"
     namespace = "main";
     zkConnectResponse = zkConnectResponseMock;
+    groupTimestamp = "latest";
+    value = 1;
+    claimType = ClaimType.GTE;
+
     const _provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth_goerli", 5);
 
-    dataRequest = DataRequest({ groupId });
+    requestContent = RequestContentLib.build({
+        dataRequests: [{
+            claimRequest: {
+                groupId
+            }
+        }]
+    })
     zkConnect = ZkConnect({
       appId,
       options: {
@@ -39,6 +58,15 @@ describe("ZkConnect", () => {
         },
       },
     });
+
+    verifiedClaim = {
+        groupId,
+        groupTimestamp,
+        value,
+        claimType,
+        proofId: BigNumber.from(zkConnectResponse.proofs[0].proofId).toHexString(),
+        __proof: zkConnectResponse.proofs[0].proofData
+    };
 
     // Mocking the IsRootAvailable method to return true even if the root is no longer available
     const isRootAvailableMock = jest.spyOn(
@@ -55,7 +83,7 @@ describe("ZkConnect", () => {
       it("should throw with an invalid zkConnectResponse", async () => {
         const invalidZkConnectResponse = null;
         await expect(
-          zkConnect.verify(invalidZkConnectResponse as any, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse as any, { requestContent, namespace })
         ).rejects.toThrow(
           `zkConnectResponse provided is undefined`
         );
@@ -64,223 +92,113 @@ describe("ZkConnect", () => {
       it("should throw with an invalid zkConnectResponse", async () => {
         const invalidZkConnectResponse = {};
         await expect(
-          zkConnect.verify(invalidZkConnectResponse as any, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse as any, { requestContent, namespace })
         ).rejects.toThrow(
           `no version provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
         );
       });
 
       it("should throw with an invalid version", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
         invalidZkConnectResponse.version = "invalid-version";
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
           `version of the zkConnectResponse "${invalidZkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`
         );
       });
 
       it("should throw with an invalid appId", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
         invalidZkConnectResponse.appId = "0x123";
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
           `zkConnectResponse appId "${invalidZkConnectResponse.appId}" does not match with server appId "${appId}"`
         );
       });
 
       it("should throw with an invalid namespace", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
         invalidZkConnectResponse.namespace = "main2";
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
           `zkConnectResponse namespace "${invalidZkConnectResponse.namespace}" does not match with server namespace "${namespace}"`
         );
       });
 
       it("should throw with an invalid groupId", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements[0].groupId = "0x123";
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim
+        invalidZkConnectResponse.proofs[0].claim.groupId = "0x123";
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
-          `No statementRequest found for verifiableStatement groupId ${invalidZkConnectResponse.verifiableStatements[0].groupId} and groupTimestamp ${invalidZkConnectResponse.verifiableStatements[0].groupTimestamp}`
+          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
         );
       });
 
       it("should throw with an invalid groupTimestamp", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements[0].groupTimestamp = 123456;
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
+        invalidZkConnectResponse.proofs[0].claim.groupTimestamp = 123456;
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
-          `No statementRequest found for verifiableStatement groupId ${invalidZkConnectResponse.verifiableStatements[0].groupId} and groupTimestamp ${invalidZkConnectResponse.verifiableStatements[0].groupTimestamp}`
+          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
         );
       });
 
       it("should throw with an invalid comparator", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements[0].comparator = "EQ";
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
+        invalidZkConnectResponse.proofs[0].claim.claimType = ClaimType.LT;
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
-          `The verifiableStatement comparator ${invalidZkConnectResponse.verifiableStatements[0].comparator} does not match the statementRequest comparator ${dataRequest.statementRequests[0].comparator}`
+          `The proof claimType ${invalidZkConnectResponse.proofs[0].claim.claimType} does not match the requestContent claimType ${zkConnectResponse.proofs[0].claim?.claimType}`
         );
       });
 
       it("should throw with an invalid value", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements[0].value = 2;
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
+        invalidZkConnectResponse.proofs[0].claim.value = 2;
         await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
+          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
-          `The verifiableStatement value ${invalidZkConnectResponse.verifiableStatements[0].value} does not match the statementRequest requestedValue ${dataRequest.statementRequests[0].requestedValue}`
-        );
-      });
-
-      it("should throw with two verifiableStatements", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements.push(
-          invalidZkConnectResponse.verifiableStatements[0]
-        );
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
-        ).rejects.toThrow(
-          `The zkConnectResponse contains more than one verifiableStatement, this is not supported yet.`
-        );
-      });
-
-      it("should throw with no verifiable statement and one statement request", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements = [];
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { dataRequest, namespace })
-        ).rejects.toThrow(
-          `The zkConnectResponse contains less verifiableStatements than requested statements.`
+          `The proof value ${invalidZkConnectResponse.proofs[0].claim.value} does not match the requestContent value ${zkConnectResponse.proofs[0].claim?.value}`
         );
       });
 
       it("Should verify", async () => {
-        const isVerified = await zkConnect.verify(zkConnectResponse, {
-          dataRequest,
+        const zkConnectVerifiedResult = await zkConnect.verify(zkConnectResponse, {
+          requestContent,
           namespace: "main",
         });
-        expect(isVerified).toEqual({
-          appId,
-          namespace: "main",
-          verifiableStatements: [
-            {
-              groupId,
-              value: 1,
-              groupTimestamp: "latest",
-              comparator: "GTE",
-              provingScheme: "hydra-s2.1",
-              proof: zkConnectResponseMock.verifiableStatements[0].proof,
-            },
-          ],
-          version: "zk-connect-v1",
-          vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
-          verifiedStatements: [
-            {
-              groupId,
-              value: 1,
-              groupTimestamp: "latest",
-              comparator: "GTE",
-              provingScheme: "hydra-s2.1",
-              proofId: "0x088258589a7b8fb0ec1ebc559f41f87bc7036af62800caf3cbce2ad1c14aab78",
-              proof: zkConnectResponseMock.verifiableStatements[0].proof,
-            },
-          ],
+        expect(zkConnectVerifiedResult).toEqual({
+            ...zkConnectResponse,
+            verifiedClaims: [verifiedClaim],
+            signedMessages: [],
+            verifiedAuths: []
         } as ZkConnectVerifiedResult);
       });
     });
 
-    describe("verify without statements", () => {
-      it("should throw with no verifiable statement, no statement request and no authProof", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.verifiableStatements = [];
-        const invalidDataRequest = JSON.parse(JSON.stringify(dataRequest));
-        invalidDataRequest.statementRequests = [];
+    describe("verify without claim", () => {
+      it("should throw with no claimRequest, no authRequest and no signedMessage", async () => {
+        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
+        invalidZkConnectResponse.proofs[0].auth = { authType: AuthType.NONE };
+        invalidZkConnectResponse.proofs[0].claim = { claimType: ClaimType.NONE };
+        const invalidRequestContent = JSON.parse(JSON.stringify(requestContent)) as ZkConnectRequestContent;
+        invalidRequestContent.dataRequests = [];
         await expect(
           zkConnect.verify(invalidZkConnectResponse, {
-            dataRequest: invalidDataRequest,
+            requestContent: invalidRequestContent,
             namespace,
           })
-        ).rejects.toThrow(`The authProof is required when no verifiableStatements are provided`);
-      });
-
-      it("should throw with no verifiable statement, no statement request and invalid authProof proving Scheme", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.authProof = {
-          proof: JSON.parse(JSON.stringify(zkConnectResponseMock.verifiableStatements[0].proof)),
-          provingScheme: "invalid",
-        };
-        invalidZkConnectResponse.verifiableStatements = [];
-
-        const invalidDataRequest = JSON.parse(JSON.stringify(dataRequest));
-        invalidDataRequest.statementRequests = [];
-        
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, {
-            dataRequest: invalidDataRequest,
-            namespace,
-          })
-        ).rejects.toThrow(
-          `authProof proving scheme "${invalidZkConnectResponse.authProof.provingScheme}" not supported in this version`
-        );
-      });
-
-      it("should throw with no verifiable statement, no statement request and invalid authProof proof (vaultNamespace is incorrect)", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        invalidZkConnectResponse.authProof = {
-          proof: JSON.parse(JSON.stringify(zkConnectResponseMock.verifiableStatements[0].proof)),
-          provingScheme: zkConnectResponseMock.verifiableStatements[0].provingScheme,
-        };
-        invalidZkConnectResponse.verifiableStatements = [];
-
-        const newDataRequest = JSON.parse(JSON.stringify(dataRequest));
-        newDataRequest.statementRequests = [];
-        
-        invalidZkConnectResponse.authProof.proof.input[11] = "1"; // vaultNamespace
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, {
-            dataRequest: newDataRequest,
-            namespace,
-          })
-        ).rejects.toThrow(
-          `vaultNamespace "${invalidZkConnectResponse.authProof.proof.input[11]}" mismatch with appId "${BigNumber.from(appId).toString()}"`
-        );
-      });
-
-      it("should verify with no verifiable statement, no statement request and valid authProof", async () => {
-        const newZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse));
-        newZkConnectResponse.authProof = {
-          proof: zkConnectResponseMock.verifiableStatements[0].proof,
-          provingScheme: zkConnectResponseMock.verifiableStatements[0].provingScheme,
-        };
-        newZkConnectResponse.verifiableStatements = [];
-
-        const newDataRequest = JSON.parse(JSON.stringify(dataRequest));
-        newDataRequest.statementRequests = [];
-
-        const isVerified = await zkConnect.verify(newZkConnectResponse, {
-          dataRequest: newDataRequest,
-          namespace: "main",
-        });
-        expect(isVerified).toEqual({
-          appId,
-          namespace: "main",
-          verifiableStatements: [],
-          authProof: {
-            provingScheme: 'hydra-s2.1',
-            proof: zkConnectResponseMock.verifiableStatements[0].proof,
-          },
-          version: "zk-connect-v1",
-          vaultId: "0x21bbc0d6dbcf41f639e1e31aa0ff518cf81e3ddd92db142e8c4f3370a36c1a70",
-          verifiedStatements: [],
-        } as ZkConnectVerifiedResult);
+        ).rejects.toThrow( `No claim, no auth and no signed message in the proof, please provide at least one`);
       });
     });
   });

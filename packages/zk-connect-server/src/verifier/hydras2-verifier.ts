@@ -13,7 +13,9 @@ import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
-import { BaseVerifier, VerifyParams } from "./base-verifier";
+import { AuthType, ClaimType, VerifiedAuth, VerifiedClaim, ZkConnectProof } from "../common-types";
+import { ethers } from "ethers";
+import { decodeProofData } from './utils/proofData';
 
 export type SnarkProof = {
   a: string[];
@@ -30,17 +32,19 @@ export type ProofPublicInputs = {
   registryTreeRoot: string;
   requestIdentifier: string;
   proofIdentifier: string;
-  statementValue: string;
+  claimValue: string;
   accountsTreeValue: string;
-  statementComparator: string;
+  claimType: string;
   vaultIdentifier: string;
   vaultNamespace: string;
   sourceVerificationEnabled: string;
   destinationVerificationEnabled: string;
 };
 
-export type VerifierParams = {
+export type VerifyParams = {
   appId: string;
+  namespace: string;
+  proof: ZkConnectProof;
 };
 
 export type HydraS2VerifierOpts = {
@@ -50,14 +54,12 @@ export type HydraS2VerifierOpts = {
   isDevMode?: boolean;
 };
 
-export class HydraS2Verifier extends BaseVerifier {
+export class HydraS2Verifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract;
   private _availableRootsRegistry: AvailableRootsRegistryContract;
   private _isDevMode: boolean;
 
   constructor(provider: Provider, opts?: HydraS2VerifierOpts) {
-    super();
-
     this._commitmentMapperRegistry = opts?.isDevMode ? 
     new CommitmentMapperRegistryContractDev() : 
     new CommitmentMapperRegistryContractProd({
@@ -75,71 +77,83 @@ export class HydraS2Verifier extends BaseVerifier {
     this._isDevMode = opts?.isDevMode;
   }
 
-  async verify({
+  async verifyClaimProof({
     appId,
     namespace,
-    verifiableStatement,
-  }: VerifyParams): Promise<boolean> {
-    const snarkProof = verifiableStatement.proof;
-    await this._matchPublicInput({ appId, namespace, verifiableStatement });
-    return HydraS2VerifierPS.verifyProof(
-      snarkProof.a,
-      snarkProof.b,
-      snarkProof.c,
-      snarkProof.input
-    );
-  }
-
-  async verifyAuthProof({
-    appId,
-    authProof,
+    proof,
   }: {
-    appId: string;
-    authProof: { proof: SnarkProof };
-  }): Promise<{ vaultIdentifier: string }> {
-    const vaultIdentifier = BigNumber.from(authProof.proof.input[10]);
-    const vaultNamespace = BigNumber.from(authProof.proof.input[11]);
-    if (!vaultNamespace.eq(BigNumber.from(appId))) {
-      throw new Error(
-        `vaultNamespace "${vaultNamespace}" mismatch with appId "${BigNumber.from(
-          appId
-        ).toString()}"`
-      );
-    }
+    appId: string,
+    namespace: string,
+    proof: ZkConnectProof
+  }): Promise<VerifiedClaim> {
+    const snarkProof = decodeProofData(proof.proofData);
+    await this._matchPublicInputWithClaim({ appId, namespace, proof });
     if (
       !(await HydraS2VerifierPS.verifyProof(
-        authProof.proof.a,
-        authProof.proof.b,
-        authProof.proof.c,
-        authProof.proof.input
+        snarkProof.a,
+        snarkProof.b,
+        snarkProof.c,
+        snarkProof.input
       ))
     ) {
       throw new Error("Snark Proof Invalid!");
     }
-    return { vaultIdentifier: vaultIdentifier.toHexString() };
+    return {
+      ...proof.claim,
+      proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
+      __proof: proof.proofData
+    }
   }
 
-  private async _matchPublicInput({
-    verifiableStatement,
-    appId,
-    namespace,
-  }: Omit<VerifyParams, "dataRequest">) {
-    // destinationIdentifier: string; [0]
-    // extraData: string; [1]
-    // commitmentMapperPubKeyX: string; [2]
-    // commitmentMapperPubKeyY: string; [3]
-    // registryTreeRoot: string; [4]
-    // requestIdentifier: string; [5]
-    // proofIdentifier: string; [6]
-    // statementValue: string; [7]
-    // accountsTreeValue: string; [8]
-    // statementComparator: string; [9]
-    // vaultIdentifier: string; [10]
-    // vaultNamespace: string; [11]
-    // sourceVerificationEnabled: string; [12]
-    // destinationVerificationEnabled: string; [13]
+  async verifySignedMessageProof({
+    proof,
+  }: {
+    proof: ZkConnectProof;
+  }): Promise<string> {
+    const snarkProof = decodeProofData(proof.proofData);
+    await this._matchPublicInputWithSignedMessage({ proof });
+    if (
+      !(await HydraS2VerifierPS.verifyProof(
+        snarkProof.a,
+        snarkProof.b,
+        snarkProof.c,
+        snarkProof.input
+      ))
+    ) {
+      throw new Error("Snark Proof Invalid!");
+    }
+    return proof.signedMessage;
+  }
 
-    const input = verifiableStatement.proof.input;
+  async verifyAuthProof({
+    proof
+  }: {
+    proof: ZkConnectProof;
+  }): Promise<VerifiedAuth> {
+    const snarkProof = decodeProofData(proof.proofData);
+    await this._matchPublicInputWithAuth({ proof });
+    if (
+      !(await HydraS2VerifierPS.verifyProof(
+        snarkProof.a,
+        snarkProof.b,
+        snarkProof.c,
+        snarkProof.input
+      ))
+    ) {
+      throw new Error("Snark Proof Invalid!");
+    }
+
+    return { 
+      ...proof.auth,
+      proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
+      __proof: proof.proofData
+    };
+  }
+
+  private async _matchPublicInputWithSignedMessage({
+    proof
+  }) {
+    const input = decodeProofData(proof.proofData).input;
     const proofPublicInputs: ProofPublicInputs = {
       destinationIdentifier: input[0],
       extraData: input[1],
@@ -148,9 +162,94 @@ export class HydraS2Verifier extends BaseVerifier {
       registryTreeRoot: input[4],
       requestIdentifier: input[5],
       proofIdentifier: input[6],
-      statementValue: input[7],
+      claimValue: input[7],
       accountsTreeValue: input[8],
-      statementComparator: input[9],
+      claimType: input[9],
+      vaultIdentifier: input[10],
+      vaultNamespace: input[11],
+      sourceVerificationEnabled: input[12],
+      destinationVerificationEnabled: input[13],
+    };
+    const proofIdentifier = proofPublicInputs.proofIdentifier;
+
+    if (proofPublicInputs.extraData != ethers.utils.keccak256(proof.signedMessage)) {
+      throw new Error(
+        `on proofId "${proofIdentifier}" extraData "${
+          proofPublicInputs.extraData
+        }" mismatch with signedMessage "${BigNumber.from(proof.signedMessage).toString()}"`
+      );
+    }
+  }
+
+  private async _matchPublicInputWithAuth({
+    proof
+  }: {
+    proof: ZkConnectProof
+  }) {
+    const input = decodeProofData(proof.proofData).input;
+    const proofPublicInputs: ProofPublicInputs = {
+      destinationIdentifier: input[0],
+      extraData: input[1],
+      commitmentMapperPubKeyX: input[2],
+      commitmentMapperPubKeyY: input[3],
+      registryTreeRoot: input[4],
+      requestIdentifier: input[5],
+      proofIdentifier: input[6],
+      claimValue: input[7],
+      accountsTreeValue: input[8],
+      claimType: input[9],
+      vaultIdentifier: input[10],
+      vaultNamespace: input[11],
+      sourceVerificationEnabled: input[12],
+      destinationVerificationEnabled: input[13],
+    };
+    const proofIdentifier = proofPublicInputs.proofIdentifier;
+
+    if (proof.auth.anonMode === true) {
+      throw new Error(
+        `proof anonMode is not supported yet`
+      );
+    }
+
+    if (proof.auth.authType === AuthType.ANON) {
+      if (!BigNumber.from(proofPublicInputs.vaultIdentifier).eq(proof.auth.userId)) {
+        throw new Error(
+          `on proofId "${proofIdentifier}" proof input vaultId must be equal to userId ${proof.auth.userId}`
+        );
+      }
+    } else {
+      if (!BigNumber.from(proofPublicInputs.destinationIdentifier).eq(proof.auth.userId)) {
+        throw new Error(
+          `on proofId "${proofIdentifier}" proof input destination must be equal to userId ${proof.auth.userId}`
+        );
+      }
+      if (
+        !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("1")
+      ) {
+        throw new Error(
+          `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 1`
+        );
+      }
+    }
+  }
+
+  private async _matchPublicInputWithClaim({
+    proof,
+    appId,
+    namespace,
+  }: VerifyParams) {
+    const input = decodeProofData(proof.proofData).input;
+    const proofPublicInputs: ProofPublicInputs = {
+      destinationIdentifier: input[0],
+      extraData: input[1],
+      commitmentMapperPubKeyX: input[2],
+      commitmentMapperPubKeyY: input[3],
+      registryTreeRoot: input[4],
+      requestIdentifier: input[5],
+      proofIdentifier: input[6],
+      claimValue: input[7],
+      accountsTreeValue: input[8],
+      claimType: input[9],
       vaultIdentifier: input[10],
       vaultNamespace: input[11],
       sourceVerificationEnabled: input[12],
@@ -158,35 +257,38 @@ export class HydraS2Verifier extends BaseVerifier {
     };
 
     const proofIdentifier = proofPublicInputs.proofIdentifier;
+    const claim = proof.claim;
 
-    const statementComparatorFromInput = BigNumber.from(
-      proofPublicInputs.statementComparator
+    // claimType
+    const claimTypFromInput = BigNumber.from(
+      proofPublicInputs.claimType
     ).eq("1");
-    const statementComparatorFromVerifiableStatement =
-      verifiableStatement.comparator === "EQ";
+    const claimTypeFromProof = claim.claimType === ClaimType.EQ;
     if (
-      statementComparatorFromInput !==
-      statementComparatorFromVerifiableStatement
+      claimTypFromInput !==
+      claimTypeFromProof
     ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" statement comparator "${verifiableStatement.comparator}" mismatch with proof input statementComparator "${statementComparatorFromInput}"`
+        `on proofId "${proofIdentifier}" claimType "${claim.claimType}" mismatch with proof input claimType "${claimTypFromInput}"`
       );
     }
 
+    // claimValue
     if (
-      !BigNumber.from(proofPublicInputs.statementValue).eq(
-        BigNumber.from(verifiableStatement.value)
+      !BigNumber.from(proofPublicInputs.claimValue).eq(
+        BigNumber.from(claim.value)
       )
     ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" value "${verifiableStatement.value}" mismatch with proof input statementValue "${proofPublicInputs.statementValue}"`
+        `on proofId "${proofIdentifier}" value "${claim.value}" mismatch with proof input claimValue "${proofPublicInputs.claimValue}"`
       );
     }
 
+    // requestIdentifier
     const requestIdentifier = encodeRequestIdentifier(
       appId,
-      verifiableStatement.groupId,
-      verifiableStatement.groupTimestamp,
+      claim.groupId,
+      claim.groupTimestamp,
       namespace
     );
     if (
@@ -201,6 +303,7 @@ export class HydraS2Verifier extends BaseVerifier {
       );
     }
 
+    //commitmentMapperPubKey
     const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] =
       await this.getCommitmentMapperPubKey();
     if (
@@ -226,26 +329,14 @@ export class HydraS2Verifier extends BaseVerifier {
       );
     }
 
-    if (!BigNumber.from(proofPublicInputs.destinationIdentifier).eq("0")) {
-      throw new Error(
-        `on proofId "${proofIdentifier}" proof input destination must be 0`
-      );
-    }
-
-    if (
-      !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("0")
-    ) {
-      throw new Error(
-        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 0`
-      );
-    }
-
+    // sourceVerificationEnabled
     if (!BigNumber.from(proofPublicInputs.sourceVerificationEnabled).eq("1")) {
       throw new Error(
         `on proofId "${proofIdentifier}" proof input sourceVerificationEnabled must be 1`
       );
     }
 
+    // isRootAvailable
     const isAvailable = await this.IsRootAvailable(
       proofPublicInputs.registryTreeRoot
     );
@@ -259,19 +350,21 @@ export class HydraS2Verifier extends BaseVerifier {
       );
     }
 
+    // accountsTreeValue
     const groupSnapshotId = encodeAccountsTreeValue(
-      verifiableStatement.groupId,
-      verifiableStatement.groupTimestamp
+      claim.groupId,
+      claim.groupTimestamp
     );
     if (
       !BigNumber.from(proofPublicInputs.accountsTreeValue).eq(groupSnapshotId)
     ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" groupId "${verifiableStatement.groupId}" or timestamp "${verifiableStatement.groupTimestamp}" incorrect`
+        `on proofId "${proofIdentifier}" groupId "${claim.groupId}" or timestamp "${claim.groupTimestamp}" incorrect`
       );
     }
-
-    if (proofPublicInputs.vaultNamespace !== BigNumber.from(appId).toString()) {
+    
+    // proofIdentifier
+    if (!BigNumber.from(appId).eq(proofPublicInputs.vaultNamespace)) {
       throw new Error(
         `on proofId "${proofIdentifier}" vaultNamespace "${
           proofPublicInputs.vaultNamespace
