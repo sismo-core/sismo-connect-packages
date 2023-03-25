@@ -157,7 +157,7 @@ export class ZkConnectVerifier {
       );
     }
 
-    if (proof.claim) {
+    if (proof.claim && proof.claim.claimType !== ClaimType.NONE) {
       const requestedClaimType = dataRequest.claimRequest.claimType;
       if (requestedClaimType !== proof.claim.claimType) {
         throw new Error(
@@ -165,16 +165,48 @@ export class ZkConnectVerifier {
         );
       }
       const requestedValue = dataRequest.claimRequest.value;
-      if (requestedValue !== proof.claim.value) {
-        if (dataRequest.claimRequest.claimType !== ClaimType.EQ &&  dataRequest.claimRequest.claimType !== ClaimType.USER_SELECT) {
+      if (proof.claim.claimType == ClaimType.EQ) {
+        if (proof.claim.value != requestedValue) {
           throw new Error(
-            `The proof value ${proof.claim.value} does not match the requestContent value ${requestedValue}`
+            `The proof value ${proof.claim.value} is not equal to the requestContent value ${requestedValue}`
           );
         }
       }
+
+      if (proof.claim.claimType == ClaimType.GT) {
+          if (proof.claim.value <= requestedValue) {
+            throw new Error(
+              `The proof value ${proof.claim.value} is not greater than the requestContent value ${requestedValue}`
+            );
+          }
+      }
+
+      if (proof.claim.claimType == ClaimType.GTE) {
+          if (proof.claim.value < requestedValue) {
+            throw new Error(
+              `The proof value ${proof.claim.value} is not equal or greater than the requestContent value ${requestedValue}`
+            );
+          }
+      }
+
+      if (proof.claim.claimType == ClaimType.LT) {
+          if (proof.claim.value >= requestedValue) {
+            throw new Error(
+              `The proof value ${proof.claim.value} is not lower than the requestContent value ${requestedValue}`
+            );
+          }
+      }
+
+      if (proof.claim.claimType == ClaimType.LTE) {
+          if (proof.claim.value > requestedValue) {
+            throw new Error(
+              `The proof value ${proof.claim.value} is not equal or lower than the requestContent value ${requestedValue}`
+            );
+          }
+      }
     }
 
-    if (proof.auth) {
+    if (proof.auth && proof.auth.authType !== AuthType.NONE) {
       const requestedUserId = dataRequest.authRequest.userId;
       if (requestedUserId !== "0") {
         if (proof.auth.userId !== requestedUserId) {

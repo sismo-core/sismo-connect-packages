@@ -164,11 +164,11 @@ describe("ZkConnect", () => {
       it("should throw with an invalid value", async () => {
         const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
         invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
-        invalidZkConnectResponse.proofs[0].claim.value = 2;
+        invalidZkConnectResponse.proofs[0].claim.value = -1;
         await expect(
           zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
         ).rejects.toThrow(
-          `The proof value ${invalidZkConnectResponse.proofs[0].claim.value} does not match the requestContent value ${zkConnectResponse.proofs[0].claim?.value}`
+          `The proof value ${invalidZkConnectResponse.proofs[0].claim.value} is not equal or greater than the requestContent value ${zkConnectResponse.proofs[0].claim?.value}`
         );
       });
 
