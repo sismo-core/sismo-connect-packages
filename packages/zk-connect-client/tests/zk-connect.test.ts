@@ -30,7 +30,7 @@ describe("ZkConnect", () => {
       zkConnect.getRequestLink({
         requestContent
       })
-    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[]}`)
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[]}`)
   });
 
   it("should generate a request link with a namespace", async () => {
@@ -39,7 +39,7 @@ describe("ZkConnect", () => {
         requestContent,
         namespace: "my-namespace"
       })
-    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[]}&namespace=my-namespace`)
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[]}&namespace=my-namespace`)
   });
 
   it("should generate a request link with 3 dataRequests", async () => {
@@ -65,7 +65,7 @@ describe("ZkConnect", () => {
       zkConnect.getRequestLink({
         requestContent: requestContentWithOperators 
       })
-    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x2\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x3\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[\"AND\",\"AND\"]}`)
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x2\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x3\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[\"AND\",\"AND\"]}`)
   });
 
   it("should generate a request link with 3 dataRequests with OR operator", async () => {
@@ -92,7 +92,7 @@ describe("ZkConnect", () => {
       zkConnect.getRequestLink({
         requestContent: requestContentWithOperators 
       })
-    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x2\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x3\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[\"OR\",\"OR\"]}`)
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x2\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}},{\"claimRequest\":{\"groupId\":\"0x3\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[\"OR\",\"OR\"]}`)
   });
 
   it("should generate a request link with a callbackPath", async () => {
@@ -101,7 +101,7 @@ describe("ZkConnect", () => {
         requestContent,
         callbackPath: "/my-callback-path"
       })
-    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[]}&callbackPath=/my-callback-path`)
+    ).toEqual(`https://vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[]}&callbackPath=/my-callback-path`)
   });
 
   it("should generate a request link with dev addresses", async () => {
@@ -109,17 +109,21 @@ describe("ZkConnect", () => {
       ...config,
       devMode: {
         enabled: true,
-        devAddresses: [
-          "0x123",
-          "0x345"
-        ]
+        devGroups: [{
+          groupId: "0x1",
+          groupTimestamp: "latest",
+          data: [
+            "0x123",
+            "0x345"
+          ]
+        }]
       }
     });
     expect(
       zkConnect.getRequestLink({
         requestContent
       })
-    ).toEqual(`https://dev.vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[]}&devConfig={\"devAddresses\":{\"0x123\":1,\"0x345\":1}}`)
+    ).toEqual(`https://dev.vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[]}&devConfig={\"enabled\":true,\"devGroups\":[{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"data\":[\"0x123\",\"0x345\"]}]}`)
   });
 
   it("should generate a request link with dev addresses with value", async () => {
@@ -127,17 +131,21 @@ describe("ZkConnect", () => {
       ...config,
       devMode: {
         enabled: true,
-        devAddresses: {
-          "0x123": 3,
-          "0x345": 2
-        }
+        devGroups: [{
+          groupId: "0x1",
+          groupTimestamp: "latest",
+          data: {
+            "0x123": 3,
+            "0x345": 2
+          }
+        }]
       }
     });
     expect(
       zkConnect.getRequestLink({
         requestContent
       })
-    ).toEqual(`https://dev.vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":0,\"extraData\":\"\"}}],\"operators\":[]}&devConfig={\"devAddresses\":{\"0x123\":3,\"0x345\":2}}`)
+    ).toEqual(`https://dev.vault-beta.sismo.io/connect?version=zk-connect-v2&appId=0xf68985adfc209fafebfb1a956913e7fa&requestContent={\"dataRequests\":[{\"claimRequest\":{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"value\":1,\"claimType\":1,\"extraData\":\"\"}}],\"operators\":[]}&devConfig={\"enabled\":true,\"devGroups\":[{\"groupId\":\"0x1\",\"groupTimestamp\":\"latest\",\"data\":{\"0x123\":3,\"0x345\":2}}]}`)
   });
 });
   

@@ -1,5 +1,4 @@
-import { BigNumberish } from '@ethersproject/bignumber';
-import { ZkConnectRequestContent } from "./common-types";
+import { DevConfig, ZkConnectRequestContent } from "./common-types";
 
 export type RequestParams = {
   requestContent: ZkConnectRequestContent;
@@ -9,10 +8,7 @@ export type RequestParams = {
 
 export type ZkConnectClientConfig = {
   appId: string,
-  devMode?: {
-    enabled?: boolean, // will use the Dev Sismo Data Vault https://dev.vault-beta.sismo.io/
-    devAddresses?: string[] | Record<string, Number | BigNumberish> // Will insert this addresses in data groups 
-  },
+  devMode?: DevConfig,
   vaultAppBaseUrl?: string
   sismoApiUrl?: string
 }

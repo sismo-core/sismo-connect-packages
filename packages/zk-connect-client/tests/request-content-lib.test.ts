@@ -14,7 +14,7 @@ describe("RequestContentLib", () => {
                     groupId: "1",
                     groupTimestamp: "latest",
                     value: 1,
-                    claimType: 0,
+                    claimType: 1,
                     extraData: ''
                 }
             }],
@@ -82,7 +82,7 @@ describe("RequestContentLib", () => {
                         groupId: "1",
                         groupTimestamp: "latest",
                         value: 1,
-                        claimType: 0,
+                        claimType: 1,
                         extraData: ''
                     }
                 },
@@ -91,7 +91,7 @@ describe("RequestContentLib", () => {
                         groupId: "2",
                         groupTimestamp: "latest",
                         value: 1,
-                        claimType: 0,
+                        claimType: 1,
                         extraData: ''
                     }
                 },
@@ -100,7 +100,7 @@ describe("RequestContentLib", () => {
                         groupId: "3",
                         groupTimestamp: "latest",
                         value: 1,
-                        claimType: 0,
+                        claimType: 1,
                         extraData: ''
                     }
                 }

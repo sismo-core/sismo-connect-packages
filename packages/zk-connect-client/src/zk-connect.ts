@@ -1,8 +1,7 @@
 import { RequestParams, ZkConnectClientConfig } from "./types";
-import { ZkConnectResponse, ZK_CONNECT_VERSION } from "./common-types";
+import { DevConfig, ZkConnectResponse, ZK_CONNECT_VERSION } from "./common-types";
 import { Sdk, GroupParams } from "./sdk";
 import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL } from "./constants";
-import { BigNumberish } from "@ethersproject/bignumber";
 
 export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
   return new ZkConnectClient(config);
@@ -11,8 +10,8 @@ export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
 export class ZkConnectClient {
   private _appId: string;
   private _vaultAppBaseUrl: string;
+  private _devConfig: DevConfig;
   private _devModeEnabled: boolean;
-  private _devAddresses: Record<string, Number | BigNumberish> | null;
   private _sdk: Sdk;
 
   constructor({ appId, devMode, vaultAppBaseUrl, sismoApiUrl }: ZkConnectClientConfig) {
@@ -23,20 +22,11 @@ export class ZkConnectClient {
     if (this._devModeEnabled) {
       console.warn("zkConnect launch in DevMode! Never use this mode in production!");
     }
-    if (devMode?.devAddresses) {
+    if (devMode?.devGroups) {
       console.warn(
         `These Eligibles addresses will be used in data groups. Never use this in production!`
       );
-      if (Array.isArray(devMode.devAddresses)) {
-        this._devAddresses = devMode.devAddresses.reduce((acc, address) => {
-          acc[address] = 1;
-          return acc;
-        }, {});
-      } else if (typeof devMode.devAddresses === "object") {
-        this._devAddresses = devMode.devAddresses;
-      } else {
-        throw new Error(`devAddresses must be of type Record<string, Number | BigNumberish>`);
-      }
+      this._devConfig = devMode;
     }
     this._sdk = new Sdk(sismoApiUrl);
   }
@@ -63,11 +53,8 @@ export class ZkConnectClient {
       }
     } 
     let url = `${this._vaultAppBaseUrl}/connect?version=${ZK_CONNECT_VERSION}&appId=${this._appId}&requestContent=${JSON.stringify(requestContent)}`;
-    if (this._devAddresses) {
-      const devConfig = {
-        devAddresses: this._devAddresses
-      }
-      url += `&devConfig=${JSON.stringify(devConfig)}`;
+    if (this._devConfig) {
+      url += `&devConfig=${JSON.stringify(this._devConfig)}`;
     }
     if (callbackPath) {
       url += `&callbackPath=${callbackPath}`;

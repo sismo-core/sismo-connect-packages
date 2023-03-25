@@ -1,3 +1,19 @@
+import { BigNumberish } from "@ethersproject/bignumber";
+
+export type DevConfig = {
+  enabled?: boolean; // https://dev.vault-beta.sismo.io/
+  modalOutput?: "bytes" | "typescript" | null; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
+  // Allow to customize data for each groupId
+  devGroups?: DevGroup[];
+};
+
+export type DevGroup = {
+  groupId: string;
+  groupTimestamp: number | "latest";
+  data: DevAddresses;
+};
+
+export type DevAddresses = string[] | Record<string, Number | BigNumberish>;
 
 export const ZK_CONNECT_VERSION = `zk-connect-v2`;
 export type ZkConnectRequest = {
@@ -64,7 +80,7 @@ export type DataRequest = {
 }
 
 export type Claim = {
-  groupId: string;
+  groupId?: string;
   groupTimestamp?: number | "latest"; // default to "latest"
   value?: number; // default to 1
   claimType?: ClaimType; // default to GTE
