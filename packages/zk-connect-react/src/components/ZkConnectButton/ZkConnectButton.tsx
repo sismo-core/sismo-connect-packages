@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import './ZkConnectButton.css';
 import { Logo } from "../Logo/Logo";
 import { Loader } from "../Loader";
-import { DataRequest, ZkConnectResponse, DataRequestType, ZkConnectClientConfig, StatementRequest } from "@sismo-core/zk-connect-client";
+import { ZkConnectResponse, ZkConnectClientConfig, ZkConnectRequestContent } from "@sismo-core/zk-connect-client";
 import { useZkConnect } from "../../hooks/useZkConnect";
 
 type ButtonProps = {
   appId?: string;
-  dataRequest?: Partial<DataRequestType> & Partial<StatementRequest>;
+  requestContent: ZkConnectRequestContent;
   onResponse?: (response: ZkConnectResponse) => void;
   config?: ZkConnectClientConfig;
   callbackPath?: string;
@@ -18,7 +18,7 @@ type ButtonProps = {
 
 export const ZkConnectButton = ({
   appId,
-  dataRequest,
+  requestContent,
   onResponse,
   config,
   callbackPath,
@@ -54,7 +54,7 @@ export const ZkConnectButton = ({
       onClick={() => {
         if (verifying) return;
         zkConnect.request({
-          dataRequest: dataRequest && DataRequest(dataRequest),
+          requestContent,
           callbackPath,
           namespace
         })
