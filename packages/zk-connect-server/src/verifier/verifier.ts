@@ -52,13 +52,13 @@ export class ZkConnectVerifier {
         requestContent
       );
 
-      if (proof.auth && proof.auth.authType !== AuthType.NONE) {
+      if (proof.auth && proof.auth.authType !== AuthType.EMPTY) {
         const verifiedAuth = await this._verifyAuthProof(
           proof
         )
         verifiedAuths.push(verifiedAuth);
       }
-      if (proof.claim && proof.claim.claimType !== ClaimType.NONE) {
+      if (proof.claim && proof.claim.claimType !== ClaimType.EMPTY) {
         const verifiedAuth = await this._verifyClaimProof(
           zkConnectResponse.appId,
           zkConnectResponse.namespace,
@@ -114,8 +114,8 @@ export class ZkConnectVerifier {
     const anonMode = proof.auth?.anonMode;
     const signedMessage = proof.signedMessage;
 
-    if (!proof.claim || proof.claim.claimType === ClaimType.NONE) {
-      if (!proof.auth || proof.auth.authType === AuthType.NONE) {
+    if (!proof.claim || proof.claim.claimType === ClaimType.EMPTY) {
+      if (!proof.auth || proof.auth.authType === AuthType.EMPTY) {
         if (!proof.signedMessage) {
           throw new Error(
             `No claim, no auth and no signed message in the proof, please provide at least one`
@@ -126,12 +126,12 @@ export class ZkConnectVerifier {
 
     const dataRequest = requestContent.dataRequests.find(
       (dataRequest) => {
-        if (dataRequest.claimRequest && proof.claim.claimType !== ClaimType.NONE) {
+        if (dataRequest.claimRequest && proof.claim.claimType !== ClaimType.EMPTY) {
           if (dataRequest.claimRequest.groupId !== groupId || dataRequest.claimRequest.groupTimestamp !== groupTimestamp) {
             return false;
           }
         }
-        if (dataRequest.authRequest && proof.auth.authType !== AuthType.NONE) {
+        if (dataRequest.authRequest && proof.auth.authType !== AuthType.EMPTY) {
           if (dataRequest.authRequest.authType !== authType || dataRequest.authRequest.anonMode !== anonMode) {
             return false;
           }
@@ -157,7 +157,7 @@ export class ZkConnectVerifier {
       );
     }
 
-    if (proof.claim && proof.claim.claimType !== ClaimType.NONE) {
+    if (proof.claim && proof.claim.claimType !== ClaimType.EMPTY) {
       const requestedClaimType = dataRequest.claimRequest.claimType;
       if (requestedClaimType !== proof.claim.claimType) {
         throw new Error(
@@ -206,7 +206,7 @@ export class ZkConnectVerifier {
       }
     }
 
-    if (proof.auth && proof.auth.authType !== AuthType.NONE) {
+    if (proof.auth && proof.auth.authType !== AuthType.EMPTY) {
       const requestedUserId = dataRequest.authRequest.userId;
       if (requestedUserId !== "0") {
         if (proof.auth.userId !== requestedUserId) {

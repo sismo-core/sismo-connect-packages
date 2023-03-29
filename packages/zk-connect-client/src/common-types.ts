@@ -88,7 +88,7 @@ export type Claim = {
 }
 
 export enum ClaimType {
-  NONE,
+  EMPTY,
   GTE,
   GT,
   EQ,
@@ -98,7 +98,7 @@ export enum ClaimType {
 }
 
 export enum AuthType {
-  NONE,
+  EMPTY,
   ANON,
   GITHUB,
   TWITTER,

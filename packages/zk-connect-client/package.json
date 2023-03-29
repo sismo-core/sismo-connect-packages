@@ -39,7 +39,8 @@
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
-    "@ethersproject/bignumber": "5.7.0"
+    "@ethersproject/bignumber": "5.7.0",
+    "ethers": "^6.2.3"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",

@@ -189,8 +189,8 @@ describe("ZkConnect", () => {
     describe("verify without claim", () => {
       it("should throw with no claimRequest, no authRequest and no signedMessage", async () => {
         const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].auth = { authType: AuthType.NONE };
-        invalidZkConnectResponse.proofs[0].claim = { claimType: ClaimType.NONE };
+        invalidZkConnectResponse.proofs[0].auth = { authType: AuthType.EMPTY };
+        invalidZkConnectResponse.proofs[0].claim = { claimType: ClaimType.EMPTY };
         const invalidRequestContent = JSON.parse(JSON.stringify(requestContent)) as ZkConnectRequestContent;
         invalidRequestContent.dataRequests = [];
         await expect(
