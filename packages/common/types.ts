@@ -143,6 +143,5 @@ export type VerifiedClaim = Claim & {
 }
 
 export type VerifiedAuth = Auth & {
-  proofId: string;
   __proof: string;
 }

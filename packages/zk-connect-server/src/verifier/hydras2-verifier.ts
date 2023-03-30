@@ -152,12 +152,24 @@ export class HydraS2Verifier {
       throw new Error("Snark Proof Invalid!");
     }
 
-    const userId = proof.auth.authType === AuthType.ANON ? snarkProof.input[10] : snarkProof.input[0];
+    let userId;
+    if (proof.auth.authType === AuthType.ANON) {
+      //userId is the vaultIdentifier
+      userId = snarkProof.input[10];
+      userId = BigNumber.from(userId).toHexString();
+    } else {
+      //userId is the destination
+      userId = snarkProof.input[0];
+      userId = BigNumber.from(userId).toHexString();
+      //Remove account indicator E.g for github 0x0001 and twitter 0x0002
+      userId = userId.substring(6);
+      userId = BigNumber.from(userId).toNumber();
+      userId = userId.toString();
+    }
 
     return { 
       ...proof.auth,
-      userId,
-      proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
+      userId: userId,
       __proof: proof.proofData
     };
   }
