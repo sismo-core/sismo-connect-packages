@@ -12,14 +12,6 @@ import {
 } from './common-types'
 import { Sdk, GroupParams } from './sdk'
 import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL } from './constants'
-import {
-  dataSlice,
-  ethers,
-  hexlify,
-  keccak256,
-  toUtf8Bytes,
-  zeroPadBytes,
-} from 'ethers'
 
 export const ZkConnect = (config: ZkConnectClientConfig): ZkConnectClient => {
   return new ZkConnectClient(config)
@@ -152,60 +144,13 @@ export class ZkConnectClient {
     return this._sdk.getGroup({ id, name, timestamp })
   }
 
-  public getABIResponse = (): string | null => {
-    const zkConnectResponse = this.getResponse()
-    const AbiCoder = new ethers.AbiCoder()
-
-    const zkResponseABIEncoded = AbiCoder.encode(
-      [
-        'tuple(bytes16 appId, bytes16 namespace, bytes32 version, tuple(tuple(bytes16 groupId, bytes16 groupTimestamp, uint256 value, uint8 claimType, bytes extraData) claim, tuple(uint8 authType, bool anonMode, uint256 userId, bytes extraData) auth, bytes signedMessage, bytes32 provingScheme,bytes proofData,bytes extraData)[] proofs) zkConnectResponse',
-      ],
-      [
-        {
-          appId: zeroPadBytes(hexlify(zkConnectResponse.appId), 16),
-          namespace: dataSlice(
-            keccak256(toUtf8Bytes(zkConnectResponse.namespace ?? 'main')),
-            0,
-            16
-          ),
-          version: zeroPadBytes(toUtf8Bytes(zkConnectResponse.version), 32),
-          proofs: zkConnectResponse.proofs.map((proof) => {
-            const claimForEncoding = {
-              groupId: zeroPadBytes(hexlify(proof.claim?.groupId ?? '0x0'), 16),
-              groupTimestamp: zeroPadBytes(
-                toUtf8Bytes(
-                  proof.claim?.groupTimestamp?.toString() ?? 'latest'
-                ),
-                16
-              ),
-              value: proof.claim?.value ?? 1,
-              claimType: proof.claim?.claimType ?? ClaimType.EMPTY,
-              extraData: toUtf8Bytes(proof.claim?.extraData ?? ''),
-            } as Claim
-
-            const authForEncoding = {
-              authType: proof.auth?.authType ?? AuthType.EMPTY,
-              anonMode: proof.auth?.anonMode ?? false,
-              userId: proof.auth?.userId ?? 0,
-              extraData: toUtf8Bytes(proof.auth?.extraData ?? ''),
-            } as Auth
-
-            return {
-              claim: claimForEncoding,
-              auth: authForEncoding,
-              signedMessage: toUtf8Bytes(proof.signedMessage ?? ''),
-              provingScheme: zeroPadBytes(
-                toUtf8Bytes(proof.provingScheme ?? 'hydra-s2.1'),
-                32
-              ),
-              proofData: proof.proofData,
-              extraData: toUtf8Bytes(proof.extraData ?? ''),
-            }
-          }),
-        },
-      ]
-    )
-
-    return zkResponseABIEncoded
+  public getResponseBytes = (): string | null => {
+    if (!window)
+      throw new Error(`getResponse is not available outside of a browser`)
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('zkConnectResponse')) {
+      return url.searchParams.get('zkConnectResponse') as string
+    }
+    return null
   }
 }

@@ -10,14 +10,11 @@ import {
   ZkConnectServer,
   ZkConnectVerifiedResult,
   ZK_CONNECT_VERSION,
-} from '../src'
-import { zkConnectResponseMock } from './mocks'
-import { ethers } from 'ethers'
-import { BigNumber } from '@ethersproject/bignumber'
-import {
-  decodeProofData,
-  encodeProofData,
-} from '../src/verifier/utils/proofData'
+} from "../src";
+import { zkConnectResponseMock, zkConnectResponseMock2 } from "./mocks";
+import { ethers } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
+import { decodeProofData, encodeProofData } from "../src/verifier/utils/proofData";
 
 describe('ZkConnect', () => {
   let verifiedClaim: VerifiedClaim
@@ -55,25 +52,25 @@ describe('ZkConnect', () => {
         provider: _provider,
         verifier: {
           hydraS2: {
-            commitmentMapperRegistryAddress:
-              '0x0844662f25817B735BC9B6d9D11995F1A6c4dCB1',
-            availableRootsRegistryAddress:
-              '0xdDa4c8d2933dAA21Aac75B88fF59725725ba813F',
+            commitmentMapperPubKeys: [
+              "0x07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb9",
+              "0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa"
+            ]
           },
         },
       },
     })
 
+    const snarkProof = decodeProofData(zkConnectResponse.proofs[0].proofData);
+
     verifiedClaim = {
-      groupId,
-      groupTimestamp,
-      value,
-      claimType,
-      proofId: BigNumber.from(
-        zkConnectResponse.proofs[0].proofId
-      ).toHexString(),
-      __proof: zkConnectResponse.proofs[0].proofData,
-    }
+        groupId,
+        groupTimestamp,
+        value,
+        claimType,
+        proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
+        __proof: zkConnectResponse.proofs[0].proofData
+    };
 
     // Mocking the IsRootAvailable method to return true even if the root is no longer available
     const isRootAvailableMock = jest.spyOn(

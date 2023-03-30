@@ -1,28 +1,29 @@
 import { BigNumberish } from '@ethersproject/bignumber'
 
 export type DevConfig = {
-  enabled?: boolean // https://dev.vault-beta.sismo.io/
-  modalOutput?: 'bytes' | 'typescript' | null // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
+  enabled?: boolean; // https://dev.vault-beta.sismo.io/
+  displayRawResponse?: "bytes" | "typescript" | null; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
   // Allow to customize data for each groupId
   devGroups?: DevGroup[]
 }
 
 export type DevGroup = {
-  groupId: string
-  groupTimestamp: number | 'latest'
-  data: DevAddresses
-}
+  groupId: string;
+  groupTimestamp?: number | "latest";
+  data: DevAddresses;
+};
 
 export type DevAddresses = string[] | Record<string, Number | BigNumberish>
 
 export const ZK_CONNECT_VERSION = `zk-connect-v2`
 export type ZkConnectRequest = {
-  appId: string
-  namespace?: string
-  requestContent?: ZkConnectRequestContent // updated
-  callbackPath?: string
-  version: string
-}
+  appId: string;
+  namespace?: string;
+  requestContent?: ZkConnectRequestContent; // updated
+  devConfig?: DevConfig;
+  callbackPath?: string;
+  version: string;
+};
 export type ZkConnectRequestContent = {
   dataRequests: DataRequest[]
   operators: LogicalOperator[]
@@ -136,14 +137,13 @@ export type ZkConnectResponse = Pick<
 }
 
 export type ZkConnectProof = {
-  auth?: Auth
-  claim?: Claim
-  signedMessage?: string | any
-  provingScheme: string
-  proofData: string
-  proofId: string
-  extraData: any
-}
+  auth?: Auth;
+  claim?: Claim;
+  signedMessage?: string | any;
+  provingScheme: string;
+  proofData: string;
+  extraData: any;
+};
 
 export type ZkConnectVerifiedResult = ZkConnectResponse & {
   signedMessages: string[]

@@ -3,6 +3,7 @@ import { HydraS2Verifier as HydraS2VerifierPS } from "@sismo-core/hydra-s2";
 import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
   GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+  GOERLI_COMMITMENT_MAPPER_REGISTRY_ADDRESS
 } from "../constants";
 import {
   AvailableRootsRegistryContract,
@@ -52,6 +53,7 @@ export type HydraS2VerifierOpts = {
   commitmentMapperRegistryAddress?: string;
   availableRootsRegistryAddress?: string;
   isDevMode?: boolean;
+  commitmentMapperPubKeys?: [string, string];
 };
 
 export class HydraS2Verifier {
@@ -60,14 +62,17 @@ export class HydraS2Verifier {
   private _isDevMode: boolean;
 
   constructor(provider: Provider, opts?: HydraS2VerifierOpts) {
-    this._commitmentMapperRegistry = opts?.isDevMode ? 
-    new CommitmentMapperRegistryContractDev() : 
-    new CommitmentMapperRegistryContractProd({
-      address:
-        opts?.commitmentMapperRegistryAddress ||
-        GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
-      provider,
-    });
+    if (opts?.commitmentMapperPubKeys) {
+      this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(opts.commitmentMapperPubKeys[0], opts.commitmentMapperPubKeys[1])
+    } else {
+      new CommitmentMapperRegistryContractProd({
+        address:
+          opts?.commitmentMapperRegistryAddress ||
+          opts?.isDevMode ? GOERLI_COMMITMENT_MAPPER_REGISTRY_ADDRESS : GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+        provider,
+      });
+    }
+
     this._availableRootsRegistry = new AvailableRootsRegistryContract({
       address:
         opts?.availableRootsRegistryAddress ||
@@ -143,8 +148,11 @@ export class HydraS2Verifier {
       throw new Error("Snark Proof Invalid!");
     }
 
+    const userId = proof.auth.authType === AuthType.ANON ? snarkProof.input[10] : snarkProof.input[0];
+
     return { 
       ...proof.auth,
+      userId,
       proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
       __proof: proof.proofData
     };
@@ -172,11 +180,12 @@ export class HydraS2Verifier {
     };
     const proofIdentifier = proofPublicInputs.proofIdentifier;
 
-    if (proofPublicInputs.extraData != ethers.utils.keccak256(proof.signedMessage)) {
+    const signedMessage = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(proof.signedMessage));
+    if (!BigNumber.from(proofPublicInputs.extraData).eq(signedMessage)) {
       throw new Error(
         `on proofId "${proofIdentifier}" extraData "${
-          proofPublicInputs.extraData
-        }" mismatch with signedMessage "${BigNumber.from(proof.signedMessage).toString()}"`
+          BigNumber.from(proofPublicInputs.extraData).toHexString()
+        }" mismatch with signedMessage "${signedMessage}"`
       );
     }
   }
@@ -211,25 +220,13 @@ export class HydraS2Verifier {
       );
     }
 
-    if (proof.auth.authType === AuthType.ANON) {
-      if (!BigNumber.from(proofPublicInputs.vaultIdentifier).eq(proof.auth.userId)) {
-        throw new Error(
-          `on proofId "${proofIdentifier}" proof input vaultId must be equal to userId ${proof.auth.userId}`
-        );
-      }
-    } else {
-      if (!BigNumber.from(proofPublicInputs.destinationIdentifier).eq(proof.auth.userId)) {
-        throw new Error(
-          `on proofId "${proofIdentifier}" proof input destination must be equal to userId ${proof.auth.userId}`
-        );
-      }
-      if (
-        !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("1")
-      ) {
-        throw new Error(
-          `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 1`
-        );
-      }
+    if (
+      proof.auth.authType !== AuthType.ANON &&
+      !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("1")
+    ) {
+      throw new Error(
+        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 1`
+      );
     }
   }
 

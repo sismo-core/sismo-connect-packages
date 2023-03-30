@@ -2,14 +2,14 @@ import { BigNumberish } from "@ethersproject/bignumber";
 
 export type DevConfig = {
   enabled?: boolean; // https://dev.vault-beta.sismo.io/
-  modalOutput: "bytes" | "typescript" | null; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
+  displayRawResponse?: "bytes" | "typescript" | null; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
   // Allow to customize data for each groupId
   devGroups?: DevGroup[];
 };
 
 export type DevGroup = {
   groupId: string;
-  groupTimestamp: number | "latest";
+  groupTimestamp?: number | "latest";
   data: DevAddresses;
 };
 
@@ -20,6 +20,7 @@ export type ZkConnectRequest = {
   appId: string;
   namespace?: string;
   requestContent?: ZkConnectRequestContent; // updated
+  devConfig?: DevConfig;
   callbackPath?: string;
   version: string;
 };
@@ -127,7 +128,6 @@ export type ZkConnectProof = {
   signedMessage?: string | any;
   provingScheme: string;
   proofData: string;
-  proofId: string;
   extraData: any;
 };
 

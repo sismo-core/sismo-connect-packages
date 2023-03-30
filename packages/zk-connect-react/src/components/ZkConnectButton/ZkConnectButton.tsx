@@ -2,12 +2,14 @@ import React, { useEffect } from "react";
 import './ZkConnectButton.css';
 import { Logo } from "../Logo/Logo";
 import { Loader } from "../Loader";
-import { ZkConnectResponse, ZkConnectClientConfig, ZkConnectRequestContent } from "@sismo-core/zk-connect-client";
+import { ZkConnectResponse, ZkConnectClientConfig, Claim, Auth } from "@sismo-core/zk-connect-client";
 import { useZkConnect } from "../../hooks/useZkConnect";
 
 type ButtonProps = {
   appId?: string;
-  requestContent: ZkConnectRequestContent;
+  claimRequest?: Claim;
+  authRequest?: Auth;
+  messageSignatureRequest?: string;
   onResponse?: (response: ZkConnectResponse) => void;
   config?: ZkConnectClientConfig;
   callbackPath?: string;
@@ -18,7 +20,9 @@ type ButtonProps = {
 
 export const ZkConnectButton = ({
   appId,
-  requestContent,
+  claimRequest,
+  authRequest,
+  messageSignatureRequest,
   onResponse,
   config,
   callbackPath,
@@ -31,6 +35,9 @@ export const ZkConnectButton = ({
   }
   if (appId && config && appId !== config.appId) {
     throw new Error("the 'appId' props of your ZkConnectButton is different from the 'appId' in your configuration. Please add the same 'appId' props as in your configuration or remove the 'appId' prop")
+  }
+  if (!claimRequest && !authRequest && !messageSignatureRequest) {
+    throw new Error("Please specify at least one claimRequest or authRequest or messageSignatureRequest");
   }
 
   const { zkConnect, response } = useZkConnect({ 
@@ -54,7 +61,9 @@ export const ZkConnectButton = ({
       onClick={() => {
         if (verifying) return;
         zkConnect.request({
-          requestContent,
+          claimRequest,
+          authRequest,
+          messageSignatureRequest,
           callbackPath,
           namespace
         })

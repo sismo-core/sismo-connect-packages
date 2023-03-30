@@ -17,9 +17,9 @@ export class ZkConnectServer {
   private _devModeEnabled: boolean
 
   constructor({ appId, devMode, options }: ZkConnectServerConfig) {
-    this._appId = appId
-
-    this._devModeEnabled = devMode?.enabled ?? false
+    this._appId = appId;
+    
+    this._devModeEnabled = devMode?.enabled ?? false;
     if (this._devModeEnabled) {
       console.warn(
         'zkConnect launch in DevMode! Never use this mode in production!'

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 export type ZkConnectHook = {
     response: ZkConnectResponse | null,
+    responseBytes: string,
     zkConnect: ZkConnectClient
 };
 
@@ -12,6 +13,7 @@ export type ZkConnectProps = {
 
 export const useZkConnect = ({ config }: ZkConnectProps): ZkConnectHook => {
     const [response, setResponse] = useState(null);
+    const [responseBytes, setResponseBytes] = useState(null);
     
     const zkConnect = useMemo(() => {
         return ZkConnect(config)
@@ -19,11 +21,14 @@ export const useZkConnect = ({ config }: ZkConnectProps): ZkConnectHook => {
 
     useEffect(() => {
         const zkConnectResponse = zkConnect.getResponse();
+        const zkConnectResponseBytes = zkConnect.getResponseBytes();
         if (zkConnectResponse) setResponse(zkConnectResponse);
+        if (zkConnectResponseBytes) setResponseBytes(zkConnectResponseBytes);
     }, []);
 
     return {
         response,
+        responseBytes,
         zkConnect
     };
 };

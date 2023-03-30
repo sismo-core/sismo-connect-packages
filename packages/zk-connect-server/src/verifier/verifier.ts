@@ -156,23 +156,17 @@ export class ZkConnectVerifier {
           return false
         }
       }
-      if (dataRequest.messageSignatureRequest) {
-        if (dataRequest.messageSignatureRequest !== signedMessage) {
-          return false
-        }
-      }
       return true
     })
 
     if (!dataRequest) {
       throw new Error(
-        `No dataRequest found for claimRequest groupId ${groupId} and groupTimestamp ${groupTimestamp} 
-        ${
-          signedMessage &&
-          `, authRequest authType ${authType} and anonMode ${anonMode}`
-        }
-        ${signedMessage && `, signedMessage ${signedMessage}`}`
-      )
+        `No dataRequest found for claimRequest groupId ${groupId} and groupTimestamp ${groupTimestamp} ${
+          signedMessage && `, authRequest authType ${authType} and anonMode ${anonMode}`
+        } ${
+          signedMessage && `, signedMessage ${signedMessage}`
+        }`
+      );
     }
 
     if (proof.claim && proof.claim.claimType !== ClaimType.EMPTY) {
