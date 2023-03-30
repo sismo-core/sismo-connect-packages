@@ -97,10 +97,10 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@sismo-core/zk-connect-client@0.0.2-beta.7":
-  version "0.0.2-beta.7"
-  resolved "https://registry.yarnpkg.com/@sismo-core/zk-connect-client/-/zk-connect-client-0.0.2-beta.7.tgz#630b5ac9f119d82bcd190923ddcf35b49455f2b9"
-  integrity sha512-vRXGy85v1xU0rQVVlcAKnZyS711g58bpwC4RKsGng8GkFeQ1dfH3gQZ65gkb4Odhesz5mG2i8D8v2hIs4jKlng==
+"@sismo-core/zk-connect-client@0.0.2-beta.8":
+  version "0.0.2-beta.8"
+  resolved "https://registry.yarnpkg.com/@sismo-core/zk-connect-client/-/zk-connect-client-0.0.2-beta.8.tgz#3436f4f4cc29890387b2875f7d7458e9bb2ba105"
+  integrity sha512-WqpG+1MTWuN/s6opTa1NQVOVsaehJP41QTlLh2O6b4GSmU8tEcjsOQpHy5tyLpl1/OV3/j53MUvoIN+sSTz+qw==
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
 

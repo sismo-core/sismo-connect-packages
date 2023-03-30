@@ -161,10 +161,12 @@ export class HydraS2Verifier {
       //userId is the destination
       userId = snarkProof.input[0];
       userId = BigNumber.from(userId).toHexString();
-      //Remove account indicator E.g for github 0x0001 and twitter 0x0002
-      userId = userId.substring(6);
-      userId = BigNumber.from(userId).toNumber();
-      userId = userId.toString();
+      if (proof.auth.authType !== AuthType.EVM_ACCOUNT) {
+        //Remove account indicator E.g for github 0x0001 and twitter 0x0002
+        userId = userId.substring(6);
+        userId = BigNumber.from(userId).toNumber();
+        userId = userId.toString();
+      }
     }
 
     return { 

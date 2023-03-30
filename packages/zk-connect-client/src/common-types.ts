@@ -2,7 +2,7 @@ import { BigNumberish } from '@ethersproject/bignumber'
 
 export type DevConfig = {
   enabled?: boolean; // https://dev.vault-beta.sismo.io/
-  displayRawResponse?: "bytes" | "typescript" | null; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
+  displayRawResponse?: boolean; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
   // Allow to customize data for each groupId
   devGroups?: DevGroup[]
 }

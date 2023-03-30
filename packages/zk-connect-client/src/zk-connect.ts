@@ -44,8 +44,8 @@ export class ZkConnectClient {
       console.warn(
         `These Eligibles addresses will be used in data groups. Never use this in production!`
       )
-      this._devConfig = devMode
     }
+    this._devConfig = devMode;
     this._sdk = new Sdk(sismoApiUrl)
   }
 
