@@ -5,6 +5,8 @@ import {
   Claim,
   ClaimType,
   DevConfig,
+  RequestContentLib,
+  ZkConnectRequestContent,
   ZkConnectResponse,
   ZK_CONNECT_VERSION,
 } from './common-types'
@@ -56,21 +58,43 @@ export class ZkConnectClient {
   }
 
   public request = ({
-    requestContent,
+    claimRequest,
+    authRequest,
+    messageSignatureRequest,
     namespace,
     callbackPath,
   }: RequestParams) => {
     if (!window)
       throw new Error(`requestProof is not available outside of a browser`)
-    const url = this.getRequestLink({ requestContent, namespace, callbackPath })
+    const url = this.getRequestLink({
+      claimRequest,
+      authRequest,
+      messageSignatureRequest,
+      namespace,
+      callbackPath,
+    })
     window.location.href = encodeURI(url)
   }
 
   public getRequestLink = ({
-    requestContent,
+    claimRequest,
+    authRequest,
+    messageSignatureRequest,
     namespace,
     callbackPath,
   }: RequestParams): string => {
+    if (!claimRequest && !authRequest && !messageSignatureRequest) {
+      throw new Error(
+        `requestContent or claimRequest or authRequest or messageSignatureRequest is required`
+      )
+    }
+
+    const requestContent: ZkConnectRequestContent = RequestContentLib.build({
+      claimRequest,
+      authRequest,
+      messageSignatureRequest,
+    })
+
     if (requestContent.operators && requestContent.operators.length > 0) {
       if (
         requestContent.operators.length >
