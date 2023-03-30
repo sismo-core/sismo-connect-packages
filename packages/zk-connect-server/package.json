@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/zk-connect-server",
-  "version": "0.0.2-beta.7",
+  "version": "0.0.2-beta.13",
   "description": "zkConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",

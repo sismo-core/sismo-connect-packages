@@ -26,13 +26,14 @@ export class ZkConnectServer {
       )
     }
 
-    //By default use public gnosis provider
+    //By default use public gnosis provider 
     const verifierProvider =
       options?.provider ??
-      new ethers.providers.JsonRpcProvider({
-        url: 'https://rpc.gnosis.gateway.fm',
-        skipFetchSetup: true,
-      })
+        new ethers.providers.JsonRpcProvider({
+          url: 'https://rpc.gnosis.gateway.fm',
+          skipFetchSetup: true,
+        });
+
     this._verifier = new ZkConnectVerifier(verifierProvider, {
       ...(options?.verifier ?? {}),
       isDevMode: this._devModeEnabled,

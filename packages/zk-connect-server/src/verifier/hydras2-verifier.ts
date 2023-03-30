@@ -65,12 +65,15 @@ export class HydraS2Verifier {
     if (opts?.commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(opts.commitmentMapperPubKeys[0], opts.commitmentMapperPubKeys[1])
     } else {
-      this._commitmentMapperRegistry = new CommitmentMapperRegistryContractProd({
-        address:
-          opts?.commitmentMapperRegistryAddress ||
-          opts?.isDevMode ? GOERLI_COMMITMENT_MAPPER_REGISTRY_ADDRESS : GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
-        provider,
-      });
+      if (opts?.isDevMode) {
+        this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev("0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256", "0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74")
+      } else {
+        const address = opts?.commitmentMapperRegistryAddress ?? GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS;
+        this._commitmentMapperRegistry = new CommitmentMapperRegistryContractProd({
+          address: address,
+          provider,
+        });
+      }
     }
 
     this._availableRootsRegistry = new AvailableRootsRegistryContract({
@@ -79,6 +82,7 @@ export class HydraS2Verifier {
         GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
       provider,
     });
+
     this._isDevMode = opts?.isDevMode;
   }
 

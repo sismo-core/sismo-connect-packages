@@ -34,7 +34,7 @@ export class ZkConnectVerifier {
   constructor(provider: Provider, opts?: VerifierOpts) {
     this.hydraS2Verifier = new HydraS2Verifier(provider, {
       ...opts?.hydraS2,
-      isDevMode: opts.isDevMode,
+      isDevMode: opts?.isDevMode,
     })
   }
 
