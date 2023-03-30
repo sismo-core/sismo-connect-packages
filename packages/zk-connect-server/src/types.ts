@@ -1,21 +1,23 @@
-import { VerifierOpts } from "./verifier";
-import { ZkConnectRequestContent } from "./common-types";
-import { Provider } from "@ethersproject/abstract-provider";
+import { VerifierOpts } from './verifier'
+import { Auth, Claim, ZkConnectRequestContent } from './common-types'
+import { Provider } from '@ethersproject/abstract-provider'
 
 export type VerifyParamsZkConnect = {
-  requestContent?: ZkConnectRequestContent;
-  namespace?: string;
-};
+  claimRequest?: Claim
+  authRequest?: Auth
+  messageSignatureRequest?: any
+  namespace?: string
+}
 
 //////////////////
 
 export type ZkConnectServerConfig = {
-  appId: string,
+  appId: string
   devMode?: {
     enabled?: boolean
-  },
-  options?: {
-    provider?: Provider;
-    verifier?: VerifierOpts;
   }
-};
+  options?: {
+    provider?: Provider
+    verifier?: VerifierOpts
+  }
+}

@@ -1,6 +1,6 @@
 import {
-    AuthType,
-    Claim,
+  AuthType,
+  Claim,
   ClaimType,
   RequestContentLib,
   VerifiedClaim,
@@ -10,196 +10,256 @@ import {
   ZkConnectServer,
   ZkConnectVerifiedResult,
   ZK_CONNECT_VERSION,
-} from "../src";
-import { zkConnectResponseMock } from "./mocks";
-import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
-import { decodeProofData, encodeProofData } from "../src/verifier/utils/proofData";
+} from '../src'
+import { zkConnectResponseMock } from './mocks'
+import { ethers } from 'ethers'
+import { BigNumber } from '@ethersproject/bignumber'
+import {
+  decodeProofData,
+  encodeProofData,
+} from '../src/verifier/utils/proofData'
 
-describe("ZkConnect", () => {
-  let verifiedClaim: VerifiedClaim;
-  let zkConnect: ZkConnectServer;
-  let zkConnectResponse: ZkConnectResponse;
-  let appId: string;
-  let groupId: string;
-  let namespace: string;
-  let requestContent: ZkConnectRequestContent;
-  let groupTimestamp: number | "latest";
-  let value: number;
-  let claimType: ClaimType;
+describe('ZkConnect', () => {
+  let verifiedClaim: VerifiedClaim
+  let zkConnect: ZkConnectServer
+  let zkConnectResponse: ZkConnectResponse
+  let appId: string
+  let groupId: string
+  let namespace: string
+  let claimRequest: Claim
+  let groupTimestamp: number | 'latest'
+  let value: number
+  let claimType: ClaimType
 
   beforeAll(() => {
-    appId = "0xf68985adfc209fafebfb1a956913e7fa";
-    groupId = "0x682544d549b8a461d7fe3e589846bb7b"
-    namespace = "main";
-    zkConnectResponse = zkConnectResponseMock;
-    groupTimestamp = "latest";
-    value = 1;
-    claimType = ClaimType.GTE;
+    appId = '0xf68985adfc209fafebfb1a956913e7fa'
+    groupId = '0x682544d549b8a461d7fe3e589846bb7b'
+    namespace = 'main'
+    zkConnectResponse = zkConnectResponseMock
+    groupTimestamp = 'latest'
+    value = 1
+    claimType = ClaimType.GTE
 
-    const _provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth_goerli", 5);
+    const _provider = new ethers.providers.JsonRpcProvider(
+      'https://rpc.ankr.com/eth_goerli',
+      5
+    )
 
-    requestContent = RequestContentLib.build({
-        dataRequests: [{
-            claimRequest: {
-                groupId
-            }
-        }]
-    })
+    claimRequest = {
+      groupId,
+    }
+
     zkConnect = ZkConnect({
       appId,
       options: {
         provider: _provider,
         verifier: {
           hydraS2: {
-            commitmentMapperRegistryAddress: "0x0844662f25817B735BC9B6d9D11995F1A6c4dCB1",
-            availableRootsRegistryAddress: "0xdDa4c8d2933dAA21Aac75B88fF59725725ba813F",
+            commitmentMapperRegistryAddress:
+              '0x0844662f25817B735BC9B6d9D11995F1A6c4dCB1',
+            availableRootsRegistryAddress:
+              '0xdDa4c8d2933dAA21Aac75B88fF59725725ba813F',
           },
         },
       },
-    });
+    })
 
     verifiedClaim = {
-        groupId,
-        groupTimestamp,
-        value,
-        claimType,
-        proofId: BigNumber.from(zkConnectResponse.proofs[0].proofId).toHexString(),
-        __proof: zkConnectResponse.proofs[0].proofData
-    };
+      groupId,
+      groupTimestamp,
+      value,
+      claimType,
+      proofId: BigNumber.from(
+        zkConnectResponse.proofs[0].proofId
+      ).toHexString(),
+      __proof: zkConnectResponse.proofs[0].proofData,
+    }
 
     // Mocking the IsRootAvailable method to return true even if the root is no longer available
     const isRootAvailableMock = jest.spyOn(
-      zkConnect["_verifier"]["hydraS2Verifier"] as any,
-      "IsRootAvailable"
-    );
+      zkConnect['_verifier']['hydraS2Verifier'] as any,
+      'IsRootAvailable'
+    )
     isRootAvailableMock.mockImplementation(async () => {
-      return true;
-    });
-  });
+      return true
+    })
+  })
 
-  describe("zkConnect server", () => {
-    describe("verify with statements", () => {
-      it("should throw with an invalid zkConnectResponse", async () => {
-        const invalidZkConnectResponse = null;
+  describe('zkConnect server', () => {
+    describe('verify with statements', () => {
+      it('should throw with an invalid zkConnectResponse', async () => {
+        const invalidZkConnectResponse = null
         await expect(
-          zkConnect.verify(invalidZkConnectResponse as any, { requestContent, namespace })
-        ).rejects.toThrow(
-          `zkConnectResponse provided is undefined`
-        );
-      });
-
-      it("should throw with an invalid zkConnectResponse", async () => {
-        const invalidZkConnectResponse = {};
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse as any, { requestContent, namespace })
-        ).rejects.toThrow(
-          `no version provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
-        );
-      });
-
-      it("should throw with an invalid version", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.version = "invalid-version";
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `version of the zkConnectResponse "${invalidZkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`
-        );
-      });
-
-      it("should throw with an invalid appId", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.appId = "0x123";
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `zkConnectResponse appId "${invalidZkConnectResponse.appId}" does not match with server appId "${appId}"`
-        );
-      });
-
-      it("should throw with an invalid namespace", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.namespace = "main2";
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `zkConnectResponse namespace "${invalidZkConnectResponse.namespace}" does not match with server namespace "${namespace}"`
-        );
-      });
-
-      it("should throw with an invalid groupId", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim
-        invalidZkConnectResponse.proofs[0].claim.groupId = "0x123";
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
-        );
-      });
-
-      it("should throw with an invalid groupTimestamp", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
-        invalidZkConnectResponse.proofs[0].claim.groupTimestamp = 123456;
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
-        );
-      });
-
-      it("should throw with an invalid comparator", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
-        invalidZkConnectResponse.proofs[0].claim.claimType = ClaimType.LT;
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `The proof claimType ${invalidZkConnectResponse.proofs[0].claim.claimType} does not match the requestContent claimType ${zkConnectResponse.proofs[0].claim?.claimType}`
-        );
-      });
-
-      it("should throw with an invalid value", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse.proofs[0].claim as Claim;
-        invalidZkConnectResponse.proofs[0].claim.value = -1;
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, { requestContent, namespace })
-        ).rejects.toThrow(
-          `The proof value ${invalidZkConnectResponse.proofs[0].claim.value} is not equal or greater than the requestContent value ${zkConnectResponse.proofs[0].claim?.value}`
-        );
-      });
-
-      it("Should verify", async () => {
-        const zkConnectVerifiedResult = await zkConnect.verify(zkConnectResponse, {
-          requestContent,
-          namespace: "main",
-        });
-        expect(zkConnectVerifiedResult).toEqual({
-            ...zkConnectResponse,
-            verifiedClaims: [verifiedClaim],
-            signedMessages: [],
-            verifiedAuths: []
-        } as ZkConnectVerifiedResult);
-      });
-    });
-
-    describe("verify without claim", () => {
-      it("should throw with no claimRequest, no authRequest and no signedMessage", async () => {
-        const invalidZkConnectResponse = JSON.parse(JSON.stringify(zkConnectResponse)) as ZkConnectResponse;
-        invalidZkConnectResponse.proofs[0].auth = { authType: AuthType.EMPTY };
-        invalidZkConnectResponse.proofs[0].claim = { claimType: ClaimType.EMPTY };
-        const invalidRequestContent = JSON.parse(JSON.stringify(requestContent)) as ZkConnectRequestContent;
-        invalidRequestContent.dataRequests = [];
-        await expect(
-          zkConnect.verify(invalidZkConnectResponse, {
-            requestContent: invalidRequestContent,
+          zkConnect.verify(invalidZkConnectResponse as any, {
+            claimRequest,
             namespace,
           })
-        ).rejects.toThrow( `No claim, no auth and no signed message in the proof, please provide at least one`);
-      });
-    });
-  });
-});
+        ).rejects.toThrow(`zkConnectResponse provided is undefined`)
+      })
+
+      it('should throw with an invalid zkConnectResponse', async () => {
+        const invalidZkConnectResponse = {}
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse as any, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `no version provided in your zkConnectResponse, please use the zkConnectResponse that was returned by the Sismo vault app`
+        )
+      })
+
+      it('should throw with an invalid version', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.version = 'invalid-version'
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `version of the zkConnectResponse "${invalidZkConnectResponse.version}" not compatible with this version "${ZK_CONNECT_VERSION}"`
+        )
+      })
+
+      it('should throw with an invalid appId', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.appId = '0x123'
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `zkConnectResponse appId "${invalidZkConnectResponse.appId}" does not match with server appId "${appId}"`
+        )
+      })
+
+      it('should throw with an invalid namespace', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.namespace = 'main2'
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `zkConnectResponse namespace "${invalidZkConnectResponse.namespace}" does not match with server namespace "${namespace}"`
+        )
+      })
+
+      it('should throw with an invalid groupId', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse
+          .proofs[0].claim as Claim
+        invalidZkConnectResponse.proofs[0].claim.groupId = '0x123'
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
+        )
+      })
+
+      it('should throw with an invalid groupTimestamp', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse
+          .proofs[0].claim as Claim
+        invalidZkConnectResponse.proofs[0].claim.groupTimestamp = 123456
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `No dataRequest found for claimRequest groupId ${invalidZkConnectResponse.proofs[0].claim.groupId} and groupTimestamp ${invalidZkConnectResponse.proofs[0].claim.groupTimestamp}`
+        )
+      })
+
+      it('should throw with an invalid comparator', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse
+          .proofs[0].claim as Claim
+        invalidZkConnectResponse.proofs[0].claim.claimType = ClaimType.LT
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `The proof claimType ${invalidZkConnectResponse.proofs[0].claim.claimType} does not match the requestContent claimType ${zkConnectResponse.proofs[0].claim?.claimType}`
+        )
+      })
+
+      it('should throw with an invalid value', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.proofs[0].claim = invalidZkConnectResponse
+          .proofs[0].claim as Claim
+        invalidZkConnectResponse.proofs[0].claim.value = -1
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `The proof value ${invalidZkConnectResponse.proofs[0].claim.value} is not equal or greater than the requestContent value ${zkConnectResponse.proofs[0].claim?.value}`
+        )
+      })
+
+      it('Should verify', async () => {
+        const zkConnectVerifiedResult = await zkConnect.verify(
+          zkConnectResponse,
+          {
+            claimRequest,
+            namespace: 'main',
+          }
+        )
+        expect(zkConnectVerifiedResult).toEqual({
+          ...zkConnectResponse,
+          verifiedClaims: [verifiedClaim],
+          signedMessages: [],
+          verifiedAuths: [],
+        } as ZkConnectVerifiedResult)
+      })
+    })
+
+    describe('verify without claim', () => {
+      it('should throw with no claimRequest, no authRequest and no signedMessage', async () => {
+        const invalidZkConnectResponse = JSON.parse(
+          JSON.stringify(zkConnectResponse)
+        ) as ZkConnectResponse
+        invalidZkConnectResponse.proofs[0].auth = { authType: AuthType.EMPTY }
+        invalidZkConnectResponse.proofs[0].claim = {
+          claimType: ClaimType.EMPTY,
+        }
+        const invalidRequestContent = JSON.parse(
+          JSON.stringify(claimRequest)
+        ) as Claim
+        await expect(
+          zkConnect.verify(invalidZkConnectResponse, {
+            claimRequest: invalidRequestContent,
+            namespace,
+          })
+        ).rejects.toThrow(
+          `No claim, no auth and no signed message in the proof, please provide at least one`
+        )
+      })
+    })
+  })
+})
