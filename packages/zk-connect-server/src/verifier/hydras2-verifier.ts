@@ -65,7 +65,7 @@ export class HydraS2Verifier {
     if (opts?.commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(opts.commitmentMapperPubKeys[0], opts.commitmentMapperPubKeys[1])
     } else {
-      new CommitmentMapperRegistryContractProd({
+      this._commitmentMapperRegistry = new CommitmentMapperRegistryContractProd({
         address:
           opts?.commitmentMapperRegistryAddress ||
           opts?.isDevMode ? GOERLI_COMMITMENT_MAPPER_REGISTRY_ADDRESS : GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
