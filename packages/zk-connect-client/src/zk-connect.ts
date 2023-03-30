@@ -148,8 +148,8 @@ export class ZkConnectClient {
     if (!window)
       throw new Error(`getResponse is not available outside of a browser`)
     const url = new URL(window.location.href)
-    if (url.searchParams.has('zkConnectResponse')) {
-      return url.searchParams.get('zkConnectResponse') as string
+    if (url.searchParams.has('zkConnectResponseBytes')) {
+      return url.searchParams.get('zkConnectResponseBytes') as string
     }
     return null
   }
