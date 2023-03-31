@@ -5,3 +5,5 @@ deployments
 package-lock.json
 lib
 build
+cache
+out
