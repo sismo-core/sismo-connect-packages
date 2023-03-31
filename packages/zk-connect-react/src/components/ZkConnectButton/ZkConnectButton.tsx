@@ -11,6 +11,7 @@ type ButtonProps = {
   authRequest?: Auth;
   messageSignatureRequest?: string;
   onResponse?: (response: ZkConnectResponse) => void;
+  onResponseBytes?: (responseBytes: string) => void;
   config?: ZkConnectClientConfig;
   callbackPath?: string;
   namespace?: string;
@@ -24,6 +25,7 @@ export const ZkConnectButton = ({
   authRequest,
   messageSignatureRequest,
   onResponse,
+  onResponseBytes,
   config,
   callbackPath,
   namespace,
@@ -40,7 +42,7 @@ export const ZkConnectButton = ({
     throw new Error("Please specify at least one claimRequest or authRequest or messageSignatureRequest");
   }
 
-  const { zkConnect, response } = useZkConnect({ 
+  const { zkConnect, response, responseBytes } = useZkConnect({ 
     config: config || {
       appId
     }
@@ -51,6 +53,11 @@ export const ZkConnectButton = ({
     onResponse(response);
   }, [response]);
 
+  useEffect(() => {
+    if (!responseBytes || !onResponseBytes) return;
+    onResponseBytes(responseBytes);
+  }, [responseBytes]);
+  
   return (
     <button
       className="zkConnectButton"
