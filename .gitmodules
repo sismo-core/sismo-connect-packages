@@ -1,6 +1,7 @@
+[submodule "lib/zk-connect-onchain-verifier"]
+	branch = main
+	path = lib/zk-connect-onchain-verifier
+	url = https://github.com/sismo-core/zk-connect-onchain-verifier
 [submodule "packages/zk-connect-solidity/lib/zk-connect-onchain-verifier"]
 	path = packages/zk-connect-solidity/lib/zk-connect-onchain-verifier
 	url = https://github.com/sismo-core/zk-connect-onchain-verifier
-	branch = main
-[submodule "lib/zk-connect-onchain-verifier"]
-	branch = main

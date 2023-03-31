@@ -9,5 +9,4 @@ pragma solidity ^0.8.17;
  * Its aim is to provide a set of sub-libraries with high-level functions to interact with the Sismo protocol easily.
  */
 
-import {ZkConnect} from "zk-connect-onchain-verifier/libs/zk-connect/ZkConnectLib.sol";
-import "zk-connect-onchain-verifier/libs/utils/Structs.sol";
+import "zk-connect-onchain-verifier/libs/zk-connect/ZkConnectLib.sol";

@@ -21,7 +21,7 @@
 </div>
 
 
-zkConnect solidity is a Solidity library that allows you to verify the zk-proofs of your zkConnect Application onchain.
+zkConnect solidity is a Solidity library that allows you to verify the zk-proofs of your zkConnect Application onchain and simplify the use of the [zk-connect-onchain-verifier](https://github.com/sismo-core/zk-connect-onchain-verifier).
 
 Here is the link to the full documentation of the library: [zkConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-solidity-library-verify-on-chain-soon)
 

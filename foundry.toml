@@ -1,0 +1,6 @@
+[profile.default]
+optimizer_runs = 1000000
+verbosity = 1
+src = "packages/zk-connect-solidity/src"
+libs = ["packages/zk-connect-solidity/lib"]
+
