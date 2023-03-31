@@ -17,9 +17,9 @@ export const encodeRequestIdentifier = (
       ["uint128", "uint128"],
       [groupId, encodedTimestamp]
     );
-  
+
     const serviceId = encodeServiceId(appId, namespace);
-  
+
     const requestIdentifier = BigNumber.from(
       ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(

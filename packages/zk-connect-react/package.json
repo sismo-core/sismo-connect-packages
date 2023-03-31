@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/zk-connect-react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "zkConnect React package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -44,6 +44,6 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@sismo-core/zk-connect-client": "^0.0.1"
+    "@sismo-core/zk-connect-client": "^0.0.3"
   }
 }

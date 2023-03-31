@@ -1,96 +1,161 @@
-import { BigNumberish } from "@ethersproject/bignumber";
+import { BigNumberish } from '@ethersproject/bignumber'
 
+export type DevConfig = {
+  enabled?: boolean; // https://dev.vault-beta.sismo.io/
+  displayRawResponse?: boolean; // if bytes, open a modal with the ZkConnectResponse direclty encoded in bytes + registryTreeRoot displayed
+  // Allow to customize data for each groupId
+  devGroups?: DevGroup[]
+}
 
-export const ZK_CONNECT_VERSION = `zk-connect-v1`;
+export type DevGroup = {
+  groupId: string;
+  groupTimestamp?: number | "latest";
+  data: DevAddresses;
+};
+
+export type DevAddresses = string[] | Record<string, Number | BigNumberish>
+
+export const ZK_CONNECT_VERSION = `zk-connect-v2`
 export type ZkConnectRequest = {
   appId: string;
-  dataRequest?: DataRequestType;
   namespace?: string;
+  requestContent?: ZkConnectRequestContent; // updated
+  devConfig?: DevConfig;
   callbackPath?: string;
   version: string;
 };
-
-export type DataRequestArgs =  Partial<DataRequestType> & Partial<StatementRequest>;
-export type DataRequestType = {
-  statementRequests: StatementRequest[];
-  operator: LogicalOperator | null;
-}
-export const DataRequest = (args: DataRequestArgs): DataRequestType => {
-  if (args.statementRequests) {
-    if (args.groupId) {
-      throw new Error("Cannot provide both statements and groupId");
-    }
-    if (args.groupTimestamp) {
-      throw new Error("Cannot provide both statements and groupTimestamp");
-    }
-    if (args.requestedValue) {
-      throw new Error("Cannot provide both statements and selectValue");
-    }
-    if (args.comparator) {
-      throw new Error("Cannot provide both statements and comparator");
-    }
-    if (args.provingScheme) {
-      throw new Error("Cannot provide both statements and provingScheme");
-    }
-    if (args.extraData) {
-      throw new Error("Cannot provide both statements and extraData");
-    }
-  } else {
-    if (!args.groupId) {
-      throw new Error("Must provide groupId");
-    }
-  }
-
-  return {
-    statementRequests: args.statementRequests || [{
-      groupId: args.groupId,
-      groupTimestamp: args.groupTimestamp ?? "latest",
-      requestedValue: args.requestedValue ?? 1,
-      comparator: args.comparator ?? "GTE",
-      provingScheme: args.provingScheme ?? ProvingScheme.HYDRA_S2,
-      extraData: args.extraData ?? null,
-    } as StatementRequest],
-    operator: args.operator ?? null
-  };
+export type ZkConnectRequestContent = {
+  dataRequests: DataRequest[]
+  operators: LogicalOperator[]
 }
 
-export type StatementRequest = {
-  groupId: string;
-  groupTimestamp?: number | "latest"; // default to "latest"
-  requestedValue?: number | BigNumberish | "USER_SELECTED_VALUE"; // default to 1
-  comparator?: StatementComparator; // default to "GTE". "EQ" If requestedValue="USER_SELECTED_VALUE"
-  provingScheme?: "hydra-s2.1"; // default to "hydra-s2.1"
-  extraData?: any;
-};
+export type RequestContentArgs = {
+  claimRequest?: Claim
+  authRequest?: Auth
+  messageSignatureRequest?: any
+}
 
 export enum ProvingScheme {
-  HYDRA_S2 = "hydra-s2.1",
+  HYDRA_S2 = 'hydra-s2.1',
 }
 
-export type StatementComparator = "GTE" | "EQ";
+export class RequestContentLib {
+  static build({
+    claimRequest,
+    authRequest,
+    messageSignatureRequest,
+  }: RequestContentArgs): ZkConnectRequestContent {
+    // we build a dataRequest from claimRequest, authRequest or messageSignatureRequest
+    // we support only one of each
+    const dataRequest: DataRequest = {}
 
-export type VerifiableStatement = StatementRequest & {
-  value: number | BigNumberish;
-  proof: any;
-};
-export type VerifiedStatement = VerifiableStatement & { proofId: string };
+    if (!authRequest && !claimRequest && !messageSignatureRequest) {
+      throw new Error(
+        'Must provide at least one authRequest or claimRequest or messageSignatureRequest in your dataRequests'
+      )
+    }
 
-export type LogicalOperator = "AND" | "OR";
+    if (authRequest) {
+      dataRequest.authRequest = {
+        authType: authRequest.authType,
+        anonMode: authRequest.anonMode ?? false,
+        userId: authRequest.userId ?? '0',
+        extraData: authRequest.extraData ?? '',
+      }
+    }
+    if (claimRequest) {
+      dataRequest.claimRequest = {
+        groupId: claimRequest.groupId,
+        groupTimestamp: claimRequest.groupTimestamp ?? 'latest',
+        value: claimRequest.value ?? 1,
+        claimType: claimRequest.claimType ?? ClaimType.GTE,
+        extraData: claimRequest.extraData ?? '',
+      }
+    }
+    if (messageSignatureRequest) {
+      dataRequest.messageSignatureRequest = messageSignatureRequest
+    }
 
-export type AuthProof = {
-  provingScheme: string;
-  proof: any;
-};
+    return {
+      dataRequests: [dataRequest],
+      operators: [],
+    }
+  }
+}
 
-export type ZkConnectResponse = Omit<
+export type LogicalOperator = 'AND' | 'OR'
+
+export type DataRequest = {
+  authRequest?: Auth
+  claimRequest?: Claim
+  messageSignatureRequest?: any
+}
+
+export type Claim = {
+  groupId?: string
+  groupTimestamp?: number | 'latest' // default to "latest"
+  value?: number // default to 1
+  claimType?: ClaimType // default to GTE
+  extraData?: any // default to ''
+}
+
+export enum ClaimType {
+  EMPTY,
+  GTE,
+  GT,
+  EQ,
+  LT,
+  LTE,
+  USER_SELECT,
+}
+
+export enum AuthType {
+  EMPTY,
+  ANON,
+  GITHUB,
+  TWITTER,
+  EVM_ACCOUNT,
+}
+
+export type Auth = {
+  // twitter// github// evmAccount
+  authType: AuthType
+  // if anonMode == true, user does not reveal the Id
+  // they only prove ownership of one account of this type in the vault
+  anonMode?: boolean // anonMode default false;
+  // githubAccount / twitter account / ethereum address
+  // if userId == 0, user can chose any userId
+  userId?: string // default 0
+  extraData?: any // default ''
+}
+
+export type ZkConnectResponse = Pick<
   ZkConnectRequest,
-  "callbackPath" | "dataRequest"
+  'appId' | 'namespace' | 'version'
 > & {
-  authProof?: AuthProof;
-  verifiableStatements: VerifiableStatement[];
+  proofs: ZkConnectProof[]
+}
+
+export type ZkConnectProof = {
+  auth?: Auth;
+  claim?: Claim;
+  signedMessage?: string | any;
+  provingScheme: string;
+  proofData: string;
+  extraData: any;
 };
 
 export type ZkConnectVerifiedResult = ZkConnectResponse & {
-  vaultId: string;
-  verifiedStatements: VerifiedStatement[];
-};
+  signedMessages: string[]
+  verifiedClaims: VerifiedClaim[]
+  verifiedAuths: VerifiedAuth[]
+}
+
+export type VerifiedClaim = Claim & {
+  proofId: string
+  __proof: string
+}
+
+export type VerifiedAuth = Auth & {
+  __proof: string
+}

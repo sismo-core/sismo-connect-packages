@@ -11,11 +11,7 @@ export class CommitmentMapperRegistryContractProd implements CommitmentMapperReg
   }
 
   public async getCommitmentMapperPubKey(): Promise<[BigNumber, BigNumber]> {
-    return [
-      BigNumber.from("0x07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb9"),
-      BigNumber.from("0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa"),
-    ];
-    // return await this.contract.getEdDSAPubKey();
+    return await this.contract.getEdDSAPubKey();
   }
 }
 
