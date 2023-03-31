@@ -1,1 +1,1 @@
-zk-connect-onchain-verifier/=packages/zk-connect-solidity/lib/zk-connect-onchain-verifier/src/
+zk-connect-onchain-verifier/=packages/zk-connect-solidity/lib/zk-connect-onchain-verifier/
