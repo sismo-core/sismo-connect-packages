@@ -27,6 +27,41 @@ Here is the link to the full documentation of the library: [zkConnect onchain ve
 
 You can learn more on zkConnect [here](https://docs.sismo.io/sismo-docs/readme/zkconnect).
 
+# Use with Forge
+
+## Installation
+
+Install the library
+```bash
+forge install sismo-core/zk-connect-packages
+```
+
+Configure [remappings.txt](https://book.getfoundry.sh/projects/dependencies?highlight=remapping#remapping-dependencies) file:
+
+```
+zk-connect-solidity/=lib/zk-connect-packages/packages/zk-connect-solidity/src/
+```
+
+Import in your contract
+```solidity
+import "zk-connect-solidity/SismoLib.sol";
+```
+
+## Usage
+Inherit ZkConnect library in your contract
+
+```sol
+contract ZKApp is ZkConnect  {
+  constructor(
+      bytes16 appId, // the appId of your zkConnect app (you need to register your zkConnect app on https://factory.sismo.io)
+  )  ZkConnect(appId) {
+
+    ... 
+  }
+}
+```
+
+
 ## License
 
 Distributed under the MIT License.
