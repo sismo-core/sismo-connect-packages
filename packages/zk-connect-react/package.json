@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/zk-connect-react",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "zkConnect React package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
