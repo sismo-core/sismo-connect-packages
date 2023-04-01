@@ -2,8 +2,7 @@ import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment
 import { HydraS2Verifier as HydraS2VerifierPS } from "@sismo-core/hydra-s2";
 import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
-  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
-  GOERLI_COMMITMENT_MAPPER_REGISTRY_ADDRESS
+  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
 } from "../constants";
 import {
   AvailableRootsRegistryContract,
@@ -17,6 +16,7 @@ import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
 import { AuthType, ClaimType, VerifiedAuth, VerifiedClaim, ZkConnectProof } from "../common-types";
 import { ethers } from "ethers";
 import { decodeProofData } from './utils/proofData';
+import { isHexlify } from './utils/isHexlify';
 
 export type SnarkProof = {
   a: string[];
@@ -198,7 +198,14 @@ export class HydraS2Verifier {
     };
     const proofIdentifier = proofPublicInputs.proofIdentifier;
 
-    const signedMessage = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(proof.signedMessage));
+    let extraData = null;
+    if (isHexlify(proof.signedMessage)) {
+      extraData = ethers.utils.hexlify(proof.signedMessage);
+    } else {
+      extraData = ethers.utils.toUtf8Bytes(proof.signedMessage);
+    }
+
+    const signedMessage = ethers.utils.keccak256(extraData);
     if (!BigNumber.from(proofPublicInputs.extraData).eq(signedMessage)) {
       throw new Error(
         `on proofId "${proofIdentifier}" extraData "${
