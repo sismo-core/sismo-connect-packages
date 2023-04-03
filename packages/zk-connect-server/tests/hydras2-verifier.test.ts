@@ -105,10 +105,15 @@ describe('ZkConnect Verifier', () => {
         value,
         claimType,
       },
-      provingScheme:ProvingScheme.HYDRA_S2,
-      proofData: encodeProofData(proofMock1.snarkProof.a, proofMock1.snarkProof.b, proofMock1.snarkProof.c, proofMock1.snarkProof.input),
-      extraData: "",
-    };
+      provingScheme: ProvingScheme.HYDRA_S2,
+      proofData: encodeProofData(
+        proofMock1.snarkProof.a,
+        proofMock1.snarkProof.b,
+        proofMock1.snarkProof.c,
+        proofMock1.snarkProof.input
+      ),
+      extraData: '',
+    }
 
     vaultIdentifier = proofPublicInputs.vaultIdentifier
     proofIdentifier = proofPublicInputs.proofIdentifier
