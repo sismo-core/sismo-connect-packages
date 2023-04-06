@@ -156,14 +156,13 @@ describe('ZkConnect', () => {
         invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
           .proofs[0].claims as ClaimRequest[]
         invalidSismoConnectResponse.proofs[0].claims[0].groupId = '0x123'
-        const invalidClaim = invalidSismoConnectResponse.proofs[0].claims[0];
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
         ).rejects.toThrow(
-          `No claimRequest found for groupId ${invalidClaim.groupId}, groupTimestamp ${invalidClaim.groupTimestamp} and claimType ${invalidClaim.claimType}`
+          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
         )
       })
 
@@ -174,14 +173,13 @@ describe('ZkConnect', () => {
         invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
           .proofs[0].claims as ClaimRequest[]
         invalidSismoConnectResponse.proofs[0].claims[0].groupTimestamp = 123456
-        const invalidClaim = invalidSismoConnectResponse.proofs[0].claims[0];
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
         ).rejects.toThrow(
-          `No claimRequest found for groupId ${invalidClaim.groupId}, groupTimestamp ${invalidClaim.groupTimestamp} and claimType ${invalidClaim.claimType}`
+          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
         )
       })
 
@@ -192,14 +190,13 @@ describe('ZkConnect', () => {
         invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
           .proofs[0].claims as ClaimRequest[]
         invalidSismoConnectResponse.proofs[0].claims[0].claimType = ClaimType.LT;
-        const invalidClaim = invalidSismoConnectResponse.proofs[0].claims[0];
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
         ).rejects.toThrow(
-          `No claimRequest found for groupId ${invalidClaim.groupId}, groupTimestamp ${invalidClaim.groupTimestamp} and claimType ${invalidClaim.claimType}`
+          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
         )
       })
 
@@ -210,9 +207,6 @@ describe('ZkConnect', () => {
 
         invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[];
         invalidSismoConnectResponse.proofs[0].claims[0].value = -1;
-
-        console.log("test claimRequest", claimRequest);
-        console.log("test invalidSismoConnectResponse", invalidSismoConnectResponse.proofs[0].claims);
 
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
@@ -232,27 +226,14 @@ describe('ZkConnect', () => {
             namespace: 'main',
           }
         )
-        expect(zkConnectVerifiedResult.verifiedClaims[0]).toEqual(verifiedClaim);
+        expect(zkConnectVerifiedResult.claims[0]).toEqual(verifiedClaim);
       })
     })
 
     describe('verify without claim', () => {
       it('should throw with no claimRequest, no authRequest and no signedMessage', async () => {
-        const invalidSismoConnectResponse = JSON.parse(
-          JSON.stringify(sismoConnectResponse)
-        ) as SismoConnectResponse
-        console.log("hey claimRequest", claimRequest);
-        console.log("hey invalidSismoConnectResponse", JSON.stringify(invalidSismoConnectResponse));
-
-        (invalidSismoConnectResponse.proofs[0].auths as AuthRequest[]) = [{ authType: AuthType.GITHUB }];
-        (invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[]) = [{ claimType: ClaimType.GT }];
-
-        const invalidRequestContent = JSON.parse(
-          JSON.stringify(claimRequest)
-        ) as ClaimRequest
         await expect(
-          sismoConnect.verify(invalidSismoConnectResponse, {
-            claims: [invalidRequestContent],
+          sismoConnect.verify(sismoConnectResponse, {
             namespace,
           })
         ).rejects.toThrow(

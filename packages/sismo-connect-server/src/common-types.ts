@@ -95,6 +95,7 @@ export type Auth = {
   extraData?: any;
 }
 
+//TODO add omit 
 export type Claim = {
   claimType?: ClaimType;
   groupId?: string;
@@ -104,34 +105,34 @@ export type Claim = {
 }
 
 export class SismoConnectVerifiedResult {
-  public verifiedAuths: VerifiedAuth[];
-  public verifiedClaims: VerifiedClaim[];
+  public auths: VerifiedAuth[];
+  public claims: VerifiedClaim[];
   public signedMessage: string | undefined;
   public response: SismoConnectResponse;
 
   constructor({
     response,
-    verifiedClaims,
-    verifiedAuths,
+    claims,
+    auths,
   }: {
     response: SismoConnectResponse,
-    verifiedClaims: VerifiedClaim[],
-    verifiedAuths: VerifiedAuth[],
+    claims: VerifiedClaim[],
+    auths: VerifiedAuth[],
   }) {
     this.response = response;
-    this.verifiedClaims = verifiedClaims;
-    this.verifiedAuths = verifiedAuths;
+    this.claims = claims;
+    this.auths = auths;
     this.signedMessage = response.signedMessage;
   }
 
   public getUserId(authType: AuthType): string | undefined {
     //TODO resolve from 0x001 to github
-    return this.verifiedAuths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
+    return this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
   }
 
   public getUserIds(authType: AuthType): string[] {
     //TODO resolve from 0x001 to github
-    return this.verifiedAuths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
+    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
   }
 
   public getSignedMessage(): string | undefined {
@@ -210,11 +211,11 @@ export class RequestBuilder {
   }
 }
 
-export type VerifiedClaim = ClaimRequest & {
+export type VerifiedClaim = Claim & {
   proofId: string;
   proofData: string;
 }
 
-export type VerifiedAuth = AuthRequest & {
+export type VerifiedAuth = Auth & {
   proofData: string;
 }

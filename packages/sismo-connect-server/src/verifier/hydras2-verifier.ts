@@ -272,6 +272,18 @@ export class HydraS2Verifier {
       );
     }
 
+    if (auth.authType === AuthType.VAULT && auth.userId !== proofPublicInputs.vaultIdentifier) {
+      throw new Error(
+        `userId "${auth.userId}" mismatch with proof input vaultIdentifier ${proofPublicInputs.destinationIdentifier}`
+      );
+    }
+
+    if (auth.authType !== AuthType.VAULT && auth.userId !== proofPublicInputs.destinationIdentifier) {
+      throw new Error(
+        `userId "${auth.userId}" mismatch with proof input destinationIdentifier ${proofPublicInputs.destinationIdentifier}`
+      );
+    }
+
     if (
       auth.authType !== AuthType.VAULT &&
       !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq("1")

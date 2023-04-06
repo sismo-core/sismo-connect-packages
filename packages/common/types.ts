@@ -95,6 +95,7 @@ export type Auth = {
   extraData?: any;
 }
 
+//TODO add omit 
 export type Claim = {
   claimType?: ClaimType;
   groupId?: string;
@@ -104,34 +105,34 @@ export type Claim = {
 }
 
 export class SismoConnectVerifiedResult {
-  public verifiedAuths: VerifiedAuth[];
-  public verifiedClaims: VerifiedClaim[];
+  public auths: VerifiedAuth[];
+  public claims: VerifiedClaim[];
   public signedMessage: string | undefined;
   public response: SismoConnectResponse;
 
   constructor({
     response,
-    verifiedClaims,
-    verifiedAuths,
+    claims,
+    auths,
   }: {
     response: SismoConnectResponse,
-    verifiedClaims: VerifiedClaim[],
-    verifiedAuths: VerifiedAuth[],
+    claims: VerifiedClaim[],
+    auths: VerifiedAuth[],
   }) {
     this.response = response;
-    this.verifiedClaims = verifiedClaims;
-    this.verifiedAuths = verifiedAuths;
+    this.claims = claims;
+    this.auths = auths;
     this.signedMessage = response.signedMessage;
   }
 
   public getUserId(authType: AuthType): string | undefined {
     //TODO resolve from 0x001 to github
-    return this.verifiedAuths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
+    return this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
   }
 
   public getUserIds(authType: AuthType): string[] {
     //TODO resolve from 0x001 to github
-    return this.verifiedAuths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
+    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
   }
 
   public getSignedMessage(): string | undefined {
@@ -149,19 +150,19 @@ export class RequestBuilder {
     }
     auths = auths as AuthRequest[];
 
-    for (let auth of auths) {
-      if (auth.isAnon) throw new Error("isAnon not supported yet");
-      if (typeof auth.authType === undefined) {
+    for (let authRequest of auths) {
+      if (authRequest.isAnon) throw new Error("isAnon not supported yet");
+      if (typeof authRequest.authType === undefined) {
         throw new Error("you must provide a authType");
       }
 
-      auth.isAnon = false;
-      auth.isOptional = auth.isOptional ?? false;
-      auth.isSelectableByUser = auth.isSelectableByUser ?? false;
-      auth.userId = auth.userId ?? "0";
-      auth.extraData = auth.extraData ?? "";
+      authRequest.isAnon = false;
+      authRequest.isOptional = authRequest.isOptional ?? false;
+      authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? false;
+      authRequest.userId = authRequest.userId ?? "0";
+      authRequest.extraData = authRequest.extraData ?? "";
 
-      if (auth.userId !== "0") {
+      if (authRequest.userId !== "0") {
         //TODO resolveUserId(userId) => resolve, web2 accounts, ens etc.
       }
     }
@@ -178,18 +179,18 @@ export class RequestBuilder {
     }
     claims = claims as AuthRequest[];
 
-    for (let claim of claims) {
-      if (typeof claim.claimType === undefined) {
+    for (let claimRequest of claims) {
+      if (typeof claimRequest.claimType === undefined) {
         throw new Error("you must provide a claimType");
       }
-      if (typeof claim.groupId === undefined) {
+      if (typeof claimRequest.groupId === undefined) {
         throw new Error("you must provide a groupId");
       }
 
-      claim.claimType = claim.claimType ?? ClaimType.GTE;
-      claim.extraData = claim.extraData ?? '';
-      claim.groupTimestamp = claim.groupTimestamp ?? "latest";
-      claim.value = claim.value ?? 1;
+      claimRequest.claimType = claimRequest.claimType ?? ClaimType.GTE;
+      claimRequest.extraData = claimRequest.extraData ?? '';
+      claimRequest.groupTimestamp = claimRequest.groupTimestamp ?? "latest";
+      claimRequest.value = claimRequest.value ?? 1;
     }
     
     return claims;
@@ -210,11 +211,11 @@ export class RequestBuilder {
   }
 }
 
-export type VerifiedClaim = ClaimRequest & {
+export type VerifiedClaim = Claim & {
   proofId: string;
   proofData: string;
 }
 
-export type VerifiedAuth = AuthRequest & {
+export type VerifiedAuth = Auth & {
   proofData: string;
 }

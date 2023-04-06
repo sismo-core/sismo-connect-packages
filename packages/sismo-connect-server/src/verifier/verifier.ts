@@ -72,8 +72,8 @@ export class SismoConnectVerifier {
 
     return new SismoConnectVerifiedResult({
       response: sismoConnectResponse,
-      verifiedClaims,
-      verifiedAuths
+      claims: verifiedClaims,
+      auths: verifiedAuths
     });
   }
 
@@ -92,9 +92,7 @@ export class SismoConnectVerifier {
           countNotOptional++;
           const proofFounded = sismoConnectResponse.proofs.find(proof => {
             for (let claim of proof.claims) {
-              if (claimRequest.groupId !== claim.groupId || 
-                claimRequest.groupTimestamp !== claim.groupTimestamp || 
-                claimRequest.claimType !== claim.claimType) {
+              if (claimRequest.groupId === claim.groupId && claimRequest.groupTimestamp === claim.groupTimestamp && claimRequest.claimType === claim.claimType) {
                 return true;
               }
             }
@@ -115,8 +113,8 @@ export class SismoConnectVerifier {
           countNotOptional++;
           const proofFounded = sismoConnectResponse.proofs.find(proof => {
             for (let auth of proof.auths) {
-              if (authRequest.authType !== auth.authType || 
-                authRequest.isAnon !== auth.isAnon) {
+              if (authRequest.authType === auth.authType &&
+                authRequest.isAnon === auth.isAnon) {
                 return true;
               }
             }
@@ -151,7 +149,7 @@ export class SismoConnectVerifier {
       if (!authRequests || authRequests.length === 0) {
         if (!response.signedMessage) {
           throw new Error(
-            `No claimRequest, no authRequest and no signed message in the proof, please provide at least one`
+            `No claim, no auth and no signed message in the proof, please provide at least one`
           )
         }
       }
@@ -169,107 +167,105 @@ export class SismoConnectVerifier {
       }
     }
 
-    if (claimRequests) {
+    if (claimRequests && proof.claims) {
       for (let claim of proof.claims) {
-        if (claim) {
-          const groupId = claim?.groupId;
-          const groupTimestamp = claim?.groupTimestamp;
-          const claimType = claim?.claimType;
+        if (!claim) continue;
+        const groupId = claim?.groupId;
+        const groupTimestamp = claim?.groupTimestamp;
+        const claimType = claim?.claimType;
 
-          const claimRequest = claimRequests.find((_claimRequest) => {
-              if (
-                _claimRequest.groupId !== groupId ||
-                _claimRequest.groupTimestamp !== groupTimestamp || 
-                _claimRequest.claimType !== claimType
-              ) {
-                return false;
-              }
-              return true;
-          })
-      
-          if (!claimRequest) {
-            throw new Error(
-              `No claimRequest found for groupId ${groupId}, groupTimestamp ${groupTimestamp} and claimType ${claimType}`
-            );
-          }
+        const claimRequest = claimRequests.find((_claimRequest) => {
+            if (
+              _claimRequest.groupId !== groupId ||
+              _claimRequest.groupTimestamp !== groupTimestamp || 
+              _claimRequest.claimType !== claimType
+            ) {
+              return false;
+            }
+            return true;
+        })
     
-          const requestedClaimType = claimRequest.claimType
-          if (requestedClaimType !== claim.claimType) {
+        if (!claimRequest) {
+          throw new Error(
+            `No claimRequest found for groupId ${groupId}, groupTimestamp ${groupTimestamp} and claimType ${claimType}`
+          );
+        }
+  
+        const requestedClaimType = claimRequest.claimType
+        if (requestedClaimType !== claim.claimType) {
+          throw new Error(
+            `The proof claimType ${claim.claimType} does not match the requested claimType ${requestedClaimType}`
+          )
+        }
+        const requestedValue = claimRequest.value
+        if (claim.claimType == ClaimType.EQ) {
+          if (claim.value != requestedValue) {
             throw new Error(
-              `The proof claimType ${claim.claimType} does not match the requested claimType ${requestedClaimType}`
+              `The proof value ${claim.value} is not equal to the requested value ${requestedValue}`
             )
           }
-          const requestedValue = claimRequest.value
-          if (claim.claimType == ClaimType.EQ) {
-            if (claim.value != requestedValue) {
-              throw new Error(
-                `The proof value ${claim.value} is not equal to the requested value ${requestedValue}`
-              )
-            }
+        }
+  
+        if (claim.claimType == ClaimType.GT) {
+          if (claim.value <= requestedValue) {
+            throw new Error(
+              `The proof value ${claim.value} is not greater than the requested value ${requestedValue}`
+            )
           }
-    
-          if (claim.claimType == ClaimType.GT) {
-            if (claim.value <= requestedValue) {
-              throw new Error(
-                `The proof value ${claim.value} is not greater than the requested value ${requestedValue}`
-              )
-            }
+        }
+  
+        if (claim.claimType == ClaimType.GTE) {
+          if (claim.value < requestedValue) {
+            throw new Error(
+              `The proof value ${claim.value} is not equal or greater than the requested value ${requestedValue}`
+            )
           }
-    
-          if (claim.claimType == ClaimType.GTE) {
-            if (claim.value < requestedValue) {
-              throw new Error(
-                `The proof value ${claim.value} is not equal or greater than the requested value ${requestedValue}`
-              )
-            }
+        }
+  
+        if (claim.claimType == ClaimType.LT) {
+          if (claim.value >= requestedValue) {
+            throw new Error(
+              `The proof value ${claim.value} is not lower than the requested value ${requestedValue}`
+            )
           }
-    
-          if (claim.claimType == ClaimType.LT) {
-            if (claim.value >= requestedValue) {
-              throw new Error(
-                `The proof value ${claim.value} is not lower than the requested value ${requestedValue}`
-              )
-            }
-          }
-    
-          if (claim.claimType == ClaimType.LTE) {
-            if (claim.value > requestedValue) {
-              throw new Error(
-                `The proof value ${claim.value} is not equal or lower than the requested value ${requestedValue}`
-              )
-            }
+        }
+  
+        if (claim.claimType == ClaimType.LTE) {
+          if (claim.value > requestedValue) {
+            throw new Error(
+              `The proof value ${claim.value} is not equal or lower than the requested value ${requestedValue}`
+            )
           }
         }
       }
     }
 
-    if (authRequests) {
+    if (authRequests && proof.auths) {
       for (let auth of proof.auths) {
-        if (auth) {
-          const authType = auth?.authType;
-          const isAnon = auth?.isAnon;
-          const authRequest = authRequests.find((_authRequest) => {
-              if (
-                _authRequest.authType !== authType ||
-                _authRequest.isAnon !== isAnon
-              ) {
-                return false;
-              }
-              return true;
-          })
-      
-          if (!authRequest) {
-            throw new Error(
-              `No authRequest found for authType ${authType} and isAnon ${isAnon}`
-            );
-          }
-          const requestedUserId = authRequest.userId
-          if (requestedUserId !== '0') {
-            if (auth.userId !== requestedUserId) {
-              throw new Error(
-                `The proof auth userId ${auth.userId} does not match the requested auth userId ${requestedUserId}`
-              )
+        if (!auth) continue;
+        const authType = auth?.authType;
+        const isAnon = auth?.isAnon;
+        const authRequest = authRequests.find((_authRequest) => {
+            if (
+              _authRequest.authType !== authType ||
+              _authRequest.isAnon !== isAnon
+            ) {
+              return false;
             }
+            return true;
+        })
+    
+        if (!authRequest) {
+          throw new Error(
+            `No authRequest found for authType ${authType} and isAnon ${isAnon}`
+          );
+        }
+        const requestedUserId = authRequest.userId
+        if (requestedUserId !== '0') {
+          if (auth.userId !== requestedUserId) {
+            throw new Error(
+              `The proof auth userId ${auth.userId} does not match the requested auth userId ${requestedUserId}`
+            )
           }
         }
       }

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import './SismoConnectButton.css';
 import { Logo } from "../Logo/Logo";
 import { Loader } from "../Loader";
-import { SismoConnectResponse, SismoConnectClientConfig } from "@sismo-core/sismo-connect-client";
+import { SismoConnectResponse, SismoConnectClientConfig, ClaimRequest, AuthRequest, SignatureRequest } from "@sismo-core/sismo-connect-client";
 import { useSismoConnect } from "../../hooks/useSismoConnect";
 
 type ButtonProps = {
