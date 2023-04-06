@@ -1,5 +1,5 @@
 import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment-mapper-registry/dev';
-import { HydraS2Verifier as HydraS2VerifierPS } from "@sismo-core/hydra-s2";
+import { HydraS2Verifier as HydraS2VerifierPS, SNARK_FIELD } from "@sismo-core/hydra-s2";
 import {
   GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
   GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
@@ -204,13 +204,13 @@ export class HydraS2Verifier {
     } else {
       extraData = ethers.utils.toUtf8Bytes(proof.signedMessage);
     }
-
-    const signedMessage = ethers.utils.keccak256(extraData);
+    const signedMessage = BigNumber.from(ethers.utils.keccak256(extraData)).mod(SNARK_FIELD);
+    
     if (!BigNumber.from(proofPublicInputs.extraData).eq(signedMessage)) {
       throw new Error(
         `on proofId "${proofIdentifier}" extraData "${
           BigNumber.from(proofPublicInputs.extraData).toHexString()
-        }" mismatch with signedMessage "${signedMessage}"`
+        }" mismatch with signedMessage "${signedMessage.toHexString()}"`
       );
     }
   }
