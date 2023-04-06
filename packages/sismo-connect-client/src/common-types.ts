@@ -149,19 +149,19 @@ export class RequestBuilder {
     }
     auths = auths as AuthRequest[];
 
-    for (let auth of auths) {
-      if (auth.isAnon) throw new Error("isAnon not supported yet");
-      if (typeof auth.authType === undefined) {
+    for (let authRequest of auths) {
+      if (authRequest.isAnon) throw new Error("isAnon not supported yet");
+      if (typeof authRequest.authType === undefined) {
         throw new Error("you must provide a authType");
       }
 
-      auth.isAnon = false;
-      auth.isOptional = auth.isOptional ?? false;
-      auth.isSelectableByUser = auth.isSelectableByUser ?? false;
-      auth.userId = auth.userId ?? "0";
-      auth.extraData = auth.extraData ?? "";
+      authRequest.isAnon = false;
+      authRequest.isOptional = authRequest.isOptional ?? false;
+      authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? false;
+      authRequest.userId = authRequest.userId ?? "0";
+      authRequest.extraData = authRequest.extraData ?? "";
 
-      if (auth.userId !== "0") {
+      if (authRequest.userId !== "0") {
         //TODO resolveUserId(userId) => resolve, web2 accounts, ens etc.
       }
     }
@@ -178,18 +178,18 @@ export class RequestBuilder {
     }
     claims = claims as AuthRequest[];
 
-    for (let claim of claims) {
-      if (typeof claim.claimType === undefined) {
+    for (let claimRequest of claims) {
+      if (typeof claimRequest.claimType === undefined) {
         throw new Error("you must provide a claimType");
       }
-      if (typeof claim.groupId === undefined) {
+      if (typeof claimRequest.groupId === undefined) {
         throw new Error("you must provide a groupId");
       }
 
-      claim.claimType = claim.claimType ?? ClaimType.GTE;
-      claim.extraData = claim.extraData ?? '';
-      claim.groupTimestamp = claim.groupTimestamp ?? "latest";
-      claim.value = claim.value ?? 1;
+      claimRequest.claimType = claimRequest.claimType ?? ClaimType.GTE;
+      claimRequest.extraData = claimRequest.extraData ?? '';
+      claimRequest.groupTimestamp = claimRequest.groupTimestamp ?? "latest";
+      claimRequest.value = claimRequest.value ?? 1;
     }
     
     return claims;
