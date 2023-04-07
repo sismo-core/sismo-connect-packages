@@ -91,6 +91,7 @@ export type SismoConnectProof = {
 export type Auth = {
   authType: AuthType;
   isAnon?: boolean; //false
+  isSelectableByUser?: boolean;
   userId?: string;
   extraData?: any;
 }
@@ -100,6 +101,7 @@ export type Claim = {
   claimType?: ClaimType;
   groupId?: string;
   groupTimestamp?: number | "latest";
+  isSelectableByUser?: boolean;
   value?: number;
   extraData?: any;
 }
@@ -135,13 +137,12 @@ export class SismoConnectVerifiedResult {
   }
 
   public getUserId(authType: AuthType): string | undefined {
-    //TODO resolve from 0x001 to github
-    return this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
+    const userId = this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId;
+    return resolveSismoIdentifier(userId, authType);
   }
 
   public getUserIds(authType: AuthType): string[] {
-    //TODO resolve from 0x001 to github
-    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
+    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => resolveSismoIdentifier(auth.userId, authType)) as string[]
   }
 
   public getSignedMessage(): string | undefined {
@@ -149,16 +150,14 @@ export class SismoConnectVerifiedResult {
   }
 }
 
+const startsWithHexadecimal = (str) => {
+  let hexRegex = /^0x[0-9a-fA-F]{6}/;
+  return hexRegex.test(str); 
+}
+
 export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthType) => {
   if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return sismoIdentifier;
-
-  const isAlreadyResolved = (identifier) => {
-    if (identifier.length < 6) return true;
-    let hexRegex = /^0x[0-9a-fA-F]{6}/;
-    return !hexRegex.test(identifier);
-  }
-
-  if (isAlreadyResolved(sismoIdentifier)) return sismoIdentifier;
+  if (!startsWithHexadecimal(sismoIdentifier)) return sismoIdentifier;
 
   const removeLeadingZeros = (str) => {
     let arr = str.split("");
@@ -173,18 +172,21 @@ export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthTy
 }
 
 export const toSismoIdentifier = (identifier: string, authType: AuthType) => {
-  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return identifier;
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT)
+    return identifier;
+  if (startsWithHexadecimal(identifier)) return identifier;
 
-  const isAlreadySismoId = (identifier) => {
-    if (identifier.length < 6) return false;
-    let hexRegex = /^0x[0-9a-fA-F]{6}/;
-    return hexRegex.test(identifier);
+  let prefix = "";
+  if (authType === AuthType.GITHUB) {
+    prefix = "0x1001";
   }
-  
-  identifier = "0".repeat(14 - identifier.length) + identifier;
-  identifier += 
-  return "0x" + identifier; 
-}
+  if (authType === AuthType.TWITTER) {
+    prefix = "0x1002";
+  }
+  identifier = "0".repeat(36 - identifier.length) + identifier;
+  identifier = prefix + identifier;
+  return identifier;
+};
 
 export class RequestBuilder {
   static buildAuths(auths: AuthRequest[] | AuthRequest): AuthRequest[] {
@@ -209,7 +211,7 @@ export class RequestBuilder {
       authRequest.extraData = authRequest.extraData ?? "";
 
       if (authRequest.userId !== "0") {
-        //TODO resolveUserId(userId) => resolve, web2 accounts, ens etc.
+        authRequest.userId = toSismoIdentifier(authRequest.userId, authRequest.authType);
       }
     }
 

@@ -64,8 +64,12 @@ export class SismoConnectVerifier {
         )
         verifiedClaims.push(verifiedAuth)
       }
-      
-      if ((!proof.claims || proof.claims.length > 0) && (!proof.auths || proof.auths.length > 0) && sismoConnectResponse.signedMessage) {
+    
+      if (
+          (!proof.claims || proof.claims.length === 0) && 
+          (!proof.auths || proof.auths.length === 0) && 
+          sismoConnectResponse.signedMessage
+        ) {
         await this._verifySignedMessageProof(proof, sismoConnectResponse.signedMessage)
       }
     }
@@ -85,12 +89,12 @@ export class SismoConnectVerifier {
     //Verify that for every not optional request the user generate a proof
 
     let countNotOptional = 0;
-
     if (claimRequests) {
       for (let claimRequest of claimRequests) {
         if (!claimRequest.isOptional) {
           countNotOptional++;
           const proofFounded = sismoConnectResponse.proofs.find(proof => {
+            if (!proof.claims) return false;
             for (let claim of proof.claims) {
               if (claimRequest.groupId === claim.groupId && claimRequest.groupTimestamp === claim.groupTimestamp && claimRequest.claimType === claim.claimType) {
                 return true;
@@ -106,15 +110,19 @@ export class SismoConnectVerifier {
         }
       }
     }
-
+    
     if (authRequests) {
       for (let authRequest of authRequests) {
         if (!authRequest.isOptional) {
           countNotOptional++;
           const proofFounded = sismoConnectResponse.proofs.find(proof => {
+            if (!proof.auths) return false;
             for (let auth of proof.auths) {
-              if (authRequest.authType === auth.authType &&
-                authRequest.isAnon === auth.isAnon) {
+              //If the request ask a specific userId
+              if (authRequest.userId !== '0' && !authRequest.isSelectableByUser && authRequest.userId !== auth.userId) {
+                return false;
+              }
+              if (authRequest.authType === auth.authType) {
                 return true;
               }
             }
@@ -246,9 +254,12 @@ export class SismoConnectVerifier {
         const authType = auth?.authType;
         const isAnon = auth?.isAnon;
         const authRequest = authRequests.find((_authRequest) => {
+            //If the request ask a specific userId
+            if (_authRequest.userId !== '0' && !_authRequest.isSelectableByUser && _authRequest.userId !== auth.userId) {
+              return false;
+            }
             if (
-              _authRequest.authType !== authType ||
-              _authRequest.isAnon !== isAnon
+              _authRequest.authType !== authType
             ) {
               return false;
             }
@@ -278,7 +289,7 @@ export class SismoConnectVerifier {
   ): Promise<void> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        this.hydraS2Verifier.verifySignedMessageProof({
+        return this.hydraS2Verifier.verifySignedMessageProof({
           proof,
           signedMessage
         })

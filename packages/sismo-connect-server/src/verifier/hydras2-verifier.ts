@@ -115,6 +115,7 @@ export class HydraS2Verifier {
     ) {
       throw new Error("Snark Proof Invalid!");
     }
+    
     return {
       ...proof.claims[0],
       proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
@@ -220,6 +221,7 @@ export class HydraS2Verifier {
       sourceVerificationEnabled: input[12],
       destinationVerificationEnabled: input[13],
     };
+
     const proofIdentifier = proofPublicInputs.proofIdentifier;
 
     let extraData = null;
@@ -261,6 +263,7 @@ export class HydraS2Verifier {
       sourceVerificationEnabled: input[12],
       destinationVerificationEnabled: input[13],
     };
+    
     const proofIdentifier = proofPublicInputs.proofIdentifier;
 
     //Multiple auths in of proof not supported yet
@@ -272,9 +275,9 @@ export class HydraS2Verifier {
       );
     }
 
-    if (auth.authType === AuthType.VAULT && auth.userId !== proofPublicInputs.vaultIdentifier) {
+    if (auth.authType === AuthType.VAULT && !BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)) {
       throw new Error(
-        `userId "${auth.userId}" mismatch with proof input vaultIdentifier ${proofPublicInputs.destinationIdentifier}`
+        `userId "${auth.userId}" mismatch with proof input vaultIdentifier ${proofPublicInputs.vaultIdentifier}`
       );
     }
 

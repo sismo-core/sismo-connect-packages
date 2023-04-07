@@ -91,6 +91,7 @@ export type SismoConnectProof = {
 export type Auth = {
   authType: AuthType;
   isAnon?: boolean; //false
+  isSelectableByUser?: boolean;
   userId?: string;
   extraData?: any;
 }
@@ -100,6 +101,7 @@ export type Claim = {
   claimType?: ClaimType;
   groupId?: string;
   groupTimestamp?: number | "latest";
+  isSelectableByUser?: boolean;
   value?: number;
   extraData?: any;
 }
@@ -170,20 +172,21 @@ export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthTy
 }
 
 export const toSismoIdentifier = (identifier: string, authType: AuthType) => {
-  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return identifier;
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT)
+    return identifier;
   if (startsWithHexadecimal(identifier)) return identifier;
 
-  let prefix = null;
+  let prefix = "";
   if (authType === AuthType.GITHUB) {
-    prefix = "0x0001"
+    prefix = "0x1001";
   }
   if (authType === AuthType.TWITTER) {
-    prefix = "0x0002"
+    prefix = "0x1002";
   }
-  identifier = "0".repeat(14 - identifier.length) + identifier;
-  identifier += prefix;
+  identifier = "0".repeat(36 - identifier.length) + identifier;
+  identifier = prefix + identifier;
   return identifier;
-}
+};
 
 export class RequestBuilder {
   static buildAuths(auths: AuthRequest[] | AuthRequest): AuthRequest[] {
