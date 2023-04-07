@@ -19,7 +19,7 @@ type ButtonProps = {
   overrideStyle?: React.CSSProperties;
 };
 
-export const ZkConnectButton = ({
+export const SismoConnectButton = ({
   appId,
   claims,
   auths,

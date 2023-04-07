@@ -104,6 +104,15 @@ export type Claim = {
   extraData?: any;
 }
 
+export type VerifiedClaim = Claim & {
+  proofId: string;
+  proofData: string;
+}
+
+export type VerifiedAuth = Auth & {
+  proofData: string;
+}
+
 export class SismoConnectVerifiedResult {
   public auths: VerifiedAuth[];
   public claims: VerifiedClaim[];
@@ -126,18 +135,54 @@ export class SismoConnectVerifiedResult {
   }
 
   public getUserId(authType: AuthType): string | undefined {
-    //TODO resolve from 0x001 to github
-    return this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId
+    const userId = this.auths.find(verifiedAuth => verifiedAuth.authType === authType)?.userId;
+    return resolveSismoIdentifier(userId, authType);
   }
 
   public getUserIds(authType: AuthType): string[] {
-    //TODO resolve from 0x001 to github
-    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => auth.userId) as string[]
+    return this.auths.filter(verifiedAuth => verifiedAuth.authType === authType && verifiedAuth.userId).map(auth => resolveSismoIdentifier(auth.userId, authType)) as string[]
   }
 
   public getSignedMessage(): string | undefined {
     return this.signedMessage;
   }
+}
+
+const startsWithHexadecimal = (str) => {
+  let hexRegex = /^0x[0-9a-fA-F]{6}/;
+  return hexRegex.test(str); 
+}
+
+export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthType) => {
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return sismoIdentifier;
+  if (!startsWithHexadecimal(sismoIdentifier)) return sismoIdentifier;
+
+  const removeLeadingZeros = (str) => {
+    let arr = str.split("");
+    while (arr.length > 1 && arr[0] === "0") {
+      arr.shift();
+    }
+    return arr.join("");
+  }
+  sismoIdentifier = sismoIdentifier.substring(6);
+  sismoIdentifier = removeLeadingZeros(sismoIdentifier);
+  return sismoIdentifier;
+}
+
+export const toSismoIdentifier = (identifier: string, authType: AuthType) => {
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return identifier;
+  if (startsWithHexadecimal(identifier)) return identifier;
+
+  let prefix = null;
+  if (authType === AuthType.GITHUB) {
+    prefix = "0x0001"
+  }
+  if (authType === AuthType.TWITTER) {
+    prefix = "0x0002"
+  }
+  identifier = "0".repeat(14 - identifier.length) + identifier;
+  identifier += prefix;
+  return identifier;
 }
 
 export class RequestBuilder {
@@ -163,7 +208,7 @@ export class RequestBuilder {
       authRequest.extraData = authRequest.extraData ?? "";
 
       if (authRequest.userId !== "0") {
-        //TODO resolveUserId(userId) => resolve, web2 accounts, ens etc.
+        authRequest.userId = toSismoIdentifier(authRequest.userId, authRequest.authType);
       }
     }
 
@@ -209,13 +254,4 @@ export class RequestBuilder {
 
     return signature;
   }
-}
-
-export type VerifiedClaim = Claim & {
-  proofId: string;
-  proofData: string;
-}
-
-export type VerifiedAuth = Auth & {
-  proofData: string;
 }

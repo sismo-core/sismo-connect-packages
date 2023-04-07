@@ -104,6 +104,15 @@ export type Claim = {
   extraData?: any;
 }
 
+export type VerifiedClaim = Claim & {
+  proofId: string;
+  proofData: string;
+}
+
+export type VerifiedAuth = Auth & {
+  proofData: string;
+}
+
 export class SismoConnectVerifiedResult {
   public auths: VerifiedAuth[];
   public claims: VerifiedClaim[];
@@ -138,6 +147,43 @@ export class SismoConnectVerifiedResult {
   public getSignedMessage(): string | undefined {
     return this.signedMessage;
   }
+}
+
+export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthType) => {
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return sismoIdentifier;
+
+  const isAlreadyResolved = (identifier) => {
+    if (identifier.length < 6) return true;
+    let hexRegex = /^0x[0-9a-fA-F]{6}/;
+    return !hexRegex.test(identifier);
+  }
+
+  if (isAlreadyResolved(sismoIdentifier)) return sismoIdentifier;
+
+  const removeLeadingZeros = (str) => {
+    let arr = str.split("");
+    while (arr.length > 1 && arr[0] === "0") {
+      arr.shift();
+    }
+    return arr.join("");
+  }
+  sismoIdentifier = sismoIdentifier.substring(6);
+  sismoIdentifier = removeLeadingZeros(sismoIdentifier);
+  return sismoIdentifier;
+}
+
+export const toSismoIdentifier = (identifier: string, authType: AuthType) => {
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return identifier;
+
+  const isAlreadySismoId = (identifier) => {
+    if (identifier.length < 6) return false;
+    let hexRegex = /^0x[0-9a-fA-F]{6}/;
+    return hexRegex.test(identifier);
+  }
+  
+  identifier = "0".repeat(14 - identifier.length) + identifier;
+  identifier += 
+  return "0x" + identifier; 
 }
 
 export class RequestBuilder {
@@ -209,13 +255,4 @@ export class RequestBuilder {
 
     return signature;
   }
-}
-
-export type VerifiedClaim = Claim & {
-  proofId: string;
-  proofData: string;
-}
-
-export type VerifiedAuth = Auth & {
-  proofData: string;
 }
