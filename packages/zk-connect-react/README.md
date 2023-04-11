@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    zkConnect React
+    sismoConnect React
   </h3>
 
   <p align="center">
@@ -20,9 +20,9 @@
   </p>
 </div>
 
-zkConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-You can see the documentation of the zkConnect React package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-react-request).
+You can see the documentation of the sismoConnect React package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-react-request).
 
 ## License
 

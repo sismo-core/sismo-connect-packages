@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    zkConnect Solidity
+    sismoConnect Solidity
   </h3>
 
   <p align="center">
@@ -21,11 +21,11 @@
 </div>
 
 
-zkConnect solidity is a Solidity library that allows you to verify the zk-proofs of your zkConnect Application onchain and simplify the use of the [zk-connect-onchain-verifier](https://github.com/sismo-core/zk-connect-onchain-verifier).
+sismoConnect solidity is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain and simplify the use of the [zk-connect-onchain-verifier](https://github.com/sismo-core/zk-connect-onchain-verifier).
 
-Here is the link to the full documentation of the library: [zkConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-solidity-library-verify-on-chain-soon)
+Here is the link to the full documentation of the library: [sismoConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-solidity-library-verify-on-chain-soon)
 
-You can learn more on zkConnect [here](https://docs.sismo.io/sismo-docs/readme/zkconnect).
+You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/zkconnect).
 
 # Use with Forge
 
@@ -48,13 +48,13 @@ import "zk-connect-solidity/SismoLib.sol";
 ```
 
 ## Usage
-Inherit ZkConnect library in your contract
+Inherit SismoConnect library in your contract
 
 ```sol
-contract ZKApp is ZkConnect  {
+contract ZKApp is SismoConnect  {
   constructor(
-      bytes16 appId, // the appId of your zkConnect app (you need to register your zkConnect app on https://factory.sismo.io)
-  )  ZkConnect(appId) {
+      bytes16 appId, // the appId of your sismoConnect app (you need to register your sismoConnect app on https://factory.sismo.io)
+  )  SismoConnect(appId) {
 
     ... 
   }
