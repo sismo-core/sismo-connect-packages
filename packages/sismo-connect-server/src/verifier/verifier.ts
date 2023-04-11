@@ -130,7 +130,7 @@ export class SismoConnectVerifier {
           })
           if (!proofFounded) {
             throw new Error(
-              `A required proof is missing for the authRequest with authType ${authRequest.authType} and isAnon ${authRequest.isAnon}`
+              `A required proof is missing for the authRequest with authType ${authRequest.authType}`
             )
           }
         }
@@ -172,6 +172,12 @@ export class SismoConnectVerifier {
             }`
           );
         }
+      }
+    } else {
+      if (signedMessage) {
+        throw new Error(
+          `The signature is missing in the verify function. Please ensure that the same signature is specified in the verify function as in your frontend.`
+        );
       }
     }
 

@@ -15,6 +15,7 @@ import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
 import { AuthType, ClaimType, VerifiedAuth, VerifiedClaim, SismoConnectProof } from "../common-types";
 import { ethers } from "ethers";
+import { keccak256 } from "ethers/lib/utils";
 import { decodeProofData } from './utils/proofData';
 import { isHexlify } from './utils/isHexlify';
 
@@ -430,11 +431,17 @@ export class HydraS2Verifier {
     }
     
     // proofIdentifier
-    if (!BigNumber.from(appId).eq(proofPublicInputs.vaultNamespace)) {
+    const expectedVaultNamespace = BigNumber.from(keccak256(
+      ethers.utils.solidityPack(
+        ["uint128", "uint128"],
+        [appId, BigNumber.from(0)]
+      )
+    )).mod(SNARK_FIELD);
+    if (!expectedVaultNamespace.eq(proofPublicInputs.vaultNamespace)) {
       throw new Error(
         `on proofId "${proofIdentifier}" vaultNamespace "${
-          proofPublicInputs.vaultNamespace
-        }" mismatch with appId "${BigNumber.from(appId).toString()}"`
+          expectedVaultNamespace
+        }" mismatch with input "${proofPublicInputs.vaultNamespace}"`
       );
     }
   }
