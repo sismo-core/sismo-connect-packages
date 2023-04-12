@@ -11,11 +11,14 @@
   </p>
   
   <p align="center">
+    <a href="https://twitter.com/sismo_eth" target="_blank">
+        <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white"/>
+    </a>
     <a href="https://discord.gg/sismo" target="_blank">
         <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/>
     </a>
-    <a href="https://twitter.com/sismo_eth" target="_blank">
-        <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white"/>
+    <a href="https://builders.sismo.io" target="_blank">
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
     </a>
   </p>
 </div>
@@ -77,7 +80,7 @@ Please, feel free to open issues, PRs or simply provide feedback!
 
 ## Contact
 
-Prefer [Discord](https://discord.gg/sismo) or [Twitter](https://twitter.com/sismo_eth)
+Send us a message in [Telegram](https://builders.sismo.io/) or [Discord](https://discord.gg/sismo)
 
 <br/>
 <img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
