@@ -39,7 +39,6 @@ yarn add @sismo-core/sismo-connect-client
 import {
   SismoConnect,
   SismoConnectClientConfig,
-  SismoConnectResponse,
 } from "@sismo-core/sismo-connect-client";
 
 const sismoConnectConfig: SismoConnectClientConfig = {
@@ -59,7 +58,7 @@ sismoConnect.request({ claims: {[CLAIM_REQUEST]} });
 ...
 
 // Receive the sismoConnectResponse from the Sismo Data vault
-const sismoConnectResponse: SismoConnectResponse = sismoConnect.getResponse();
+const sismoConnectResponse = sismoConnect.getResponse();
 ```
 
 ## License

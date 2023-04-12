@@ -24,6 +24,41 @@ sismoConnect is a privacy-preserving single sign-on method for applications. Onc
 
 You can see the documentation of the sismoConnect Server package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-server-verify-off-chain).
 
+## Installation
+```bash
+# with npm
+npm install @sismo-core/sismo-connect-react
+# with yarn
+yarn add @sismo-core/sismo-connect-react
+```
+
+## Usage
+```TypeScript
+import {
+  sismoConnect,
+  SismoConnectServerConfig,
+} from "@sismo-core/sismo-connect-react";
+
+const sismoConnectConfig: SismoConnectServerConfig = {
+  appId: "0x8f347ca31790557391cec39b06f02dc2", 
+}
+
+const sismoConnect = SismoConnect(sismoConnectConfig);
+
+const CLAIM_REQUEST = { groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a"};
+
+// verifies the proofs contained in the sismoConnectResponse 
+const { verifiedAuths, verifiedClaims } = await sismoConnect.verify(
+  // response returned by the Sismo Data Vault and then sent by the frontend
+  sismoConnectResponse,
+  { 
+    claims: {[CLAIM_REQUEST]}
+  }
+);
+
+const proofId = verifiedClaims[0].proofId;
+```
+
 ## License
 
 Distributed under the MIT License.
