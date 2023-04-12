@@ -24,11 +24,11 @@
 </div>
 
 
-sismoConnect solidity is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/zk-connect-onchain-verifier).
+sismoConnect solidity is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/sismo-connect-onchain-verifier).
 
-Here is the link to the full documentation of the library: [sismoConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-solidity-library-verify-on-chain-soon)
+Here is the link to the full documentation of the library: [sismoConnect Solidity Library](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/solidity-library)
 
-You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/zkconnect).
+You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
 # Use with Forge
 
@@ -42,7 +42,7 @@ forge install sismo-core/sismo-connect-packages
 Configure [remappings.txt](https://book.getfoundry.sh/projects/dependencies?highlight=remapping#remapping-dependencies) file:
 
 ```
-zk-connect-solidity/=lib/zk-connect-packages/packages/zk-connect-solidity/src/
+sismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect-solidity/src/
 ```
 
 Import in your contract

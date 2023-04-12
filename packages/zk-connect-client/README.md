@@ -27,7 +27,7 @@ sismoConnect is a privacy-preserving single sign-on method for applications. Onc
 
 The sismoConnect Client is a frontend package built on top of the Sismo Data Vault app (the prover) to easily request proofs from your users.
 
-You can see the documentation of the sismoConnect Client package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-client-request).
+You can see the documentation of the sismoConnect Client package [here](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/client).
 
 ## Installation
 ```bash

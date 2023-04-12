@@ -27,7 +27,7 @@ sismoConnect is a privacy-preserving single sign-on method for applications. Onc
 
 The sismoConnect React package is a wrapper of the sismoConnect client package which is a package build on top of the Sismo Data Vault app (the prover) to easily request proofs from your users.
 
-You can see the documentation of the sismoConnect React package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-react-request).
+You can see the documentation of the sismoConnect React package [here](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/react).
 
 ## Installation
 ```bash
