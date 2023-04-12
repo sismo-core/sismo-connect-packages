@@ -1,1 +1,1 @@
-zk-connect-onchain-verifier/=lib/zk-connect-onchain-verifier/
+sismo-connect-onchain-verifier/=lib/sismo-connect-onchain-verifier/
