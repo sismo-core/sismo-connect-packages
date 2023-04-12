@@ -20,9 +20,47 @@
   </p>
 </div>
 
-sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs).
+
+The sismoConnect Client is a frontend package built on top of the Sismo Data Vault app (the prover) to easily request proofs from your users.
 
 You can see the documentation of the sismoConnect Client package [here](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-client-request).
+
+## Installation
+```bash
+# with npm
+npm install @sismo-core/sismo-connect-client
+# with yarn
+yarn add @sismo-core/sismo-connect-client
+```
+
+## Usage
+```TypeScript
+import {
+  SismoConnect,
+  SismoConnectClientConfig,
+  SismoConnectResponse,
+} from "@sismo-core/sismo-connect-client";
+
+const sismoConnectConfig: SismoConnectClientConfig = {
+  appId: "0x8f347ca31790557391cec39b06f02dc2", 
+}
+
+const sismoConnect = SismoConnect(sismoConnectConfig);
+
+// Create Claims, Auths, or a signedMessage
+const CLAIM_REQUEST = { 
+    groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
+};
+
+// Create the sismoConnectRequest and launch it
+sismoConnect.request({ claims: {[CLAIM_REQUEST]} });
+
+...
+
+// Receive the sismoConnectResponse from the Sismo Data vault
+const sismoConnectResponse: SismoConnectResponse = sismoConnect.getResponse();
+```
 
 ## License
 
