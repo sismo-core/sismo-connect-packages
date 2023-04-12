@@ -3,7 +3,9 @@
 node_modules
 deployments
 package-lock.json
-lib
+**/lib/cjs/**
+**/lib/esm/**
+**/lib/*.ts
 build
 cache
 out

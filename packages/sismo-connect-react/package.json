@@ -1,0 +1,49 @@
+{
+  "name": "@sismo-core/sismo-connect-react",
+  "version": "0.0.1-beta.3",
+  "description": "sismoConnect React package",
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rollup -c --bundleConfigAsCjs",
+    "eslint": "eslint --max-warnings=0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "^18.0.28",
+    "postcss": "^8.4.21",
+    "rollup": "^3.15.0",
+    "rollup-plugin-dts": "^5.1.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "engines": {
+    "npm": "USE YARN INSTEAD OF NPM"
+  },
+  "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
+  "author": "leo@sismo.io",
+  "license": "MIT",
+  "lint-staged": {
+    "src/**/*": "prettier --write --ignore-unknown",
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings=0"
+    ]
+  },
+  "peerDependencies": {},
+  "dependencies": {
+    "@sismo-core/sismo-connect-client": "0.0.1-beta.2"
+  }
+}

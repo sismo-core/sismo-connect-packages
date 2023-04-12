@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    sismoConnect
+    sismoConnect Solidity
   </h3>
 
   <p align="center">
@@ -23,9 +23,10 @@
   </p>
 </div>
 
-sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs).
 
-Here is the link to the full documentation in our GitBook: [sismoConnect Packages](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect)
+sismoConnect solidity is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/sismo-connect-onchain-verifier).
+
+Here is the link to the full documentation of the library: [sismoConnect Solidity Library](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/solidity-library)
 
 You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 

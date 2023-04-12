@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    sismoConnect
+    sismoConnect Server
   </h3>
 
   <p align="center">
@@ -23,9 +23,11 @@
   </p>
 </div>
 
-sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs).
+sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-Here is the link to the full documentation in our GitBook: [sismoConnect Packages](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect)
+The sismoConnect Server is a backend package built on top of the Hydra-S2 Verifier to easily verify proofs from your users off-chain.
+
+Here is the link to the full documentation of the package: [sismoConnect Server package](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/server).
 
 You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
