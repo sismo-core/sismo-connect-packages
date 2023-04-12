@@ -30,41 +30,6 @@ Here is the link to the full documentation of the library: [sismoConnect Solidit
 
 You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
-# Use with Forge
-
-## Installation
-
-Install the library
-```bash
-forge install sismo-core/sismo-connect-packages
-```
-
-Configure [remappings.txt](https://book.getfoundry.sh/projects/dependencies?highlight=remapping#remapping-dependencies) file:
-
-```
-sismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect-solidity/src/
-```
-
-Import in your contract
-```solidity
-import "sismo-connect/SismoConnectLib.sol";
-```
-
-## Usage
-Inherit SismoConnect library in your contract
-
-```solidity
-contract ZKApp is SismoConnect  {
-  constructor(
-    // the appId of your sismoConnect app (you need to register your sismoConnect app on https://factory.sismo.io)
-    bytes16 appId,
-  ) SismoConnect(appId) {
-
-    ... 
-  }
-}
-```
-
 ## License
 
 Distributed under the MIT License.

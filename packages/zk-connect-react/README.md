@@ -25,50 +25,11 @@
 
 sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
 
-The sismoConnect React package is a wrapper of the sismoConnect client package which is a package build on top of the Sismo Data Vault app (the prover) to easily request proofs from your users.
+The sismoConnect React package is a wrapper of the sismoConnect Client package which allows to easily request data from the Sismo Data Vault app.
 
-You can see the documentation of the sismoConnect React package [here](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/react).
+Here is the link to the full documentation of the package: [sismoConnect React package](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/react).
 
-## Installation
-```bash
-# with npm
-npm install @sismo-core/sismo-connect-react
-# with yarn
-yarn add @sismo-core/sismo-connect-react
-```
-
-## Usage
-```TypeScript
-import {
-  SismoConnectButton,
-  SismoConnectClientConfig,
-  SismoConnectResponse,
-} from "@sismo-core/sismo-connect-react";
-
-const sismoConnectConfig: SismoConnectClientConfig = {
-  appId: "0x8f347ca31790557391cec39b06f02dc2", 
-}
-
-export default function fullSismoConnectFlow() {
-  let verifying = false;
-
-  const verify = async (response: SismoConnectResponse) => {
-    verifying = true;
-    // verify the proof on a server using sismo-connect-server
-    ...
-  }
-
-  return(
-    <SismoConnectButton
-      config={sismoConnectConfig}
-      signature={{ message: "0x1234568" }}
-      claims={[{ groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a" }]}
-      onResponse={(response: SismoConnectResponse) => verify(response)}
-      verifying={verifying}
-    />
-  );
-}
-```
+You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
 ## License
 

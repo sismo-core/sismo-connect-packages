@@ -23,9 +23,11 @@
   </p>
 </div>
 
-sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs).
 
 Here is the link to the full documentation in our GitBook: [sismoConnect Packages](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect)
+
+You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
 ## License
 
