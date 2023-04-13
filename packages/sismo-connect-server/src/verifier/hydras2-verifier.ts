@@ -227,9 +227,9 @@ export class HydraS2Verifier {
 
     let extraData = null;
     if (isHexlify(signedMessage)) {
-      extraData = ethers.utils.keccak256(ethers.utils.hexlify(signedMessage));
+      extraData = ethers.utils.hexlify(signedMessage);
     } else {
-      extraData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(signedMessage));
+      extraData = ethers.utils.toUtf8Bytes(signedMessage);
     }
     const expectedSignedMessage = BigNumber.from(ethers.utils.keccak256(extraData)).mod(SNARK_FIELD);
     

@@ -9,6 +9,7 @@ import {
   SismoConnectVerifiedResult,
   SignatureRequest,
   SismoConnectProof,
+  AuthType,
 } from '../common-types'
 import { HydraS2Verifier, HydraS2VerifierOpts } from './hydras2-verifier'
 import { Provider } from '@ethersproject/abstract-provider'
@@ -119,7 +120,7 @@ export class SismoConnectVerifier {
             if (!proof.auths) return false;
             for (let auth of proof.auths) {
               //If the request ask a specific userId
-              if (authRequest.isSelectableByUser && authRequest.userId !== auth.userId) {
+              if (authRequest.authType !== AuthType.VAULT && !authRequest.isSelectableByUser && authRequest.userId !== auth.userId) {
                 return false;
               }
               if (authRequest.authType === auth.authType) {
