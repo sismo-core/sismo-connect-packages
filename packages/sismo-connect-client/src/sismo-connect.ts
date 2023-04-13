@@ -43,7 +43,9 @@ export class SismoConnectClient {
 
   public request = ({
     claims,
+    claim,
     auths,
+    auth,
     signature,
     namespace,
     callbackPath,
@@ -52,7 +54,9 @@ export class SismoConnectClient {
       throw new Error(`requestProof is not available outside of a browser`)
     const url = this.getRequestLink({
       claims,
+      claim,
       auths,
+      auth,
       signature,
       namespace,
       callbackPath,
@@ -62,15 +66,25 @@ export class SismoConnectClient {
 
   public getRequestLink = ({
     claims,
+    claim,
     auths,
+    auth,
     signature,
     namespace,
     callbackPath,
   }: RequestParams): string => {
-    if (!claims && !auths && !signature) {
+    if (!claims && !auths && !signature && !claim && !auth) {
       throw new Error(
         `claims or auths or signature is required`
       )
+    }
+
+    if (auths && auth) {
+      throw new Error("You can't use both auth and auths");
+    }
+
+    if (claims && claim) {
+      throw new Error("You can't use both claim and claims");
     }
 
     let url = `${
@@ -80,12 +94,16 @@ export class SismoConnectClient {
     }`
 
     if (claims) {
-      claims = RequestBuilder.buildClaims(claims);
-      url += `&claims=${JSON.stringify(claims)}`;
+      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claims))}`;
+    }
+    if (claim) {
+      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claim))}`;
     }
     if (auths) {
-      auths = RequestBuilder.buildAuths(auths);
-      url += `&auths=${JSON.stringify(auths)}`;
+      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auths))}`;
+    }
+    if (auth) {
+      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auth))}`;
     }
     if (signature) {
       signature = RequestBuilder.buildSignature(signature);

@@ -119,7 +119,7 @@ export class SismoConnectVerifier {
             if (!proof.auths) return false;
             for (let auth of proof.auths) {
               //If the request ask a specific userId
-              if (authRequest.userId !== '0' && !authRequest.isSelectableByUser && authRequest.userId !== auth.userId) {
+              if (authRequest.isSelectableByUser && authRequest.userId !== auth.userId) {
                 return false;
               }
               if (authRequest.authType === auth.authType) {
