@@ -1,4 +1,4 @@
-import { proofMock1 } from './mocks'
+import { sismoConnectSimpleClaimResponseMock } from './mocks'
 import { BigNumber } from '@ethersproject/bignumber'
 import { HydraS2VerifierMocked } from './hydras2-verifier-mocked'
 import { encodeRequestIdentifier } from '../src/verifier/utils/encodeRequestIdentifier'
@@ -9,16 +9,13 @@ import {
   ClaimType,
   VerifiedClaim,
   SismoConnectProof,
-  SismoConnectVerifier,
-  AuthRequest,
 } from '../src'
-import { ProvingScheme } from '../src'
 import {
   decodeProofData,
   encodeProofData,
 } from '../src/verifier/utils/proofData'
 
-describe('ZkConnect Verifier', () => {
+describe('Sismo Connect Verifier', () => {
   let appId: string
   let groupId: string
   let groupTimestamp: number | 'latest'
@@ -30,14 +27,14 @@ describe('ZkConnect Verifier', () => {
   let proof: SismoConnectProof
 
   let hydraS2VerifierMocked: HydraS2VerifierMocked
-  let sismoConnectVerifier: SismoConnectVerifier
   let namespace: string
 
   let claimRequest: ClaimRequest
-  let authRequest: AuthRequest
 
   let proofIdentifier: string
   let vaultIdentifier: string
+
+  let commitmentMapperPubKey: [BigNumber, BigNumber];
 
   let expectVerifyClaimToThrow: (
     proof: SismoConnectProof,
@@ -45,7 +42,7 @@ describe('ZkConnect Verifier', () => {
   ) => Promise<void>
 
   beforeAll(() => {
-    appId = '0xf68985adfc209fafebfb1a956913e7fa'
+    appId = '0x112a692a2005259c25f6094161007967'
     groupId = '0x682544d549b8a461d7fe3e589846bb7b'
     namespace = 'main'
     groupTimestamp = 'latest'
@@ -59,28 +56,32 @@ describe('ZkConnect Verifier', () => {
         claimType
     };
 
+    const snarkProof = decodeProofData(sismoConnectSimpleClaimResponseMock.proofs[0].proofData);
+
     proofPublicInputs = {
-      destinationIdentifier: proofMock1.snarkProof.input[0],
-      extraData: proofMock1.snarkProof.input[1],
-      commitmentMapperPubKeyX: proofMock1.snarkProof.input[2],
-      commitmentMapperPubKeyY: proofMock1.snarkProof.input[3],
-      registryTreeRoot: proofMock1.snarkProof.input[4],
-      requestIdentifier: proofMock1.snarkProof.input[5],
-      proofIdentifier: proofMock1.snarkProof.input[6],
-      claimValue: proofMock1.snarkProof.input[7],
-      accountsTreeValue: proofMock1.snarkProof.input[8],
-      claimType: proofMock1.snarkProof.input[9],
-      vaultIdentifier: proofMock1.snarkProof.input[10],
-      vaultNamespace: proofMock1.snarkProof.input[11],
-      sourceVerificationEnabled: proofMock1.snarkProof.input[12],
-      destinationVerificationEnabled: proofMock1.snarkProof.input[13],
+      destinationIdentifier: BigNumber.from(snarkProof.input[0]).toHexString(),
+      extraData: BigNumber.from(snarkProof.input[1]).toHexString(),
+      commitmentMapperPubKeyX: BigNumber.from(snarkProof.input[2]).toHexString(),
+      commitmentMapperPubKeyY: BigNumber.from(snarkProof.input[3]).toHexString(),
+      registryTreeRoot: BigNumber.from(snarkProof.input[4]).toHexString(),
+      requestIdentifier: BigNumber.from(snarkProof.input[5]).toString(),
+      proofIdentifier: BigNumber.from(snarkProof.input[6]).toString(),
+      claimValue: BigNumber.from(snarkProof.input[7]).toString(),
+      accountsTreeValue: BigNumber.from(snarkProof.input[8]).toString(),
+      claimType: BigNumber.from(snarkProof.input[9]).toString(),
+      vaultIdentifier: BigNumber.from(snarkProof.input[10]).toHexString(),
+      vaultNamespace: BigNumber.from(snarkProof.input[11]).toHexString(),
+      sourceVerificationEnabled: BigNumber.from(snarkProof.input[12]).toHexString(),
+      destinationVerificationEnabled: BigNumber.from(snarkProof.input[13]).toHexString(),
     }
 
+    commitmentMapperPubKey = [
+      BigNumber.from(snarkProof.input[2]),
+      BigNumber.from(snarkProof.input[3]),
+    ]
+
     hydraS2VerifierMocked = new HydraS2VerifierMocked({
-      commitmentMapperPubKey: [
-        BigNumber.from(proofMock1.snarkProof.input[2]),
-        BigNumber.from(proofMock1.snarkProof.input[3]),
-      ],
+      commitmentMapperPubKey,
     })
 
     verifiedClaim = {
@@ -88,26 +89,18 @@ describe('ZkConnect Verifier', () => {
       groupTimestamp,
       value,
       claimType,
+      isSelectableByUser: false,
+      extraData: "",
       proofId: BigNumber.from(proofPublicInputs.proofIdentifier).toHexString(),
       proofData: encodeProofData(
-        proofMock1.snarkProof.a,
-        proofMock1.snarkProof.b,
-        proofMock1.snarkProof.c,
-        proofMock1.snarkProof.input
+        snarkProof.a,
+        snarkProof.b,
+        snarkProof.c,
+        snarkProof.input
       ),
     }
 
-    proof = {
-      claims: [{
-        groupId,
-        groupTimestamp,
-        value,
-        claimType,
-      }],
-      provingScheme:ProvingScheme.HYDRA_S2,
-      proofData: encodeProofData(proofMock1.snarkProof.a, proofMock1.snarkProof.b, proofMock1.snarkProof.c, proofMock1.snarkProof.input),
-      extraData: "",
-    };
+    proof = sismoConnectSimpleClaimResponseMock.proofs[0];
 
     vaultIdentifier = proofPublicInputs.vaultIdentifier
     proofIdentifier = proofPublicInputs.proofIdentifier
@@ -126,14 +119,14 @@ describe('ZkConnect Verifier', () => {
     }
   })
 
-  it('Should encode the right external nullifier', async () => {
-    const externalNullifier = encodeRequestIdentifier(
+  it('Should encode the right request identifier', async () => {
+    const requestIdentifier = encodeRequestIdentifier(
       appId,
       groupId,
       groupTimestamp,
       namespace
     )
-    expect(BigNumber.from(externalNullifier).toString()).toEqual(
+    expect(BigNumber.from(requestIdentifier).toString()).toEqual(
       proofPublicInputs.requestIdentifier
     )
   })
@@ -207,7 +200,7 @@ describe('ZkConnect Verifier', () => {
       it('Should throw with incorrect input commitmentMapperPubKeyX', async () => {
         const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
-        proofDecoded.input[2] = proofDecoded.input[2] + '1'
+        proofDecoded.input[2] = '0x1'
         const proofEncoded = encodeProofData(
           proofDecoded.a,
           proofDecoded.b,
@@ -219,7 +212,7 @@ describe('ZkConnect Verifier', () => {
         await expectVerifyClaimToThrow(
           invalidProof,
           `on proofId "${proofIdentifier}" commitmentMapperPubKeyX "${BigNumber.from(
-            proofMock1.commitmentMapperPubKey[0]
+            commitmentMapperPubKey[0]
           ).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(
             proofDecoded.input[2]
           ).toHexString()}"`
@@ -229,7 +222,7 @@ describe('ZkConnect Verifier', () => {
       it('Should throw with incorrect input commitmentMapperPubKeyX', async () => {
         const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
-        proofDecoded.input[3] = '1'
+        proofDecoded.input[3] = '0x1'
         const proofEncoded = encodeProofData(
           proofDecoded.a,
           proofDecoded.b,
@@ -241,7 +234,7 @@ describe('ZkConnect Verifier', () => {
         await expectVerifyClaimToThrow(
           invalidProof,
           `on proofId "${proofIdentifier}" commitmentMapperPubKeyY "${BigNumber.from(
-            proofMock1.commitmentMapperPubKey[1]
+            commitmentMapperPubKey[1]
           ).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(
             proofDecoded.input[3]
           ).toHexString()}"`

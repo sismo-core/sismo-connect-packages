@@ -1,15 +1,13 @@
 import {
-  AuthType,
   ClaimRequest,
   ClaimType,
   VerifiedClaim,
   SismoConnect,
   SismoConnectResponse,
   SismoConnectServer,
-  AuthRequest,
   SISMO_CONNECT_VERSION,
 } from "../src";
-import { sismoConnectResponseMock } from "./mocks";
+import { sismoConnectSimpleClaimResponseMock } from "./mocks";
 import { ethers } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { decodeProofData } from "../src/verifier/utils/proofData";
@@ -25,12 +23,13 @@ describe('ZkConnect', () => {
   let groupTimestamp: number | 'latest'
   let value: number
   let claimType: ClaimType
+  let commitmentMapperPubKey: [string, string];
 
   beforeAll(() => {
-    appId = '0xf68985adfc209fafebfb1a956913e7fa'
+    appId = '0x112a692a2005259c25f6094161007967'
     groupId = '0x682544d549b8a461d7fe3e589846bb7b'
     namespace = 'main'
-    sismoConnectResponse = sismoConnectResponseMock
+    sismoConnectResponse = sismoConnectSimpleClaimResponseMock
     groupTimestamp = 'latest'
     value = 1
     claimType = ClaimType.GTE
@@ -39,6 +38,12 @@ describe('ZkConnect', () => {
       'https://rpc.ankr.com/eth_goerli',
       5
     )
+    
+    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData);
+    commitmentMapperPubKey = [
+      BigNumber.from(snarkProof.input[2]).toHexString(),
+      BigNumber.from(snarkProof.input[3]).toHexString(),
+    ]
 
     claimRequest = {
       groupId,
@@ -50,22 +55,19 @@ describe('ZkConnect', () => {
         provider: _provider,
         verifier: {
           hydraS2: {
-            commitmentMapperPubKeys: [
-              "0x07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb9",
-              "0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa"
-            ]
+            commitmentMapperPubKeys: commitmentMapperPubKey
           },
         },
       },
     })
-
-    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData);
 
     verifiedClaim = {
         groupId,
         groupTimestamp,
         value,
         claimType,
+        extraData: "",
+        isSelectableByUser: false,
         proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
         proofData: sismoConnectResponse.proofs[0].proofData
     };

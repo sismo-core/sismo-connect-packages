@@ -206,9 +206,20 @@ export class RequestBuilder {
 
       authRequest.isAnon = false;
       authRequest.isOptional = authRequest.isOptional ?? false;
-      authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? false;
       authRequest.userId = authRequest.userId ?? "0";
       authRequest.extraData = authRequest.extraData ?? "";
+
+      if (authRequest.userId === "0") {
+        authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? true;
+      } else {
+        if (authRequest.isSelectableByUser) throw new Error("Could not select isSelectableByUser true and a specific userId")
+        authRequest.isSelectableByUser = false;
+      }
+
+      if (authRequest.authType === AuthType.VAULT) {
+        authRequest.isSelectableByUser = false;
+        authRequest.userId = "0"
+      }
 
       if (authRequest.userId !== "0") {
         authRequest.userId = toSismoIdentifier(authRequest.userId, authRequest.authType);

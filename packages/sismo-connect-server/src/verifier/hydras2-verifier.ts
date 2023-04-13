@@ -227,17 +227,17 @@ export class HydraS2Verifier {
 
     let extraData = null;
     if (isHexlify(signedMessage)) {
-      extraData = ethers.utils.keccak256(ethers.utils.hexlify(signedMessage));
+      extraData = ethers.utils.hexlify(signedMessage);
     } else {
-      extraData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(signedMessage));
+      extraData = ethers.utils.toUtf8Bytes(signedMessage);
     }
-    const signedMessage = BigNumber.from(ethers.utils.keccak256(extraData)).mod(SNARK_FIELD);
+    const expectedSignedMessage = BigNumber.from(ethers.utils.keccak256(extraData)).mod(SNARK_FIELD);
     
-    if (!BigNumber.from(proofPublicInputs.extraData).eq(signedMessage)) {
+    if (!BigNumber.from(proofPublicInputs.extraData).eq(expectedSignedMessage)) {
       throw new Error(
         `on proofId "${proofIdentifier}" extraData "${
           BigNumber.from(proofPublicInputs.extraData).toHexString()
-        }" mismatch with signedMessage "${signedMessage.toHexString()}"`
+        }" mismatch with signedMessage "${expectedSignedMessage.toHexString()}"`
       );
     }
   }
@@ -278,13 +278,13 @@ export class HydraS2Verifier {
 
     if (auth.authType === AuthType.VAULT && !BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)) {
       throw new Error(
-        `userId "${auth.userId}" mismatch with proof input vaultIdentifier ${proofPublicInputs.vaultIdentifier}`
+        `userId "${BigNumber.from(auth.userId).toHexString()}" mismatch with proof input vaultIdentifier ${BigNumber.from(proofPublicInputs.vaultIdentifier).toHexString()}`
       );
     }
 
-    if (auth.authType !== AuthType.VAULT && auth.userId !== proofPublicInputs.destinationIdentifier) {
+    if (auth.authType !== AuthType.VAULT && !BigNumber.from(auth.userId).eq(proofPublicInputs.destinationIdentifier)) {
       throw new Error(
-        `userId "${auth.userId}" mismatch with proof input destinationIdentifier ${proofPublicInputs.destinationIdentifier}`
+        `userId "${BigNumber.from(auth.userId).toHexString()}" mismatch with proof input destinationIdentifier ${BigNumber.from(proofPublicInputs.destinationIdentifier).toHexString()}`
       );
     }
 

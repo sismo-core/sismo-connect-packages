@@ -7,7 +7,9 @@ import { useSismoConnect } from "../../hooks/useSismoConnect";
 
 type ButtonProps = {
   appId?: string;
+  claim?: ClaimRequest;
   claims?: ClaimRequest[];
+  auth?: AuthRequest;
   auths?: AuthRequest[];
   signature?: SignatureRequest;
   onResponse?: (response: SismoConnectResponse) => void;
@@ -22,7 +24,9 @@ type ButtonProps = {
 export const SismoConnectButton = ({
   appId,
   claims,
+  claim,
   auths,
+  auth,
   signature,
   onResponse,
   onResponseBytes,
@@ -38,8 +42,15 @@ export const SismoConnectButton = ({
   if (appId && config && appId !== config.appId) {
     throw new Error("the 'appId' props of your ZkConnectButton is different from the 'appId' in your configuration. Please add the same 'appId' props as in your configuration or remove the 'appId' prop")
   }
-  if (!claims && !auths && !signature) {
+  if (!claims && !auths && !signature && !claim && !auth) {
     throw new Error("Please specify at least one claimRequest or authRequest or signatureRequest");
+  }
+
+  if (claim && claims) {
+    throw new Error("You can't use both claim and claims props");
+  }
+  if (auth && auths) {
+    throw new Error("You can't use both auth and auths props");
   }
 
   const { sismoConnect, response, responseBytes } = useSismoConnect({ 
@@ -70,6 +81,8 @@ export const SismoConnectButton = ({
         sismoConnect.request({
           claims,
           auths,
+          claim,
+          auth,
           signature,
           callbackPath,
           namespace
@@ -93,7 +106,7 @@ export const SismoConnectButton = ({
           verifying ? 
             "verifying..."
             :
-            "sismoConnect"
+            "Sign in with Sismo"
         }
       </div>
     </button>
