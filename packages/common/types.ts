@@ -216,6 +216,11 @@ export class RequestBuilder {
         authRequest.isSelectableByUser = false;
       }
 
+      if (authRequest.authType === AuthType.VAULT) {
+        authRequest.isSelectableByUser = false;
+        authRequest.userId = "0"
+      }
+
       if (authRequest.userId !== "0") {
         authRequest.userId = toSismoIdentifier(authRequest.userId, authRequest.authType);
       }
