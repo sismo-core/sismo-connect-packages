@@ -193,7 +193,7 @@ export class RequestBuilder {
     if (!auths) {
       return [];
     }
-    if ((auths as AuthRequest)?.authType) {
+    if (typeof (auths as AuthRequest)?.authType !== undefined) {
       auths = [(auths as AuthRequest)];
     }
     auths = auths as AuthRequest[];
