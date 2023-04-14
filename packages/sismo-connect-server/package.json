@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-server",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "sismoConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
