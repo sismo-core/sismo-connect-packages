@@ -97,10 +97,10 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@sismo-core/sismo-connect-client@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.6.tgz#91fbca7985f3ca34a3beab28caa4fa49c4538337"
-  integrity sha512-bhZ5Kpy+epjwfARwavs43kjQfk/p+/vKXteqA6Bcg33nz/j0fYQ4ZV6Hq8KEq7ITfOtssAgDGGD2JY9XOcvn0g==
+"@sismo-core/sismo-connect-client@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.7.tgz#d58eb1f9399ee43d32a077812b17e1b61d18b6b9"
+  integrity sha512-CiOpl07sblvZtAWIPqImakB4p3KqaBTLICShB4XrU9qsKb2ZKys6dOn8evPWxgWxT3j9v2FdIe+eJ5E0ZFN8QQ==
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
 
