@@ -13,7 +13,7 @@ import { Provider } from "@ethersproject/abstract-provider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRequestIdentifier } from "./utils/encodeRequestIdentifier";
 import { encodeAccountsTreeValue } from "./utils/encodeAccountsTreeValue";
-import { AuthType, ClaimType, VerifiedAuth, VerifiedClaim, SismoConnectProof } from "../common-types";
+import { AuthType, ClaimType, VerifiedAuth, VerifiedClaim, SismoConnectProof, resolveSismoIdentifier } from "../common-types";
 import { ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
 import { decodeProofData } from './utils/proofData';
@@ -183,12 +183,7 @@ export class HydraS2Verifier {
       //userId is the destination
       userId = snarkProof.input[0];
       userId = BigNumber.from(userId).toHexString();
-      if (auth.authType !== AuthType.EVM_ACCOUNT) {
-        //Remove account indicator E.g for github 0x0001 and twitter 0x0002
-        userId = userId.substring(6);
-        userId = BigNumber.from(userId).toNumber();
-        userId = userId.toString();
-      }
+      userId = resolveSismoIdentifier(userId, auth.authType);
     }
 
     return { 
