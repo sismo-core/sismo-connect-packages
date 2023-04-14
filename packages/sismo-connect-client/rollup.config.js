@@ -23,6 +23,11 @@ export default [
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
     ],
+    external: [
+      "viem",
+      "js-base64",
+      "pako"
+    ]
   },
   {
     input: "lib/esm/types/index.d.ts",

@@ -4,6 +4,9 @@ import {
 } from './common-types'
 import { Sdk, GroupParams } from './sdk'
 import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL } from './constants'
+//import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
+import { unCompressResponse } from './utils/unCompressResponse'
+import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
 
 export const SismoConnect = (config: SismoConnectClientConfig): SismoConnectClient => {
   return new SismoConnectClient(config)
@@ -119,6 +122,7 @@ export class SismoConnectClient {
     if (namespace) {
       url += `&namespace=${namespace}`
     }
+    url += `&compressed=true`
     return url
   }
 
@@ -126,10 +130,10 @@ export class SismoConnectClient {
     if (!window)
       throw new Error(`getResponse is not available outside of a browser`)
     const url = new URL(window.location.href)
-    if (url.searchParams.has('sismoConnectResponse')) {
-      return JSON.parse(
-        url.searchParams.get('sismoConnectResponse') as string
-      ) as SismoConnectResponse
+    if (url.searchParams.has('sismoConnectResponseCompressed')) {
+      const compressedResponse = url.searchParams.get('sismoConnectResponseCompressed');
+      const uncompressedResponse = unCompressResponse(compressedResponse);
+      return JSON.parse(uncompressedResponse) as SismoConnectResponse;
     }
     return null
   }
@@ -142,8 +146,11 @@ export class SismoConnectClient {
     if (!window)
       throw new Error(`getResponse is not available outside of a browser`)
     const url = new URL(window.location.href)
-    if (url.searchParams.has('sismoConnectResponseBytes')) {
-      return url.searchParams.get('sismoConnectResponseBytes') as string
+    if (url.searchParams.has('sismoConnectResponseCompressed')) {
+      const compressedResponse = url.searchParams.get('sismoConnectResponseCompressed');
+      const uncompressedResponse = unCompressResponse(compressedResponse);
+      const sismoConnectResponse = JSON.parse(uncompressedResponse) as SismoConnectResponse;
+      return toSismoConnectResponseBytes(sismoConnectResponse);
     }
     return null
   }

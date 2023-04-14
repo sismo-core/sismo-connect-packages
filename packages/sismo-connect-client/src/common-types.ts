@@ -7,7 +7,7 @@ export type SismoConnectRequest = {
   namespace?: string;
   
   auths?: AuthRequest[];
-	claims?: ClaimRequest[];
+  claims?: ClaimRequest[];
   signature?: SignatureRequest;
   
   devConfig?: DevConfig;
@@ -19,8 +19,8 @@ export type AuthRequest = {
   authType: AuthType;
   isAnon?: boolean; //false
   userId?: string;
-	isOptional?: boolean;	
-  isSelectableByUser?: boolean;	 
+  isOptional?: boolean; 
+  isSelectableByUser?: boolean;  
   extraData?: any;
 }
 
@@ -30,15 +30,15 @@ export type ClaimRequest = {
   groupTimestamp?: number | "latest";
   value?: number;
   
-	isOptional?: boolean; 
+  isOptional?: boolean; 
   isSelectableByUser?: boolean;
 
   extraData?: any;
 }
 
 export type SignatureRequest = {
-	 message: string;
-	 isSelectableByUser?: boolean;	 
+   message: string;
+   isSelectableByUser?: boolean;   
    extraData?: any;
 }
 
@@ -211,8 +211,8 @@ export class RequestBuilder {
 
       if (authRequest.userId === "0") {
         authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? true;
+        if (authRequest.isSelectableByUser === false) throw new Error("Could not select isSelectableByUser false and a specific userId")
       } else {
-        if (authRequest.isSelectableByUser) throw new Error("Could not select isSelectableByUser true and a specific userId")
         authRequest.isSelectableByUser = false;
       }
 
@@ -269,3 +269,4 @@ export class RequestBuilder {
     return signature;
   }
 }
+
