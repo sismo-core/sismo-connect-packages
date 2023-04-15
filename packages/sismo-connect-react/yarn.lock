@@ -143,10 +143,10 @@
     "@noble/hashes" "~1.3.0"
     "@scure/base" "~1.1.0"
 
-"@sismo-core/sismo-connect-client@0.0.8-beta.1":
-  version "0.0.8-beta.1"
-  resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.8-beta.1.tgz#d5d23f268c5a2746490009b4ce74a25d06ab3b49"
-  integrity sha512-78gxJW0G/HxeyJpMC/2RgfqNMMt9lMe7ckBPHIs6UImDsYWt74yRMzh9tY7bCySQLZGG8E/YouFEAIt/8md4hQ==
+"@sismo-core/sismo-connect-client@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.9.tgz#c51f083382e19fc283065bf6fd17a576f169d1ec"
+  integrity sha512-1l1aku4cfc2VJpCx09wg2kUcJC3LymjSlAKovm0DVIzwHWBof27VpGLkAU2rC4uIE9s+cGEyHvy2bp5E1YITKQ==
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
     js-base64 "^3.7.5"
@@ -1173,9 +1173,9 @@ util-deprecate@^1.0.2:
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
 viem@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-0.3.1.tgz#1da35b7a6fa18ba1e511ddef2372b8841e2afa73"
-  integrity sha512-snWgwW3ZZzZts0fI4cqweOTzNV6vKTxTpktGxkOz4np31w6b7YUjczHU6SZ5JmWhNPWAw3PTckzj7e1V6DuPJA==
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-0.3.2.tgz#adfd45aeeeda96782623d867f1b59a3aba2f1932"
+  integrity sha512-JhoTT3JSnya17JYOjt8QALICkLIg0SVfYtP7RxF3uqTzPQq7ZtDSrZGgHbEGwIFhMmdRTz9SwDVCjloeAbirFA==
   dependencies:
     "@adraffy/ens-normalize" "1.9.0"
     "@noble/curves" "0.9.0"

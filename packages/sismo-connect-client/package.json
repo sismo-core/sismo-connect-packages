@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-client",
-  "version": "0.0.8-beta.1",
+  "version": "0.0.9",
   "description": "Sismo Connect client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",

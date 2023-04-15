@@ -211,7 +211,6 @@ export class RequestBuilder {
 
       if (authRequest.userId === "0") {
         authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? true;
-        if (authRequest.isSelectableByUser === false) throw new Error("Could not select isSelectableByUser false and a specific userId")
       } else {
         authRequest.isSelectableByUser = false;
       }
