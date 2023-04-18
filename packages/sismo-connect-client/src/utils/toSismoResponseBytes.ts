@@ -18,23 +18,12 @@ export const hexlify = (data) => {
     return isHex(data) ? data as Hex : toHex(data);
 } 
 
-const encodeSignedMessage = (signedMessage) => {
-    if (signedMessage) {
-        if (isHex(signedMessage)) {
-            return toHex(signedMessage);
-        } else {
-            return toBytes(signedMessage);
-        }
-    }
-    return toBytes("0x0000000000000000000000000000000000000000000000000000000000000000");
-}
-
 const formatResponseToEncode = (sismoConnectResponse: SismoConnectResponse) => {
     return {
         appId: toBytes16(sismoConnectResponse.appId),
         namespace: toBytes16(sismoConnectResponse?.namespace ?? "main"),
         version: toBytes32(sismoConnectResponse.version),
-        signedMessage: encodeSignedMessage(sismoConnectResponse.signedMessage),
+        signedMessage: sismoConnectResponse.signedMessage as `0x${string}` ?? toBytes("0x0000000000000000000000000000000000000000000000000000000000000000"),
         proofs: sismoConnectResponse.proofs?.map(proof => {
             return {
                 claims: proof.claims?.map(claim => {
