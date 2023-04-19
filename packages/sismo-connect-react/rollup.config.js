@@ -23,6 +23,11 @@ export default [
       typescript({ tsconfig: "./tsconfig.json" }),
       postcss(),
     ],
+    external: [
+      "viem",
+      "js-base64",
+      "pako"
+    ]
   },
   {
     input: "lib/esm/types/index.d.ts",
