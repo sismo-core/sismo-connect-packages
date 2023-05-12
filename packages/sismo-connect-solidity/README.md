@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    sismoConnect Solidity
+    Sismo Connect Solidity
   </h3>
 
   <p align="center">
@@ -24,11 +24,42 @@
 </div>
 
 
-sismoConnect solidity is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/sismo-connect-onchain-verifier).
+Sismo Connect Solidity is a Solidity library that allows you to verify the zk-proofs of your Sismo Connect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/sismo-connect-onchain-verifier).
 
-Here is the link to the full documentation of the library: [sismoConnect Solidity Library](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/solidity-library)
+Here is the link to the full documentation of the library: [Sismo Connect Solidity Library](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/solidity)
 
-You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
+You can learn more on Sismo Connect [here](https://docs.sismo.io/discover-sismo-connect/empower-your-app).
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/download/) >= 18.15.0 (Latest LTS version)
+- [Yarn](https://classic.yarnpkg.com/en/docs/install)
+- [Foundry](https://book.getfoundry.sh/)
+
+## Usage
+
+### Installation
+
+```bash
+# update foundry
+foundryup
+
+# install the package
+forge install sismo-core/sismo-connect-packages --no-commit
+
+# add the remapping in remappings.txt
+echo "\nsismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect-solidity/src/" >> remappings.txt
+```
+
+### Import the library
+In your solidity file:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+import "sismo-connect-solidity/SismoLib.sol"; // import the library
+```
 
 ## License
 

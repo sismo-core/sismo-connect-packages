@@ -3,7 +3,7 @@
   <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    sismoConnect Server
+    Sismo Connect Server
   </h3>
 
   <p align="center">
@@ -23,13 +23,42 @@
   </p>
 </div>
 
-sismoConnect is a privacy-preserving single sign-on method for applications. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs). 
+Sismo Connect is single sign-on method for applications enabling aggregated data requests to users thanks to privacy. Once integrated, applications can request private, granular data from users, while users can authenticate and selectively reveal their data thanks to zero-knowledge proofs (ZKPs).
 
-The sismoConnect Server is a backend package built on top of the Hydra-S2 Verifier to easily verify proofs from your users off-chain.
+The Sismo Connect Server is a backend package built on top of the Hydra-S2 Verifier to easily verify proofs from your users off-chain.
 
-Here is the link to the full documentation of the package: [sismoConnect Server package](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/server).
+Here is the link to the full documentation of the package: [Sismo Connect Server package](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/server).
 
-You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
+You can learn more on Sismo Connect [here](https://docs.sismo.io/discover-sismo-connect/empower-your-app).
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/download/) >= 18.15.0 (Latest LTS version)
+
+## Usage
+### Installation
+Install Sismo Connect server package in your backend with npm or yarn:
+```bash
+# with npm
+npm i @sismo-core/sismo-connect-server
+# with yarn
+yarn add @sismo-core/sismo-connect-server
+```
+
+### Import
+Import the package in your backend:
+```typescript
+import { SismoConnect, SismoConnectServerConfig } from "@sismo-core/sismo-connect-server";
+
+const config: SismoConnectServerConfig = {
+  // you will need to register an appId in the Sismo Factory
+  appId: "0x8f347ca31790557391cec39b06f02dc2",
+}
+
+// create a new Sismo Connect instance with the server configuration
+const sismoConnect = SismoConnect(config);
+```
+
+See the full documentation [here](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/server).
 
 ## License
 
