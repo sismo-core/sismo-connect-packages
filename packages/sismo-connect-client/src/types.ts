@@ -8,6 +8,7 @@ export type RequestParams = {
   signature?: SignatureRequest
   namespace?: string
   callbackPath?: string
+  callbackUrl?: string
 }
 
 export type SismoConnectClientConfig = {

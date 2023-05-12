@@ -52,10 +52,16 @@ export class SismoConnectClient {
     signature,
     namespace,
     callbackPath,
+    callbackUrl
   }: RequestParams) => {
     if (!window)
       throw new Error(`requestProof is not available outside of a browser`)
-    const url = this.getRequestLink({
+
+    if (!callbackUrl) {
+      callbackUrl = window.location.origin + window.location.pathname;
+    }
+    
+    let url = this.getRequestLink({
       claims,
       claim,
       auths,
@@ -63,6 +69,7 @@ export class SismoConnectClient {
       signature,
       namespace,
       callbackPath,
+      callbackUrl
     })
     window.location.href = encodeURI(url)
   }
@@ -75,6 +82,7 @@ export class SismoConnectClient {
     signature,
     namespace,
     callbackPath,
+    callbackUrl
   }: RequestParams): string => {
     if (!claims && !auths && !signature && !claim && !auth) {
       throw new Error(
@@ -121,6 +129,9 @@ export class SismoConnectClient {
     }
     if (namespace) {
       url += `&namespace=${namespace}`
+    }
+    if (callbackUrl) {
+      url += `&callbackUrl=${callbackUrl}`;
     }
     url += `&compressed=true`
     return url

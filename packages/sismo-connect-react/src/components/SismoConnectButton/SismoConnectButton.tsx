@@ -16,6 +16,7 @@ type ButtonProps = {
   onResponseBytes?: (responseBytes: string) => void;
   config?: SismoConnectClientConfig;
   callbackPath?: string;
+  callbackUrl?: string;
   namespace?: string;
   verifying?: boolean;
   overrideStyle?: React.CSSProperties;
@@ -32,6 +33,7 @@ export const SismoConnectButton = ({
   onResponseBytes,
   config,
   callbackPath,
+  callbackUrl,
   namespace,
   verifying,
   overrideStyle,
@@ -85,6 +87,7 @@ export const SismoConnectButton = ({
           auth,
           signature,
           callbackPath,
+          callbackUrl,
           namespace
         })
       }}
