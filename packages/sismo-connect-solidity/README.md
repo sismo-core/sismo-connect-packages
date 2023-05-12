@@ -48,7 +48,7 @@ foundryup
 forge install sismo-core/sismo-connect-packages --no-commit
 
 # add the remapping in remappings.txt
-echo "\nsismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect-solidity/src/" >> remappings.txt
+echo $'sismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect-solidity/src/' >> remappings.txt
 ```
 
 ### Import the library
