@@ -9,15 +9,7 @@ export type VerifyParamsSismoConnect = {
   namespace?: string
 }
 
-//////////////////
-
-export type SismoConnectServerConfig = {
-  appId: string
-  devMode?: {
-    enabled?: boolean
-  }
-  options?: {
-    provider?: Provider
-    verifier?: VerifierOpts
-  }
+export type SismoConnectServerOptions = {
+  provider?: Provider
+  verifier?: VerifierOpts
 }

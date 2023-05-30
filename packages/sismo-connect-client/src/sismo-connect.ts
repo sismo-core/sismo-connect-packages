@@ -1,47 +1,74 @@
-import { RequestParams, SismoConnectClientConfig } from './types'
+import { RequestParams } from './types';
 import {
-  DevConfig, RequestBuilder, SismoConnectResponse, SISMO_CONNECT_VERSION,
-} from './common-types'
-import { Sdk, GroupParams } from './sdk'
-import { DEV_VAULT_APP_BASE_URL, PROD_VAULT_APP_BASE_URL } from './constants'
-//import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
-import { unCompressResponse } from './utils/unCompressResponse'
-import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
+  RequestBuilder, SismoConnectResponse, SISMO_CONNECT_VERSION, SismoConnectConfig, Vault, DevConfig, DevVault, ClaimType,
+} from './common-types';
+import { Sdk, GroupParams } from './sdk';
+import { DEV_VAULT_APP_BASE_URL, MAIN_VAULT_APP_BASE_URL, DEMO_VAULT_APP_BASE_URL } from './constants';
+import { unCompressResponse } from './utils/unCompressResponse';
+import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes';
 
-export const SismoConnect = (config: SismoConnectClientConfig): SismoConnectClient => {
-  return new SismoConnectClient(config)
+export const SismoConnect = ({ config }: { config: SismoConnectConfig }): SismoConnectClient => {
+  return new SismoConnectClient({ config });
 }
 
 export class SismoConnectClient {
   private _appId: string
   private _vaultAppBaseUrl: string
-  private _devConfig: DevConfig
-  private _devModeEnabled: boolean
-  private _sdk: Sdk
+  private _displayRawResponse: boolean
+  private _vault: Vault;
+  private _devVault: DevVault;
+  private _sdk: Sdk;
+  private _config: SismoConnectConfig;
 
-  constructor({
-    appId,
-    devMode,
-    vaultAppBaseUrl,
-    sismoApiUrl,
-  }: SismoConnectClientConfig) {
-    this._appId = appId
-    this._devModeEnabled = devMode?.enabled ?? false
-    this._vaultAppBaseUrl =
-      vaultAppBaseUrl ??
-      (this._devModeEnabled ? DEV_VAULT_APP_BASE_URL : PROD_VAULT_APP_BASE_URL)
-    if (this._devModeEnabled) {
+  constructor({ config }: { config: SismoConnectConfig }) {
+    this._config = config;
+    if (!this._config) {
+      throw new Error('No SismoConnect config provided.');
+    }
+    this._appId = this._config.appId;
+    this._vault = this._config.vault ?? Vault.Main;
+
+    if (!this._config.vaultAppBaseUrl)
+      switch (this._vault) {
+        case Vault.Dev:
+          this._vaultAppBaseUrl = DEV_VAULT_APP_BASE_URL;
+          break;
+        case Vault.Main:
+          this._vaultAppBaseUrl = MAIN_VAULT_APP_BASE_URL;
+          break;
+        case Vault.Demo:
+          this._vaultAppBaseUrl = DEMO_VAULT_APP_BASE_URL;
+          break;
+      }
+    else  
+      this._vaultAppBaseUrl = this._vaultAppBaseUrl = this._config.vaultAppBaseUrl;
+
+    this._displayRawResponse = this._config.displayRawResponse;
+    if (this._config.displayRawResponse) {
       console.warn(
-        'sismoConnect launch in DevMode! Never use this mode in production!'
+        'Sismo Connect displayRawResponse is true. Never use this mode in production!'
       )
     }
-    if (devMode?.devGroups) {
+
+    if (this._config.vault === Vault.Dev) {
+      this._devVault = this._config.devVault;
       console.warn(
-        `These Eligibles addresses will be used in data groups. Never use this in production!`
+        'Sismo Connect redirect to the Dev Vault. Never use this mode in production!'
+      )
+      if (this._config.devVault?.groupsOverride) {
+        console.warn(
+          `Groups override in the Dev Vault by your groups added in the config. Never use this in production!`
+        )
+      }
+    }
+
+    if (this._config.vault === Vault.Demo) {
+      console.warn(
+        'Sismo Connect redirect to the Demo Vault. Never use this mode in production!'
       )
     }
-    this._devConfig = devMode;
-    this._sdk = new Sdk(sismoApiUrl)
+
+    this._sdk = new Sdk(this._config.sismoApiUrl)
   }
 
   public request = ({
@@ -106,7 +133,7 @@ export class SismoConnectClient {
 
     if (claims) {
       url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claims))}`;
-    }
+    } 
     if (claim) {
       url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claim))}`;
     }
@@ -121,14 +148,62 @@ export class SismoConnectClient {
       url += `&signature=${JSON.stringify(signature)}`
     }
 
-    if (this._devConfig) {
-      url += `&devConfig=${JSON.stringify(this._devConfig)}`
+    if (this._vault === Vault.Dev || this._vault === Vault.Demo) {
+      let devGroups = null;
+
+      if (this._vault === Vault.Dev && this._devVault?.groupsOverride) {
+        devGroups = this._devVault.groupsOverride;
+      }
+  
+      if (this._vault === Vault.Demo) {
+        if (claims || claim) {
+          claims = claims ?? [claim];
+          devGroups = claims.map((_claim) => {
+            let value = 1;
+            if (_claim) {
+              switch(_claim.claimType) {
+                case ClaimType.EQ:
+                  value = _claim.value;
+                  break;
+                case ClaimType.GT:
+                  value = _claim.value + 1;
+                  break;
+                case ClaimType.GTE:
+                  value = _claim.value + 1;
+                  break;
+                case ClaimType.LT:
+                  value = _claim.value - 1;
+                  break;
+                case ClaimType.LTE:
+                  value = _claim.value - 1;
+                  break;
+              }
+            }
+            return {
+              groupId: _claim.groupId,
+              data: {
+                // Add vitalik account
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045":  value
+              },
+            };
+          })
+        }
+      }
+
+      const devConfig: DevConfig = {
+        enabled: true,
+        displayRawResponse: this._displayRawResponse,
+        devGroups: devGroups
+      }
+  
+      url += `&devConfig=${JSON.stringify(devConfig)}`;
     }
+
     if (callbackPath) {
-      url += `&callbackPath=${callbackPath}`
+      url += `&callbackPath=${callbackPath}`;
     }
     if (namespace) {
-      url += `&namespace=${namespace}`
+      url += `&namespace=${namespace}`;
     }
     if (callbackUrl) {
       url += `&callbackUrl=${callbackUrl}`;

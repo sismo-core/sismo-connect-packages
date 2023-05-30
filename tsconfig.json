@@ -11,7 +11,7 @@
       "noImplicitAny": false,
       "resolveJsonModule": true,
       "sourceMap": true,
-      "baseUrl": ".",
+      "baseUrl": "."
     },
     "include": [
       "src",

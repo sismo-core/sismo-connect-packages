@@ -1,15 +1,16 @@
 import {
   ClaimRequest,
   SismoConnect, 
-  SismoConnectClient, 
-  SismoConnectClientConfig,
+  SismoConnectClient,
+  SismoConnectConfig,
+  Vault, 
 } from '../src'
 
 describe('ZkConnect', () => {
   let appId: string
   let groupId: string
   let claim: ClaimRequest
-  let config: SismoConnectClientConfig
+  let config: SismoConnectConfig
 
   let sismoConnect: SismoConnectClient
 
@@ -115,9 +116,9 @@ describe('ZkConnect', () => {
   it('should generate a request link with dev addresses', async () => {
     sismoConnect = SismoConnect({
       ...config,
-      devMode: {
-        enabled: true,
-        devGroups: [
+      vault: Vault.Dev,
+      devVault: {
+        groupsOverride: [
           {
             groupId: '0x1',
             groupTimestamp: 'latest',
@@ -138,9 +139,9 @@ describe('ZkConnect', () => {
   it('should generate a request link with dev addresses with value', async () => {
     sismoConnect = SismoConnect({
       ...config,
-      devMode: {
-        enabled: true,
-        devGroups: [
+      vault: Vault.Dev,
+      devVault: {
+        groupsOverride: [
           {
             groupId: '0x1',
             groupTimestamp: 'latest',

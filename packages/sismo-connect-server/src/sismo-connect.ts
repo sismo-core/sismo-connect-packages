@@ -1,31 +1,43 @@
-import { SismoConnectServerConfig, VerifyParamsSismoConnect } from './types'
+import { SismoConnectServerOptions, VerifyParamsSismoConnect } from './types'
 import { ethers } from 'ethers'
 import {
   RequestBuilder,
   SismoConnectResponse,
   SismoConnectVerifiedResult,
   SISMO_CONNECT_VERSION,
+  SismoConnectConfig,
+  Vault,
 } from './common-types'
 import { SismoConnectVerifier } from './verifier'
 
-export const SismoConnect = (config: SismoConnectServerConfig): SismoConnectServer => {
-  return new SismoConnectServer(config)
+export const SismoConnect = ({ config, options }: { config: SismoConnectConfig, options?: SismoConnectServerOptions}): SismoConnectServer => {
+  return new SismoConnectServer({ config, options });
 }
 
 export class SismoConnectServer {
   private _appId: string
   private _verifier: SismoConnectVerifier
-  private _devModeEnabled: boolean
+  private _vault: Vault;
 
-  constructor({ appId, devMode, options }: SismoConnectServerConfig) {
-    this._appId = appId;
-    
-    this._devModeEnabled = devMode?.enabled ?? false;
-    if (this._devModeEnabled) {
+  constructor({ config, options }: { config: SismoConnectConfig, options?: SismoConnectServerOptions}) {
+    if (!config) {
+      throw new Error('No SismoConnect config provided.');
+    }
+    this._appId = config.appId;
+    this._vault = config.vault ?? Vault.Main;
+
+    if (config.vault === Vault.Dev) {
       console.warn(
-        'zkConnect launch in DevMode! Never use this mode in production!'
+        'Sismo Connect redirect to the Dev Vault. Never use this mode in production!'
       )
     }
+    if (config.vault === Vault.Demo) {
+      console.warn(
+        'Sismo Connect redirect to the Demo Vault. Never use this mode in production!'
+      )
+    }
+
+    const isDevMode = this._vault === Vault.Dev || this._vault === Vault.Demo;
 
     //By default use public gnosis provider 
     const verifierProvider =
@@ -37,7 +49,7 @@ export class SismoConnectServer {
 
     this._verifier = new SismoConnectVerifier(verifierProvider, {
       ...(options?.verifier ?? {}),
-      isDevMode: this._devModeEnabled,
+      isDevMode,
     })
   }
 

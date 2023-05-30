@@ -15,26 +15,11 @@ export type SismoConnectRequest = {
   version: string;
 };
 
-export type AuthRequest = {
-  authType: AuthType;
-  isAnon?: boolean; //false
-  userId?: string;
-  isOptional?: boolean; 
-  isSelectableByUser?: boolean;  
-  extraData?: any;
-}
-
-export type ClaimRequest = {
-  claimType?: ClaimType;
-  groupId?: string;
-  groupTimestamp?: number | "latest";
-  value?: number;
-  
-  isOptional?: boolean; 
-  isSelectableByUser?: boolean;
-
-  extraData?: any;
-}
+export type DevConfig = {
+  enabled?: boolean;
+  displayRawResponse?: boolean;
+  devGroups?: DevGroup[];
+};
 
 export type SignatureRequest = {
    message: string;
@@ -42,10 +27,23 @@ export type SignatureRequest = {
    extraData?: any;
 }
 
-export type DevConfig = {
-  enabled?: boolean;
-  displayRawResponse?: boolean;
-  devGroups?: DevGroup[];
+export enum Vault {
+  Main = "main", 
+  Dev = "dev",
+  Demo = "demo"
+}
+
+export type SismoConnectConfig = {
+  appId: string;
+  vault?: Vault,  // default Vault.Main
+  devVault?: DevVault;  // only used when vault is Vault.Dev
+  displayRawResponse?: boolean; // 
+  sismoApiUrl?: string; // api to fetch group informations, prod API by default
+  vaultAppBaseUrl?: string; // here for debugging purposes, determined by vaultEnv field if not specified
+}
+
+export type DevVault = {
+  groupsOverride?: DevGroup[]; 
 };
 
 export type DevGroup = {
@@ -88,23 +86,30 @@ export type SismoConnectProof = {
   extraData: any;
 };
 
-export type Auth = {
+export type AuthRequest = {
   authType: AuthType;
   isAnon?: boolean; //false
-  isSelectableByUser?: boolean;
   userId?: string;
+  isOptional?: boolean; 
+  isSelectableByUser?: boolean;  
   extraData?: any;
 }
 
-//TODO add omit 
-export type Claim = {
+export type Auth = Omit<AuthRequest, 'isOptional'>;
+
+export type ClaimRequest = {
   claimType?: ClaimType;
   groupId?: string;
   groupTimestamp?: number | "latest";
-  isSelectableByUser?: boolean;
   value?: number;
+  
+  isOptional?: boolean; 
+  isSelectableByUser?: boolean;
+
   extraData?: any;
 }
+
+export type Claim = Omit<ClaimRequest, 'isOptional'>;
 
 export type VerifiedClaim = Claim & {
   proofId: string;
@@ -268,4 +273,3 @@ export class RequestBuilder {
     return signature;
   }
 }
-

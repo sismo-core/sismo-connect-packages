@@ -1,4 +1,4 @@
-import { AuthRequest, ClaimRequest, DevConfig, SignatureRequest } from './common-types'
+import { AuthRequest, ClaimRequest, SignatureRequest } from './common-types'
 
 export type RequestParams = {
   claims?: ClaimRequest[]
@@ -9,11 +9,4 @@ export type RequestParams = {
   namespace?: string
   callbackPath?: string
   callbackUrl?: string
-}
-
-export type SismoConnectClientConfig = {
-  appId: string
-  devMode?: DevConfig
-  vaultAppBaseUrl?: string
-  sismoApiUrl?: string
 }
