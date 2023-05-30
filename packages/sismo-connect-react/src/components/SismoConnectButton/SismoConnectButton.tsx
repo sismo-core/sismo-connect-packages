@@ -15,10 +15,14 @@ type ButtonProps = {
   onResponse?: (response: SismoConnectResponse) => void;
   onResponseBytes?: (responseBytes: string) => void;
   config?: SismoConnectClientConfig;
+  // [Deprecated]
   callbackPath?: string;
   callbackUrl?: string;
   namespace?: string;
+  // [Deprecated]
   verifying?: boolean;
+  loading?: boolean;
+  text?: string;
   overrideStyle?: React.CSSProperties;
 };
 
@@ -32,10 +36,14 @@ export const SismoConnectButton = ({
   onResponse,
   onResponseBytes,
   config,
+  // [Deprecated]
   callbackPath,
   callbackUrl,
   namespace,
+  // [Deprecated]
   verifying,
+  text,
+  loading,
   overrideStyle,
 }: ButtonProps) => {
   if (!appId && !config) {
@@ -75,11 +83,11 @@ export const SismoConnectButton = ({
     <button
       className="sismoConnectButton"
       style={{
-        cursor: verifying ? "default" : "cursor",
+        cursor: verifying || loading ? "default" : "cursor",
         ...overrideStyle
       }}
       onClick={() => {
-        if (verifying) return;
+        if (verifying || loading) return;
         sismoConnect.request({
           claims,
           auths,
@@ -93,7 +101,7 @@ export const SismoConnectButton = ({
       }}
     >
       {
-        verifying ? 
+        verifying || loading ? 
         <Loader />
         :
         <div 
@@ -106,10 +114,7 @@ export const SismoConnectButton = ({
         className="sismoConnectButtonText"
       >
         {
-          verifying ? 
-            "verifying..."
-            :
-            "Sign in with Sismo"
+          text || "Sign in with Sismo"
         }
       </div>
     </button>
