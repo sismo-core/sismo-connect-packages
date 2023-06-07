@@ -6,69 +6,71 @@ import {
   SismoConnectVerifiedResult,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
-  Vault,
 } from './common-types'
 import { SismoConnectVerifier } from './verifier'
+import {
+  OnChainProvider,
+  OnchainProviderProd,
+} from './verifier/libs/onchain-provider'
 
-export const SismoConnect = ({ config, options }: { config: SismoConnectConfig, options?: SismoConnectServerOptions}): SismoConnectServer => {
-  return new SismoConnectServer({ config, options });
+export const SismoConnect = ({
+  config,
+  options,
+}: {
+  config: SismoConnectConfig
+  options?: SismoConnectServerOptions
+}): SismoConnectServer => {
+  return new SismoConnectServer({ config, options })
 }
 
 export class SismoConnectServer {
-  private _appId: string
+  private _sismoConnectConfig: SismoConnectConfig
   private _verifier: SismoConnectVerifier
-  private _vault: Vault;
 
-  constructor({ config, options }: { config: SismoConnectConfig, options?: SismoConnectServerOptions}) {
+  constructor({
+    config,
+    options,
+  }: {
+    config: SismoConnectConfig
+    options?: SismoConnectServerOptions
+  }) {
     if (!config) {
-      throw new Error('No SismoConnect config provided.');
+      throw new Error('No SismoConnect config provided.')
     }
-    this._appId = config.appId;
-    this._vault = config.vault ?? Vault.Main;
 
-    if (config.vault === Vault.Dev) {
+    config.vault = config.vault ?? { impersonate: [] }
+    this._sismoConnectConfig = config
+
+    const isImpersonationMode: boolean = config.vault?.impersonate?.length > 0
+
+    if (isImpersonationMode) {
       console.warn(
-        'Sismo Connect redirect to the Dev Vault. Never use this mode in production!'
+        `Sismo Connect redirects to the Impersonation Vault. The generated proofs are based on impersonated accounts: ${config.vault.impersonate}. Never use this mode in production!`
       )
     }
-    if (config.vault === Vault.Demo) {
-      console.warn(
-        'Sismo Connect redirect to the Demo Vault. Never use this mode in production!'
-      )
-    }
 
-    const isDevMode = this._vault === Vault.Dev || this._vault === Vault.Demo;
+    //By default use public gnosis provider
+    const onChainProvider: OnChainProvider =
+      options?.onChainProvider ??
+      new OnchainProviderProd({ url: 'https://rpc.gnosis.gateway.fm' })
 
-    //By default use public gnosis provider 
-    const verifierProvider =
-      options?.provider ??
-        new ethers.providers.JsonRpcProvider({
-          url: 'https://rpc.gnosis.gateway.fm',
-          skipFetchSetup: true,
-        });
-
-    this._verifier = new SismoConnectVerifier(verifierProvider, {
+    this._verifier = new SismoConnectVerifier(onChainProvider, {
       ...(options?.verifier ?? {}),
-      isDevMode,
+      isImpersonationMode,
     })
   }
 
   public verify = async (
     sismoConnectResponse: SismoConnectResponse,
-    {
-      auths,
-      claims,
-      signature,
-      namespace,
-    }: VerifyParamsSismoConnect = {}
+    { auths, claims, signature, namespace }: VerifyParamsSismoConnect = {}
   ): Promise<SismoConnectVerifiedResult> => {
     if (!sismoConnectResponse) {
       throw new Error(`sismoConnectResponse provided is undefined`)
     }
 
-    auths = RequestBuilder.buildAuths(auths);
-    claims = RequestBuilder.buildClaims(claims);
-    signature = RequestBuilder.buildSignature(signature);
+    auths = RequestBuilder.buildAuths(auths)
+    claims = RequestBuilder.buildClaims(claims)
+    signature = RequestBuilder.buildSignature(signature)
 
     if (!sismoConnectResponse.version) {
       throw new Error(
@@ -92,9 +94,9 @@ export class SismoConnectServer {
         `version of the sismoConnectResponse "${sismoConnectResponse.version}" not compatible with this version "${SISMO_CONNECT_VERSION}"`
       )
     }
-    if (sismoConnectResponse.appId !== this._appId) {
+    if (sismoConnectResponse.appId !== this._sismoConnectConfig.appId) {
       throw new Error(
-        `sismoConnectResponse appId "${sismoConnectResponse.appId}" does not match with server appId "${this._appId}"`
+        `sismoConnectResponse appId "${sismoConnectResponse.appId}" does not match with server appId "${this._sismoConnectConfig.appId}"`
       )
     }
     if (sismoConnectResponse.namespace !== namespace) {

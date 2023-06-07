@@ -1,49 +1,65 @@
-import { RequestParams } from './types';
+import { RequestParams } from './types'
 import {
-  RequestBuilder, SismoConnectResponse, SISMO_CONNECT_VERSION, SismoConnectConfig, Vault, DevConfig, DevVault, ClaimType,
-} from './common-types';
-import { Sdk, GroupParams } from './sdk';
-import { DEV_VAULT_APP_BASE_URL, MAIN_VAULT_APP_BASE_URL, DEMO_VAULT_APP_BASE_URL } from './constants';
-import { unCompressResponse } from './utils/unCompressResponse';
-import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes';
+  RequestBuilder,
+  SismoConnectResponse,
+  SISMO_CONNECT_VERSION,
+  SismoConnectConfig,
+  Vault,
+  DevConfig,
+  DevVault,
+  ClaimType,
+} from './common-types'
+import { Sdk, GroupParams } from './sdk'
+import {
+  DEV_VAULT_APP_BASE_URL,
+  MAIN_VAULT_APP_BASE_URL,
+  DEMO_VAULT_APP_BASE_URL,
+} from './constants'
+import { unCompressResponse } from './utils/unCompressResponse'
+import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
 
-export const SismoConnect = ({ config }: { config: SismoConnectConfig }): SismoConnectClient => {
-  return new SismoConnectClient({ config });
+export const SismoConnect = ({
+  config,
+}: {
+  config: SismoConnectConfig
+}): SismoConnectClient => {
+  return new SismoConnectClient({ config })
 }
 
 export class SismoConnectClient {
   private _appId: string
   private _vaultAppBaseUrl: string
   private _displayRawResponse: boolean
-  private _vault: Vault;
-  private _devVault: DevVault;
-  private _sdk: Sdk;
-  private _config: SismoConnectConfig;
+  private _vault: Vault
+  private _devVault: DevVault
+  private _sdk: Sdk
+  private _config: SismoConnectConfig
 
   constructor({ config }: { config: SismoConnectConfig }) {
-    this._config = config;
+    this._config = config
     if (!this._config) {
-      throw new Error('No SismoConnect config provided.');
+      throw new Error('No SismoConnect config provided.')
     }
-    this._appId = this._config.appId;
-    this._vault = this._config.vault ?? Vault.Main;
+    this._appId = this._config.appId
+    this._vault = this._config.vault ?? Vault.Main
 
     if (!this._config.vaultAppBaseUrl)
       switch (this._vault) {
         case Vault.Dev:
-          this._vaultAppBaseUrl = DEV_VAULT_APP_BASE_URL;
-          break;
+          this._vaultAppBaseUrl = DEV_VAULT_APP_BASE_URL
+          break
         case Vault.Main:
-          this._vaultAppBaseUrl = MAIN_VAULT_APP_BASE_URL;
-          break;
+          this._vaultAppBaseUrl = MAIN_VAULT_APP_BASE_URL
+          break
         case Vault.Demo:
-          this._vaultAppBaseUrl = DEMO_VAULT_APP_BASE_URL;
-          break;
+          this._vaultAppBaseUrl = DEMO_VAULT_APP_BASE_URL
+          break
       }
-    else  
-      this._vaultAppBaseUrl = this._vaultAppBaseUrl = this._config.vaultAppBaseUrl;
+    else
+      this._vaultAppBaseUrl = this._vaultAppBaseUrl =
+        this._config.vaultAppBaseUrl
 
-    this._displayRawResponse = this._config.displayRawResponse;
+    this._displayRawResponse = this._config.displayRawResponse
     if (this._config.displayRawResponse) {
       console.warn(
         'Sismo Connect displayRawResponse is true. Never use this mode in production!'
@@ -51,7 +67,7 @@ export class SismoConnectClient {
     }
 
     if (this._config.vault === Vault.Dev) {
-      this._devVault = this._config.devVault;
+      this._devVault = this._config.devVault
       console.warn(
         'Sismo Connect redirect to the Dev Vault. Never use this mode in production!'
       )
@@ -79,15 +95,15 @@ export class SismoConnectClient {
     signature,
     namespace,
     callbackPath,
-    callbackUrl
+    callbackUrl,
   }: RequestParams) => {
     if (!window)
       throw new Error(`requestProof is not available outside of a browser`)
 
     if (!callbackUrl) {
-      callbackUrl = window.location.origin + window.location.pathname;
+      callbackUrl = window.location.origin + window.location.pathname
     }
-    
+
     let url = this.getRequestLink({
       claims,
       claim,
@@ -96,7 +112,7 @@ export class SismoConnectClient {
       signature,
       namespace,
       callbackPath,
-      callbackUrl
+      callbackUrl,
     })
     window.location.href = encodeURI(url)
   }
@@ -109,83 +125,77 @@ export class SismoConnectClient {
     signature,
     namespace,
     callbackPath,
-    callbackUrl
+    callbackUrl,
   }: RequestParams): string => {
     if (!claims && !auths && !signature && !claim && !auth) {
-      throw new Error(
-        `claims or auths or signature is required`
-      )
+      throw new Error(`claims or auths or signature is required`)
     }
 
     if (auths && auth) {
-      throw new Error("You can't use both auth and auths");
+      throw new Error("You can't use both auth and auths")
     }
 
     if (claims && claim) {
-      throw new Error("You can't use both claim and claims");
+      throw new Error("You can't use both claim and claims")
     }
 
-    let url = `${
-      this._vaultAppBaseUrl
-    }/connect?version=${SISMO_CONNECT_VERSION}&appId=${
-      this._appId
-    }`
+    let url = `${this._vaultAppBaseUrl}/connect?version=${SISMO_CONNECT_VERSION}&appId=${this._appId}`
 
     if (claims) {
-      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claims))}`;
-    } 
+      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claims))}`
+    }
     if (claim) {
-      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claim))}`;
+      url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claim))}`
     }
     if (auths) {
-      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auths))}`;
+      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auths))}`
     }
     if (auth) {
-      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auth))}`;
+      url += `&auths=${JSON.stringify(RequestBuilder.buildAuths(auth))}`
     }
     if (signature) {
-      signature = RequestBuilder.buildSignature(signature);
+      signature = RequestBuilder.buildSignature(signature)
       url += `&signature=${JSON.stringify(signature)}`
     }
 
     if (this._vault === Vault.Dev || this._vault === Vault.Demo) {
-      let devGroups = null;
+      let devGroups = null
 
       if (this._vault === Vault.Dev && this._devVault?.groupsOverride) {
-        devGroups = this._devVault.groupsOverride;
+        devGroups = this._devVault.groupsOverride
       }
-  
+
       if (this._vault === Vault.Demo) {
         if (claims || claim) {
-          claims = claims ?? [claim];
+          claims = claims ?? [claim]
           devGroups = claims.map((_claim) => {
-            let value = 1;
+            let value = 1
             if (_claim) {
-              switch(_claim.claimType) {
+              switch (_claim.claimType) {
                 case ClaimType.EQ:
-                  value = _claim.value;
-                  break;
+                  value = _claim.value
+                  break
                 case ClaimType.GT:
-                  value = _claim.value + 1;
-                  break;
+                  value = _claim.value + 1
+                  break
                 case ClaimType.GTE:
-                  value = _claim.value + 1;
-                  break;
+                  value = _claim.value + 1
+                  break
                 case ClaimType.LT:
-                  value = _claim.value - 1;
-                  break;
+                  value = _claim.value - 1
+                  break
                 case ClaimType.LTE:
-                  value = _claim.value - 1;
-                  break;
+                  value = _claim.value - 1
+                  break
               }
             }
             return {
               groupId: _claim.groupId,
               data: {
                 // Add vitalik account
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045":  value
+                '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045': value,
               },
-            };
+            }
           })
         }
       }
@@ -193,20 +203,20 @@ export class SismoConnectClient {
       const devConfig: DevConfig = {
         enabled: true,
         displayRawResponse: this._displayRawResponse,
-        devGroups: devGroups
+        devGroups: devGroups,
       }
-  
-      url += `&devConfig=${JSON.stringify(devConfig)}`;
+
+      url += `&devConfig=${JSON.stringify(devConfig)}`
     }
 
     if (callbackPath) {
-      url += `&callbackPath=${callbackPath}`;
+      url += `&callbackPath=${callbackPath}`
     }
     if (namespace) {
-      url += `&namespace=${namespace}`;
+      url += `&namespace=${namespace}`
     }
     if (callbackUrl) {
-      url += `&callbackUrl=${callbackUrl}`;
+      url += `&callbackUrl=${callbackUrl}`
     }
     url += `&compressed=true`
     return url
@@ -217,9 +227,11 @@ export class SismoConnectClient {
       throw new Error(`getResponse is not available outside of a browser`)
     const url = new URL(window.location.href)
     if (url.searchParams.has('sismoConnectResponseCompressed')) {
-      const compressedResponse = url.searchParams.get('sismoConnectResponseCompressed');
-      const uncompressedResponse = unCompressResponse(compressedResponse);
-      return JSON.parse(uncompressedResponse) as SismoConnectResponse;
+      const compressedResponse = url.searchParams.get(
+        'sismoConnectResponseCompressed'
+      )
+      const uncompressedResponse = unCompressResponse(compressedResponse)
+      return JSON.parse(uncompressedResponse) as SismoConnectResponse
     }
     return null
   }
@@ -233,10 +245,14 @@ export class SismoConnectClient {
       throw new Error(`getResponse is not available outside of a browser`)
     const url = new URL(window.location.href)
     if (url.searchParams.has('sismoConnectResponseCompressed')) {
-      const compressedResponse = url.searchParams.get('sismoConnectResponseCompressed');
-      const uncompressedResponse = unCompressResponse(compressedResponse);
-      const sismoConnectResponse = JSON.parse(uncompressedResponse) as SismoConnectResponse;
-      return toSismoConnectResponseBytes(sismoConnectResponse);
+      const compressedResponse = url.searchParams.get(
+        'sismoConnectResponseCompressed'
+      )
+      const uncompressedResponse = unCompressResponse(compressedResponse)
+      const sismoConnectResponse = JSON.parse(
+        uncompressedResponse
+      ) as SismoConnectResponse
+      return toSismoConnectResponseBytes(sismoConnectResponse)
     }
     return null
   }

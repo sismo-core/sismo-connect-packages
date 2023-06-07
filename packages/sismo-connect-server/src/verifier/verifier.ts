@@ -10,13 +10,21 @@ import {
   SignatureRequest,
   SismoConnectProof,
   AuthType,
+  SismoConnectConfig,
 } from '../common-types'
+import { ethers } from 'ethers'
+import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from '../constants'
+import {
+  AvailableRootsRegistryContract,
+  AvailableRootsRegistryContractFactory,
+} from './libs/contracts'
 import { HydraS2Verifier, HydraS2VerifierOpts } from './hydras2-verifier'
-import { Provider } from '@ethersproject/abstract-provider'
+import { OnChainProvider } from './libs/onchain-provider'
 
 export type VerifierOpts = {
   hydraS2?: HydraS2VerifierOpts
-  isDevMode?: boolean
+  availableRootsRegistryAddress?: string
+  isImpersonationMode?: boolean
 }
 
 export type VerifyParams = {
@@ -29,12 +37,25 @@ export type VerifyParams = {
 
 export class SismoConnectVerifier {
   private hydraS2Verifier: HydraS2Verifier
+  private _availableRootsRegistry: AvailableRootsRegistryContract
 
-  constructor(provider: Provider, opts?: VerifierOpts) {
-    this.hydraS2Verifier = new HydraS2Verifier(provider, {
-      ...opts?.hydraS2,
-      isDevMode: opts?.isDevMode,
-    })
+  constructor(onChainProvider: OnChainProvider, opts?: VerifierOpts) {
+    this._availableRootsRegistry =
+      AvailableRootsRegistryContractFactory.connect({
+        address:
+          opts?.availableRootsRegistryAddress ||
+          GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+        onChainProvider,
+      })
+
+    this.hydraS2Verifier = new HydraS2Verifier(
+      onChainProvider,
+      this._availableRootsRegistry,
+      {
+        ...opts?.hydraS2,
+        isImpersonationMode: opts?.isImpersonationMode,
+      }
+    )
   }
 
   async verify({
@@ -46,16 +67,25 @@ export class SismoConnectVerifier {
     const verifiedClaims: VerifiedClaim[] = []
     const verifiedAuths: VerifiedAuth[] = []
 
-    await this._checkRequiredRequests(sismoConnectResponse, claims, auths);
+    await this._checkRequiredRequests(sismoConnectResponse, claims, auths)
 
     for (let proof of sismoConnectResponse.proofs) {
-      await this._checkProofMatchRequest(proof,sismoConnectResponse, claims, auths, signature);
-  
+      await this._checkProofMatchRequest(
+        proof,
+        sismoConnectResponse,
+        claims,
+        auths,
+        signature
+      )
+
       if (proof.auths && proof.auths.length > 0) {
-        const verifiedAuth = await this._verifyAuthProof(proof, sismoConnectResponse.signedMessage)
+        const verifiedAuth = await this._verifyAuthProof(
+          proof,
+          sismoConnectResponse.signedMessage
+        )
         verifiedAuths.push(verifiedAuth)
       }
-  
+
       if (proof.claims && proof.claims.length > 0) {
         const verifiedAuth = await this._verifyClaimProof(
           sismoConnectResponse.appId,
@@ -65,21 +95,24 @@ export class SismoConnectVerifier {
         )
         verifiedClaims.push(verifiedAuth)
       }
-    
+
       if (
-          (!proof.claims || proof.claims.length === 0) && 
-          (!proof.auths || proof.auths.length === 0) && 
+        (!proof.claims || proof.claims.length === 0) &&
+        (!proof.auths || proof.auths.length === 0) &&
+        sismoConnectResponse.signedMessage
+      ) {
+        await this._verifySignedMessageProof(
+          proof,
           sismoConnectResponse.signedMessage
-        ) {
-        await this._verifySignedMessageProof(proof, sismoConnectResponse.signedMessage)
+        )
       }
     }
 
     return new SismoConnectVerifiedResult({
       response: sismoConnectResponse,
       claims: verifiedClaims,
-      auths: verifiedAuths
-    });
+      auths: verifiedAuths,
+    })
   }
 
   private async _checkRequiredRequests(
@@ -89,19 +122,23 @@ export class SismoConnectVerifier {
   ) {
     //Verify that for every not optional request the user generate a proof
 
-    let countNotOptional = 0;
+    let countNotOptional = 0
     if (claimRequests) {
       for (let claimRequest of claimRequests) {
         if (!claimRequest.isOptional) {
-          countNotOptional++;
-          const proofFounded = sismoConnectResponse.proofs.find(proof => {
-            if (!proof.claims) return false;
+          countNotOptional++
+          const proofFounded = sismoConnectResponse.proofs.find((proof) => {
+            if (!proof.claims) return false
             for (let claim of proof.claims) {
-              if (claimRequest.groupId === claim.groupId && claimRequest.groupTimestamp === claim.groupTimestamp && claimRequest.claimType === claim.claimType) {
-                return true;
+              if (
+                claimRequest.groupId === claim.groupId &&
+                claimRequest.groupTimestamp === claim.groupTimestamp &&
+                claimRequest.claimType === claim.claimType
+              ) {
+                return true
               }
             }
-            return false;
+            return false
           })
           if (!proofFounded) {
             throw new Error(
@@ -111,23 +148,28 @@ export class SismoConnectVerifier {
         }
       }
     }
-    
+
     if (authRequests) {
       for (let authRequest of authRequests) {
         if (!authRequest.isOptional) {
-          countNotOptional++;
-          const proofFounded = sismoConnectResponse.proofs.find(proof => {
-            if (!proof.auths) return false;
+          countNotOptional++
+          const proofFounded = sismoConnectResponse.proofs.find((proof) => {
+            if (!proof.auths) return false
             for (let auth of proof.auths) {
               //If the request ask a specific userId
-              if (authRequest.authType !== AuthType.VAULT && !authRequest.isSelectableByUser && authRequest.userId != "0" && authRequest.userId !== auth.userId) {
-                continue;
+              if (
+                authRequest.authType !== AuthType.VAULT &&
+                !authRequest.isSelectableByUser &&
+                authRequest.userId != '0' &&
+                authRequest.userId !== auth.userId
+              ) {
+                continue
               }
               if (authRequest.authType === auth.authType) {
-                return true;
+                return true
               }
             }
-            return false;
+            return false
           })
           if (!proofFounded) {
             throw new Error(
@@ -152,7 +194,7 @@ export class SismoConnectVerifier {
     authRequests: AuthRequest[],
     signatureRequest: SignatureRequest
   ) {
-    const signedMessage = response.signedMessage;
+    const signedMessage = response.signedMessage
 
     if (!claimRequests || claimRequests.length === 0) {
       if (!authRequests || authRequests.length === 0) {
@@ -168,44 +210,42 @@ export class SismoConnectVerifier {
       if (!signatureRequest.isSelectableByUser) {
         if (signedMessage !== signatureRequest.message) {
           throw new Error(
-            `The proof signedMessage ${signedMessage} does not match signatureRequest ${signatureRequest.message} ${
-              signedMessage
-            }`
-          );
+            `The proof signedMessage ${signedMessage} does not match signatureRequest ${signatureRequest.message} ${signedMessage}`
+          )
         }
       }
     } else {
       if (signedMessage) {
         throw new Error(
           `The signature is missing in the verify function. Please ensure that the same signature is specified in the verify function as in your frontend.`
-        );
+        )
       }
     }
 
     if (claimRequests && proof.claims) {
       for (let claim of proof.claims) {
-        if (!claim) continue;
-        const groupId = claim?.groupId;
-        const groupTimestamp = claim?.groupTimestamp;
-        const claimType = claim?.claimType;
+        if (!claim) continue
+        const groupId = claim?.groupId
+        const groupTimestamp = claim?.groupTimestamp
+        const claimType = claim?.claimType
 
         const claimRequest = claimRequests.find((_claimRequest) => {
-            if (
-              _claimRequest.groupId !== groupId ||
-              _claimRequest.groupTimestamp !== groupTimestamp || 
-              _claimRequest.claimType !== claimType
-            ) {
-              return false;
-            }
-            return true;
+          if (
+            _claimRequest.groupId !== groupId ||
+            _claimRequest.groupTimestamp !== groupTimestamp ||
+            _claimRequest.claimType !== claimType
+          ) {
+            return false
+          }
+          return true
         })
-    
+
         if (!claimRequest) {
           throw new Error(
             `No claimRequest found for groupId ${groupId}, groupTimestamp ${groupTimestamp} and claimType ${claimType}`
-          );
+          )
         }
-  
+
         const requestedClaimType = claimRequest.claimType
         if (requestedClaimType !== claim.claimType) {
           throw new Error(
@@ -220,7 +260,7 @@ export class SismoConnectVerifier {
             )
           }
         }
-  
+
         if (claim.claimType == ClaimType.GT) {
           if (claim.value <= requestedValue) {
             throw new Error(
@@ -228,7 +268,7 @@ export class SismoConnectVerifier {
             )
           }
         }
-  
+
         if (claim.claimType == ClaimType.GTE) {
           if (claim.value < requestedValue) {
             throw new Error(
@@ -236,7 +276,7 @@ export class SismoConnectVerifier {
             )
           }
         }
-  
+
         if (claim.claimType == ClaimType.LT) {
           if (claim.value >= requestedValue) {
             throw new Error(
@@ -244,7 +284,7 @@ export class SismoConnectVerifier {
             )
           }
         }
-  
+
         if (claim.claimType == ClaimType.LTE) {
           if (claim.value > requestedValue) {
             throw new Error(
@@ -257,26 +297,28 @@ export class SismoConnectVerifier {
 
     if (authRequests && proof.auths) {
       for (let auth of proof.auths) {
-        if (!auth) continue;
-        const authType = auth?.authType;
-        const isAnon = auth?.isAnon;
+        if (!auth) continue
+        const authType = auth?.authType
+        const isAnon = auth?.isAnon
         const authRequest = authRequests.find((_authRequest) => {
-            //If the request ask a specific userId
-            if (_authRequest.userId !== '0' && !_authRequest.isSelectableByUser && _authRequest.userId !== auth.userId) {
-              return false;
-            }
-            if (
-              _authRequest.authType !== authType
-            ) {
-              return false;
-            }
-            return true;
+          //If the request ask a specific userId
+          if (
+            _authRequest.userId !== '0' &&
+            !_authRequest.isSelectableByUser &&
+            _authRequest.userId !== auth.userId
+          ) {
+            return false
+          }
+          if (_authRequest.authType !== authType) {
+            return false
+          }
+          return true
         })
-    
+
         if (!authRequest) {
           throw new Error(
             `No authRequest found for authType ${authType} and isAnon ${isAnon}`
-          );
+          )
         }
         const requestedUserId = authRequest.userId
         if (requestedUserId !== '0') {
@@ -298,7 +340,7 @@ export class SismoConnectVerifier {
       case ProvingScheme.HYDRA_S2:
         return this.hydraS2Verifier.verifySignedMessageProof({
           proof,
-          signedMessage
+          signedMessage,
         })
       default:
         throw new Error(
@@ -307,12 +349,15 @@ export class SismoConnectVerifier {
     }
   }
 
-  private async _verifyAuthProof(proof: SismoConnectProof, signedMessage: string): Promise<VerifiedAuth> {
+  private async _verifyAuthProof(
+    proof: SismoConnectProof,
+    signedMessage: string
+  ): Promise<VerifiedAuth> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
         return this.hydraS2Verifier.verifyAuthProof({
           proof,
-          signedMessage
+          signedMessage,
         })
       default:
         throw new Error(

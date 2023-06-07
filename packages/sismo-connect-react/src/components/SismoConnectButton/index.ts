@@ -1,1 +1,1 @@
-export * from "./SismoConnectButton";
+export * from './SismoConnectButton'

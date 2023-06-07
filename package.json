@@ -11,7 +11,8 @@
     "build:zk-connect-server": "cd packages/zk-connect-server && yarn && yarn build",
     "build:zk-connect-react": "cd packages/zk-connect-react && yarn && yarn build",
     "prepare": "husky install",
-    "eslint": "eslint --max-warnings=0"
+    "eslint": "eslint --max-warnings=0",
+    "prettier": "prettier --write 'packages/**/src/**/*.ts'"
   },
   "devDependencies": {
     "eslint": "^8.34.0",
@@ -36,7 +37,7 @@
   "license": "MIT",
   "dependencies": {},
   "lint-staged": {
-    "src/**/*": "prettier --write --ignore-unknown",
+    "src/**/*": "prettier --write 'packages/**/src/**/*.ts'",
     "src/**/*.{ts,tsx,js,jsx}": [
       "eslint --max-warnings=0"
     ]
