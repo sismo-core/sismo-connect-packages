@@ -1,10 +1,8 @@
 import {
   ClaimRequest,
-  RequestBuilder,
   SismoConnect, 
   SismoConnectClient,
   SismoConnectConfig,
-  Vault, 
 } from '../src'
 
 describe('Sismo Connect Client', () => {
@@ -35,7 +33,7 @@ describe('Sismo Connect Client', () => {
         claims: [claim],
       })
     ).toEqual(
-      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&compressed=true`
+      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1.1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&compressed=true`
     )
   })
 
@@ -46,7 +44,7 @@ describe('Sismo Connect Client', () => {
         namespace: 'my-namespace',
       })
     ).toEqual(
-      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&namespace=my-namespace&compressed=true`
+      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1.1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&namespace=my-namespace&compressed=true`
     )
   })
 
@@ -57,7 +55,7 @@ describe('Sismo Connect Client', () => {
         callbackPath: '/my-callback-path',
       })
     ).toEqual(
-      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&callbackPath=/my-callback-path&compressed=true`
+      `https://vault-beta.sismo.io/connect?version=sismo-connect-v1.1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&callbackPath=/my-callback-path&compressed=true`
     )
   })
 
@@ -70,7 +68,7 @@ describe('Sismo Connect Client', () => {
         claims: [claim],
       })
     ).toEqual(
-      `https://dev.vault-beta.sismo.io/connect?version=sismo-connect-v1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&vault={\"impersonate\":[\"0x123\",\"0x345\"]}&compressed=true`
+      `https://dev.vault-beta.sismo.io/connect?version=sismo-connect-v1.1&appId=0xf68985adfc209fafebfb1a956913e7fa&claims=[{\"groupId\":\"0x1\",\"claimType\":0,\"extraData\":\"\",\"groupTimestamp\":\"latest\",\"value\":1}]&vault={\"impersonate\":[\"0x123\",\"0x345\"]}&compressed=true`
     )
   })
 })

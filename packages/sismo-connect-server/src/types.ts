@@ -9,6 +9,11 @@ export type VerifyParamsSismoConnect = {
   namespace?: string
 }
 
+export const SISMO_SERVER_COMPATIBLE_VERSIONS = [
+  "sismo-connect-v1",
+  "sismo-connect-v1.1"
+]
+
 export type SismoConnectServerOptions = {
   provider?: SismoConnectProvider
   verifier?: VerifierOpts

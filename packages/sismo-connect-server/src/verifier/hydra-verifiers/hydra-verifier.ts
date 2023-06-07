@@ -1,33 +1,20 @@
-import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment-mapper-registry/dev'
+import { CommitmentMapperRegistryContractDev } from '../libs/contracts/commitment-mapper-registry/dev';
 import {
-  HydraS2Verifier as HydraS2VerifierPS,
-  SNARK_FIELD,
-} from '@sismo-core/hydra-s2'
-import {
-  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
   IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY,
-} from '../constants'
-import {
-  AvailableRootsRegistryContract,
-  CommitmentMapperRegistryContract,
-  CommitmentMapperRegistryContractProd,
-} from './libs/contracts'
-import { SismoConnectProvider } from './libs/onchain-provider'
+  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
+} from "../../constants";
 import { BigNumber } from '@ethersproject/bignumber'
-import { encodeRequestIdentifier } from './utils/encodeRequestIdentifier'
-import { encodeAccountsTreeValue } from './utils/encodeAccountsTreeValue'
-import {
-  AuthType,
-  ClaimType,
-  VerifiedAuth,
-  VerifiedClaim,
-  SismoConnectProof,
-  resolveSismoIdentifier,
-} from '../common-types'
-import { ethers } from 'ethers'
-import { keccak256 } from 'ethers/lib/utils'
-import { decodeProofData } from './utils/proofData'
-import { isHexlify } from './utils/isHexlify'
+
+import { ethers } from "ethers";
+import { keccak256 } from "ethers/lib/utils";
+import { ProofDecoded, decodeProofData } from '../utils/proofData';
+import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract, CommitmentMapperRegistryContractProd } from '../libs/contracts';
+import { isHexlify } from '../utils/isHexlify';
+import { encodeRequestIdentifier } from '../utils/encodeRequestIdentifier';
+import { encodeAccountsTreeValue } from '../utils/encodeAccountsTreeValue';
+import { SNARK_FIELD } from '@sismo-core/hydra-s2';
+import { SismoConnectProvider } from '../libs/onchain-provider';
+import { AuthType, ClaimType, SismoConnectProof, VerifiedAuth, VerifiedClaim, resolveSismoIdentifier } from '../../common-types';
 
 export type SnarkProof = {
   a: string[]
@@ -59,21 +46,21 @@ export type VerifyParams = {
   proof: SismoConnectProof
 }
 
-export type HydraS2VerifierOpts = {
+export type HydraVerifierOpts = {
   provider?: SismoConnectProvider
   commitmentMapperRegistryAddress?: string
   isImpersonationMode?: boolean
   commitmentMapperPubKeys?: [string, string]
 }
 
-export class HydraS2Verifier {
+export abstract class HydraVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract
   private _availableRootsRegistry: AvailableRootsRegistryContract
 
   constructor(
     provider: SismoConnectProvider,
     availableRootsRegistry: AvailableRootsRegistryContract,
-    opts?: HydraS2VerifierOpts
+    opts?: HydraVerifierOpts
   ) {
     if (opts?.commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(
@@ -102,6 +89,8 @@ export class HydraS2Verifier {
     this._availableRootsRegistry = availableRootsRegistry
   }
 
+  protected abstract _verifyProof(snarkProof: ProofDecoded)
+
   async verifyClaimProof({
     appId,
     namespace,
@@ -121,15 +110,10 @@ export class HydraS2Verifier {
       await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     }
 
-    const isVerified = await HydraS2VerifierPS.verifyProof(
-      snarkProof.a,
-      snarkProof.b,
-      snarkProof.c,
-      snarkProof.input
-    )
-
-    if (!isVerified) {
-      throw new Error('Snark Proof Invalid!')
+    if (
+      !await this._verifyProof(snarkProof)
+    ) {
+      throw new Error("Snark Proof Invalid!");
     }
 
     return {
@@ -149,12 +133,7 @@ export class HydraS2Verifier {
     const snarkProof = decodeProofData(proof.proofData)
     await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     if (
-      !(await HydraS2VerifierPS.verifyProof(
-        snarkProof.a,
-        snarkProof.b,
-        snarkProof.c,
-        snarkProof.input
-      ))
+      !await this._verifyProof(snarkProof)
     ) {
       throw new Error('Snark Proof Invalid!')
     }
@@ -176,12 +155,7 @@ export class HydraS2Verifier {
     }
 
     if (
-      !(await HydraS2VerifierPS.verifyProof(
-        snarkProof.a,
-        snarkProof.b,
-        snarkProof.c,
-        snarkProof.input
-      ))
+      !await this._verifyProof(snarkProof)
     ) {
       throw new Error('Snark Proof Invalid!')
     }

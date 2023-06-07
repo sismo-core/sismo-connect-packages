@@ -4,7 +4,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { HydraS2VerifierMocked } from './hydras2-verifier-mocked'
 import { encodeRequestIdentifier } from '../src/verifier/utils/encodeRequestIdentifier'
 import { encodeAccountsTreeValue } from '../src/verifier/utils/encodeAccountsTreeValue'
-import { ProofPublicInputs } from '../src/verifier/hydras2-verifier'
+import { ProofPublicInputs } from '../src/verifier/hydra-verifiers'
 import {
   ClaimRequest,
   ClaimType,

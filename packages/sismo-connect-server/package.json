@@ -42,7 +42,8 @@
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
     "@sismo-core/hydra-s2": "^1.0.0",
-    "leaked-handles": "^5.2.0"
+    "leaked-handles": "^5.2.0",
+    "@sismo-core/hydra-s3": "^0.0.2"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",

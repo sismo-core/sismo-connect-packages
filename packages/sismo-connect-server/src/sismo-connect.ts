@@ -1,5 +1,4 @@
-import { SismoConnectServerOptions, VerifyParamsSismoConnect } from './types'
-import { ethers } from 'ethers'
+import { SISMO_SERVER_COMPATIBLE_VERSIONS, SismoConnectServerOptions, VerifyParamsSismoConnect } from './types'
 import {
   RequestBuilder,
   SismoConnectResponse,
@@ -89,7 +88,8 @@ export class SismoConnectServer {
     }
 
     namespace = namespace ?? 'main'
-    if (sismoConnectResponse.version !== SISMO_CONNECT_VERSION) {
+
+    if (!SISMO_SERVER_COMPATIBLE_VERSIONS.includes(sismoConnectResponse.version)) {
       throw new Error(
         `version of the sismoConnectResponse "${sismoConnectResponse.version}" not compatible with this version "${SISMO_CONNECT_VERSION}"`
       )

@@ -10,21 +10,24 @@ import {
   SignatureRequest,
   SismoConnectProof,
   AuthType,
-  SismoConnectConfig,
 } from '../common-types'
-import { ethers } from 'ethers'
 import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from '../constants'
 import {
   AvailableRootsRegistryContract,
   AvailableRootsRegistryContractFactory,
 } from './libs/contracts'
-import { HydraS2Verifier, HydraS2VerifierOpts } from './hydras2-verifier'
 import { SismoConnectProvider } from './libs/onchain-provider'
 
+import { HydraVerifierOpts } from './hydra-verifiers/hydra-verifier'
+import { HydraS2Verifier } from './hydra-verifiers/hydras2-verifier'
+import { HydraS3Verifier } from './hydra-verifiers/hydras3-verifier'
+
 export type VerifierOpts = {
-  hydraS2?: HydraS2VerifierOpts
-  availableRootsRegistryAddress?: string
+  hydraS2?: HydraVerifierOpts
+  hydraS3?: HydraVerifierOpts
   isImpersonationMode?: boolean
+  availableRootsRegistryAddress?: string
+  isDevMode?: boolean
 }
 
 export type VerifyParams = {
@@ -38,24 +41,31 @@ export type VerifyParams = {
 export class SismoConnectVerifier {
   private hydraS2Verifier: HydraS2Verifier
   private _availableRootsRegistry: AvailableRootsRegistryContract
+  private hydraS3Verifier: HydraS3Verifier
 
   constructor(provider: SismoConnectProvider, opts?: VerifierOpts) {
     this._availableRootsRegistry =
-      AvailableRootsRegistryContractFactory.connect({
-        address:
-          opts?.availableRootsRegistryAddress ||
-          GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
-        provider,
-      })
+    AvailableRootsRegistryContractFactory.connect({
+      address:
+        opts?.availableRootsRegistryAddress ||
+        GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+      provider,
+    })
 
     this.hydraS2Verifier = new HydraS2Verifier(
-      provider,
+      provider, 
       this._availableRootsRegistry,
       {
-        ...opts?.hydraS2,
-        isImpersonationMode: opts?.isImpersonationMode,
-      }
-    )
+      ...opts?.hydraS2,
+      isImpersonationMode: opts?.isImpersonationMode,
+    })
+    this.hydraS3Verifier = new HydraS3Verifier(
+      provider, 
+      this._availableRootsRegistry,
+      {
+      ...opts?.hydraS3,
+      isImpersonationMode: opts?.isImpersonationMode,
+    })
   }
 
   async verify({
@@ -342,6 +352,11 @@ export class SismoConnectVerifier {
           proof,
           signedMessage,
         })
+      case ProvingScheme.HYDRA_S3:
+        return this.hydraS3Verifier.verifySignedMessageProof({
+          proof,
+          signedMessage
+        })
       default:
         throw new Error(
           `proof proving scheme "${proof.provingScheme}" not supported in this version`
@@ -359,6 +374,11 @@ export class SismoConnectVerifier {
           proof,
           signedMessage,
         })
+      case ProvingScheme.HYDRA_S3:
+        return this.hydraS3Verifier.verifyAuthProof({
+          proof,
+          signedMessage
+        })
       default:
         throw new Error(
           `proof proving scheme "${proof.provingScheme}" not supported in this version`
@@ -375,6 +395,13 @@ export class SismoConnectVerifier {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
         return await this.hydraS2Verifier.verifyClaimProof({
+          appId,
+          signedMessage,
+          namespace,
+          proof,
+        })
+      case ProvingScheme.HYDRA_S3:
+        return await this.hydraS3Verifier.verifyClaimProof({
           appId,
           signedMessage,
           namespace,
