@@ -1,5 +1,3 @@
-import { BigNumberish } from '@ethersproject/bignumber'
-
 export const SISMO_CONNECT_VERSION = `sismo-connect-v1`
 
 export type SismoConnectRequest = {

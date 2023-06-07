@@ -1,24 +1,13 @@
-import { BigNumberish } from '@ethersproject/bignumber'
-
 export const SISMO_CONNECT_VERSION = `sismo-connect-v1`
 
 export type SismoConnectRequest = {
-  appId: string
   namespace?: string
-
   auths?: AuthRequest[]
   claims?: ClaimRequest[]
   signature?: SignatureRequest
 
-  devConfig?: DevConfig
   callbackPath?: string
   version: string
-}
-
-export type DevConfig = {
-  enabled?: boolean
-  displayRawResponse?: boolean
-  devGroups?: DevGroup[]
 }
 
 export type SignatureRequest = {
@@ -35,24 +24,15 @@ export enum Vault {
 
 export type SismoConnectConfig = {
   appId: string
-  vault?: Vault // default Vault.Main
-  devVault?: DevVault // only used when vault is Vault.Dev
+  vault?: VaultConfig // default Vault.Main
   displayRawResponse?: boolean //
   sismoApiUrl?: string // api to fetch group informations, prod API by default
   vaultAppBaseUrl?: string // here for debugging purposes, determined by vaultEnv field if not specified
 }
 
-export type DevVault = {
-  groupsOverride?: DevGroup[]
+export type VaultConfig = {
+  impersonate: string[]
 }
-
-export type DevGroup = {
-  groupId: string
-  groupTimestamp?: number | 'latest'
-  data: DevAddresses
-}
-
-export type DevAddresses = string[] | Record<string, Number | BigNumberish>
 
 export enum ProvingScheme {
   HYDRA_S2 = 'hydra-s2.1',
@@ -75,8 +55,9 @@ export enum AuthType {
 
 export type SismoConnectResponse = Pick<
   SismoConnectRequest,
-  'appId' | 'namespace' | 'version'
+  'namespace' | 'version'
 > & {
+  appId: string
   signedMessage?: string
   proofs: SismoConnectProof[]
 }

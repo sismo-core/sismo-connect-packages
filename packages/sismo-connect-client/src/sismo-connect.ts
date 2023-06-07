@@ -4,16 +4,11 @@ import {
   SismoConnectResponse,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
-  Vault,
-  DevConfig,
-  DevVault,
-  ClaimType,
 } from './common-types'
 import { Sdk, GroupParams } from './sdk'
 import {
-  DEV_VAULT_APP_BASE_URL,
+  IMPERSONATION_VAULT_APP_BASE_URL,
   MAIN_VAULT_APP_BASE_URL,
-  DEMO_VAULT_APP_BASE_URL,
 } from './constants'
 import { unCompressResponse } from './utils/unCompressResponse'
 import { toSismoConnectResponseBytes } from './utils/toSismoResponseBytes'
@@ -27,64 +22,46 @@ export const SismoConnect = ({
 }
 
 export class SismoConnectClient {
-  private _appId: string
-  private _vaultAppBaseUrl: string
-  private _displayRawResponse: boolean
-  private _vault: Vault
-  private _devVault: DevVault
   private _sdk: Sdk
-  private _config: SismoConnectConfig
+  private _sismoConnectConfig: SismoConnectConfig
 
   constructor({ config }: { config: SismoConnectConfig }) {
-    this._config = config
-    if (!this._config) {
+    if (!config) {
       throw new Error('No SismoConnect config provided.')
     }
-    this._appId = this._config.appId
-    this._vault = this._config.vault ?? Vault.Main
 
-    if (!this._config.vaultAppBaseUrl)
-      switch (this._vault) {
-        case Vault.Dev:
-          this._vaultAppBaseUrl = DEV_VAULT_APP_BASE_URL
-          break
-        case Vault.Main:
-          this._vaultAppBaseUrl = MAIN_VAULT_APP_BASE_URL
-          break
-        case Vault.Demo:
-          this._vaultAppBaseUrl = DEMO_VAULT_APP_BASE_URL
-          break
+    config.vault = config.vault ?? { impersonate: [] }
+    this._sismoConnectConfig = config
+
+    const isImpersonationMode: boolean =
+      this._sismoConnectConfig.vault?.impersonate?.length > 0
+
+    if (!this._sismoConnectConfig.vaultAppBaseUrl) {
+      if (isImpersonationMode) {
+        this._sismoConnectConfig.vaultAppBaseUrl =
+          IMPERSONATION_VAULT_APP_BASE_URL
+      } else {
+        this._sismoConnectConfig.vaultAppBaseUrl = MAIN_VAULT_APP_BASE_URL
       }
-    else
-      this._vaultAppBaseUrl = this._vaultAppBaseUrl =
-        this._config.vaultAppBaseUrl
+    }
 
-    this._displayRawResponse = this._config.displayRawResponse
-    if (this._config.displayRawResponse) {
+    if (!this._sismoConnectConfig.displayRawResponse) {
+      this._sismoConnectConfig.displayRawResponse = false
+    }
+
+    if (this._sismoConnectConfig.displayRawResponse) {
       console.warn(
         'Sismo Connect displayRawResponse is true. Never use this mode in production!'
       )
     }
 
-    if (this._config.vault === Vault.Dev) {
-      this._devVault = this._config.devVault
+    if (isImpersonationMode) {
       console.warn(
-        'Sismo Connect redirect to the Dev Vault. Never use this mode in production!'
-      )
-      if (this._config.devVault?.groupsOverride) {
-        console.warn(
-          `Groups override in the Dev Vault by your groups added in the config. Never use this in production!`
-        )
-      }
-    }
-
-    if (this._config.vault === Vault.Demo) {
-      console.warn(
-        'Sismo Connect redirect to the Demo Vault. Never use this mode in production!'
+        `Sismo Connect redirects to the Impersonation Vault. The generated proofs are based on impersonated accounts: ${this._sismoConnectConfig.vault.impersonate}. Never use this mode in production!`
       )
     }
 
-    this._sdk = new Sdk(this._config.sismoApiUrl)
+    this._sdk = new Sdk(this._sismoConnectConfig.sismoApiUrl)
   }
 
   public request = ({
@@ -139,7 +116,7 @@ export class SismoConnectClient {
       throw new Error("You can't use both claim and claims")
     }
 
-    let url = `${this._vaultAppBaseUrl}/connect?version=${SISMO_CONNECT_VERSION}&appId=${this._appId}`
+    let url = `${this._sismoConnectConfig.vaultAppBaseUrl}/connect?version=${SISMO_CONNECT_VERSION}&appId=${this._sismoConnectConfig.appId}`
 
     if (claims) {
       url += `&claims=${JSON.stringify(RequestBuilder.buildClaims(claims))}`
@@ -158,55 +135,8 @@ export class SismoConnectClient {
       url += `&signature=${JSON.stringify(signature)}`
     }
 
-    if (this._vault === Vault.Dev || this._vault === Vault.Demo) {
-      let devGroups = null
-
-      if (this._vault === Vault.Dev && this._devVault?.groupsOverride) {
-        devGroups = this._devVault.groupsOverride
-      }
-
-      if (this._vault === Vault.Demo) {
-        if (claims || claim) {
-          claims = claims ?? [claim]
-          devGroups = claims.map((_claim) => {
-            let value = 1
-            if (_claim) {
-              switch (_claim.claimType) {
-                case ClaimType.EQ:
-                  value = _claim.value
-                  break
-                case ClaimType.GT:
-                  value = _claim.value + 1
-                  break
-                case ClaimType.GTE:
-                  value = _claim.value + 1
-                  break
-                case ClaimType.LT:
-                  value = _claim.value - 1
-                  break
-                case ClaimType.LTE:
-                  value = _claim.value - 1
-                  break
-              }
-            }
-            return {
-              groupId: _claim.groupId,
-              data: {
-                // Add vitalik account
-                '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045': value,
-              },
-            }
-          })
-        }
-      }
-
-      const devConfig: DevConfig = {
-        enabled: true,
-        displayRawResponse: this._displayRawResponse,
-        devGroups: devGroups,
-      }
-
-      url += `&devConfig=${JSON.stringify(devConfig)}`
+    if (this._sismoConnectConfig.vault?.impersonate?.length > 0) {
+      url += `&vault=${JSON.stringify(this._sismoConnectConfig.vault)}`
     }
 
     if (callbackPath) {
