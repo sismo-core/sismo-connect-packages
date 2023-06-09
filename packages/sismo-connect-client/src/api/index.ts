@@ -1,2 +1,2 @@
-export * from "./api-fetcher";
-export * from "./types";
+export * from './api-fetcher'
+export * from './types'

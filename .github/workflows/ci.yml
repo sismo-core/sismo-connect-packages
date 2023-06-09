@@ -1,0 +1,54 @@
+# name: Sismo Connect Packages Tests
+
+# on:
+#   push:
+# jobs:
+#   server-test:
+#     name: Server Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Install dependencies
+#         run: cd packages/sismo-connect-server && yarn install --frozen-lockfile
+
+#       - name: Run tests
+#         run: cd packages/sismo-connect-server && yarn test
+
+#   client-test:
+#     name: Client Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Install dependencies
+#         run: cd packages/sismo-connect-client && yarn install --frozen-lockfile
+
+#       - name: Run tests
+#         run: cd packages/sismo-connect-client && yarn test
+
+#   solidity-test:
+#     name: Solidity Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - run: cd packages/sismo-connect-solidity
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Install submodules
+#         run: |
+#           git config --global url."https://github.com/".insteadOf "git@github.com:"
+#           git submodule update --init --recursive
+
+#       - name: Install dependencies
+#         run: forge install
+
+#       - name: Compile
+#         run: forge build
+
+#       - name: Run Forge tests
+#         run: forge test -vvv

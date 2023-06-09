@@ -6,13 +6,13 @@ import {
   SismoConnectResponse,
   SismoConnectServer,
   SISMO_CONNECT_VERSION,
-} from "../src";
-import { sismoConnectSimpleClaimResponseMock } from "./mocks";
-import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
-import { decodeProofData } from "../src/verifier/utils/proofData";
+} from '../src'
+import { sismoConnectSimpleClaimResponseMock } from './mocks'
+import { BigNumber } from '@ethersproject/bignumber'
+import { decodeProofData } from '../src/verifier/utils/proofData'
+import { JsonRpcProviderMock } from '../src/verifier/libs/onchain-provider'
 
-describe('ZkConnect', () => {
+describe('SismoConnect', () => {
   let verifiedClaim: VerifiedClaim
   let sismoConnect: SismoConnectServer
   let sismoConnectResponse: SismoConnectResponse
@@ -23,9 +23,9 @@ describe('ZkConnect', () => {
   let groupTimestamp: number | 'latest'
   let value: number
   let claimType: ClaimType
-  let commitmentMapperPubKey: [string, string];
+  let commitmentMapperPubKey: [string, string]
 
-  beforeAll(() => {
+  beforeEach(async () => {
     appId = '0x112a692a2005259c25f6094161007967'
     groupId = '0x682544d549b8a461d7fe3e589846bb7b'
     namespace = 'main'
@@ -34,12 +34,7 @@ describe('ZkConnect', () => {
     value = 1
     claimType = ClaimType.GTE
 
-    const _provider = new ethers.providers.JsonRpcProvider(
-      'https://rpc.ankr.com/eth_goerli',
-      5
-    )
-    
-    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData);
+    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData)
     commitmentMapperPubKey = [
       BigNumber.from(snarkProof.input[2]).toHexString(),
       BigNumber.from(snarkProof.input[3]).toHexString(),
@@ -50,48 +45,41 @@ describe('ZkConnect', () => {
     }
 
     sismoConnect = SismoConnect({
-      appId,
+      config: {
+        appId,
+      },
       options: {
-        provider: _provider,
+        provider: new JsonRpcProviderMock(),
         verifier: {
           hydraS2: {
-            commitmentMapperPubKeys: commitmentMapperPubKey
+            commitmentMapperPubKeys: commitmentMapperPubKey,
           },
         },
       },
     })
 
     verifiedClaim = {
-        groupId,
-        groupTimestamp,
-        value,
-        claimType,
-        extraData: "",
-        isSelectableByUser: false,
-        proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
-        proofData: sismoConnectResponse.proofs[0].proofData
-    };
-
-    // Mocking the IsRootAvailable method to return true even if the root is no longer available
-    const isRootAvailableMock = jest.spyOn(
-      sismoConnect['_verifier']['hydraS2Verifier'] as any,
-      'IsRootAvailable'
-    )
-    isRootAvailableMock.mockImplementation(async () => {
-      return true
-    })
+      groupId,
+      groupTimestamp,
+      value,
+      claimType,
+      extraData: '',
+      isSelectableByUser: false,
+      proofId: BigNumber.from(snarkProof.input[6]).toHexString(),
+      proofData: sismoConnectResponse.proofs[0].proofData,
+    }
   })
 
-  describe('zkConnect server', () => {
+  describe('Sismo Connect server', () => {
     describe('verify with statements', () => {
       it('should throw with an invalid sismoConnectResponse', async () => {
-        const invalidSismoConnectResponse = null
+        const invalidSismoConnectResponse = undefined
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse as any, {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(`sismoConnectResponse provided is undefined`)
+        ).rejects.toEqual(Error(`sismoConnectResponse provided is undefined`))
       })
 
       it('should throw with an invalid sismoConnectResponse', async () => {
@@ -101,8 +89,10 @@ describe('ZkConnect', () => {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `no version provided in your sismoConnectResponse, please use the sismoConnectResponse that was returned by the Sismo vault app`
+        ).rejects.toEqual(
+          Error(
+            `no version provided in your sismoConnectResponse, please use the sismoConnectResponse that was returned by the Sismo vault app`
+          )
         )
       })
 
@@ -116,8 +106,10 @@ describe('ZkConnect', () => {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `version of the sismoConnectResponse "${invalidSismoConnectResponse.version}" not compatible with this version "${SISMO_CONNECT_VERSION}"`
+        ).rejects.toEqual(
+          Error(
+            `version of the sismoConnectResponse "${invalidSismoConnectResponse.version}" not compatible with this version "${SISMO_CONNECT_VERSION}"`
+          )
         )
       })
 
@@ -131,8 +123,10 @@ describe('ZkConnect', () => {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `sismoConnectResponse appId "${invalidSismoConnectResponse.appId}" does not match with server appId "${appId}"`
+        ).rejects.toEqual(
+          Error(
+            `sismoConnectResponse appId "${invalidSismoConnectResponse.appId}" does not match with server appId "${appId}"`
+          )
         )
       })
 
@@ -146,8 +140,10 @@ describe('ZkConnect', () => {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `sismoConnectResponse namespace "${invalidSismoConnectResponse.namespace}" does not match with server namespace "${namespace}"`
+        ).rejects.toEqual(
+          Error(
+            `sismoConnectResponse namespace "${invalidSismoConnectResponse.namespace}" does not match with server namespace "${namespace}"`
+          )
         )
       })
 
@@ -155,16 +151,18 @@ describe('ZkConnect', () => {
         const invalidSismoConnectResponse = JSON.parse(
           JSON.stringify(sismoConnectResponse)
         ) as SismoConnectResponse
-        invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
-          .proofs[0].claims as ClaimRequest[]
+        invalidSismoConnectResponse.proofs[0].claims =
+          invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[]
         invalidSismoConnectResponse.proofs[0].claims[0].groupId = '0x123'
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+        ).rejects.toEqual(
+          Error(
+            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+          )
         )
       })
 
@@ -172,16 +170,18 @@ describe('ZkConnect', () => {
         const invalidSismoConnectResponse = JSON.parse(
           JSON.stringify(sismoConnectResponse)
         ) as SismoConnectResponse
-        invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
-          .proofs[0].claims as ClaimRequest[]
+        invalidSismoConnectResponse.proofs[0].claims =
+          invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[]
         invalidSismoConnectResponse.proofs[0].claims[0].groupTimestamp = 123456
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+        ).rejects.toEqual(
+          Error(
+            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+          )
         )
       })
 
@@ -189,16 +189,18 @@ describe('ZkConnect', () => {
         const invalidSismoConnectResponse = JSON.parse(
           JSON.stringify(sismoConnectResponse)
         ) as SismoConnectResponse
-        invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse
-          .proofs[0].claims as ClaimRequest[]
-        invalidSismoConnectResponse.proofs[0].claims[0].claimType = ClaimType.LT;
+        invalidSismoConnectResponse.proofs[0].claims =
+          invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[]
+        invalidSismoConnectResponse.proofs[0].claims[0].claimType = ClaimType.LT
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+        ).rejects.toEqual(
+          Error(
+            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+          )
         )
       })
 
@@ -207,28 +209,37 @@ describe('ZkConnect', () => {
           JSON.stringify(sismoConnectResponse)
         ) as SismoConnectResponse
 
-        invalidSismoConnectResponse.proofs[0].claims = invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[];
-        invalidSismoConnectResponse.proofs[0].claims[0].value = -1;
+        invalidSismoConnectResponse.proofs[0].claims =
+          invalidSismoConnectResponse.proofs[0].claims as ClaimRequest[]
+        invalidSismoConnectResponse.proofs[0].claims[0].value = -1
 
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
             namespace,
           })
-        ).rejects.toThrow(
-          `The proof value ${invalidSismoConnectResponse.proofs[0].claims[0].value} is not equal or greater than the requested value ${(sismoConnectResponse.proofs[0].claims as ClaimRequest[])[0]?.value}`
+        ).rejects.toEqual(
+          Error(
+            `The proof value ${
+              invalidSismoConnectResponse.proofs[0].claims[0].value
+            } is not equal or greater than the requested value ${
+              (sismoConnectResponse.proofs[0].claims as ClaimRequest[])[0]
+                ?.value
+            }`
+          )
         )
       })
 
       it('Should verify', async () => {
-        const zkConnectVerifiedResult = await sismoConnect.verify(
+        const sismoConnectVerifiedResult = await sismoConnect.verify(
           sismoConnectResponse,
           {
             claims: [claimRequest],
             namespace: 'main',
           }
         )
-        expect(zkConnectVerifiedResult.claims[0]).toEqual(verifiedClaim);
+
+        expect(sismoConnectVerifiedResult.claims[0]).toEqual(verifiedClaim)
       })
     })
 
@@ -238,8 +249,10 @@ describe('ZkConnect', () => {
           sismoConnect.verify(sismoConnectResponse, {
             namespace,
           })
-        ).rejects.toThrow(
-          `No claim, no auth and no signed message in the proof, please provide at least one`
+        ).rejects.toEqual(
+          Error(
+            `No claim, no auth and no signed message in the proof, please provide at least one`
+          )
         )
       })
     })

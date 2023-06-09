@@ -12,500 +12,498 @@ import {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
-import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
+} from 'ethers'
+import { FunctionFragment, Result, EventFragment } from '@ethersproject/abi'
+import { Listener, Provider } from '@ethersproject/providers'
+import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common'
 
 export interface AvailableRootsRegistryInterface extends utils.Interface {
-  contractName: "AvailableRootsRegistry";
+  contractName: 'AvailableRootsRegistry'
   functions: {
-    "_roots(address,uint256)": FunctionFragment;
-    "initialize(address)": FunctionFragment;
-    "isRootAvailableForAttester(address,uint256)": FunctionFragment;
-    "isRootAvailableForMe(uint256)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "registerRootForAll(uint256)": FunctionFragment;
-    "registerRootForAttester(address,uint256)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "unregisterRootForAll(uint256)": FunctionFragment;
-    "unregisterRootForAttester(address,uint256)": FunctionFragment;
-  };
+    '_roots(address,uint256)': FunctionFragment
+    'initialize(address)': FunctionFragment
+    'isRootAvailableForAttester(address,uint256)': FunctionFragment
+    'isRootAvailableForMe(uint256)': FunctionFragment
+    'owner()': FunctionFragment
+    'registerRootForAll(uint256)': FunctionFragment
+    'registerRootForAttester(address,uint256)': FunctionFragment
+    'renounceOwnership()': FunctionFragment
+    'transferOwnership(address)': FunctionFragment
+    'unregisterRootForAll(uint256)': FunctionFragment
+    'unregisterRootForAttester(address,uint256)': FunctionFragment
+  }
 
   encodeFunctionData(
-    functionFragment: "_roots",
+    functionFragment: '_roots',
     values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "initialize", values: [string]): string;
+  ): string
+  encodeFunctionData(functionFragment: 'initialize', values: [string]): string
   encodeFunctionData(
-    functionFragment: "isRootAvailableForAttester",
+    functionFragment: 'isRootAvailableForAttester',
     values: [string, BigNumberish]
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "isRootAvailableForMe",
+    functionFragment: 'isRootAvailableForMe',
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  ): string
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string
   encodeFunctionData(
-    functionFragment: "registerRootForAll",
+    functionFragment: 'registerRootForAll',
     values: [BigNumberish]
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "registerRootForAttester",
+    functionFragment: 'registerRootForAttester',
     values: [string, BigNumberish]
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
+    functionFragment: 'renounceOwnership',
     values?: undefined
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "unregisterRootForAll",
+    functionFragment: 'unregisterRootForAll',
     values: [BigNumberish]
-  ): string;
+  ): string
   encodeFunctionData(
-    functionFragment: "unregisterRootForAttester",
+    functionFragment: 'unregisterRootForAttester',
     values: [string, BigNumberish]
-  ): string;
+  ): string
 
-  decodeFunctionResult(functionFragment: "_roots", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: '_roots', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result
   decodeFunctionResult(
-    functionFragment: "isRootAvailableForAttester",
+    functionFragment: 'isRootAvailableForAttester',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "isRootAvailableForMe",
+    functionFragment: 'isRootAvailableForMe',
     data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  ): Result
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result
   decodeFunctionResult(
-    functionFragment: "registerRootForAll",
+    functionFragment: 'registerRootForAll',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "registerRootForAttester",
+    functionFragment: 'registerRootForAttester',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "renounceOwnership",
+    functionFragment: 'renounceOwnership',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "unregisterRootForAll",
+    functionFragment: 'unregisterRootForAll',
     data: BytesLike
-  ): Result;
+  ): Result
   decodeFunctionResult(
-    functionFragment: "unregisterRootForAttester",
+    functionFragment: 'unregisterRootForAttester',
     data: BytesLike
-  ): Result;
+  ): Result
 
   events: {
-    "OwnershipTransferred(address,address)": EventFragment;
-    "RegisteredRootForAll(uint256)": EventFragment;
-    "RegisteredRootForAttester(address,uint256)": EventFragment;
-    "UnregisteredRootForAll(uint256)": EventFragment;
-    "UnregisteredRootForAttester(address,uint256)": EventFragment;
-  };
+    'OwnershipTransferred(address,address)': EventFragment
+    'RegisteredRootForAll(uint256)': EventFragment
+    'RegisteredRootForAttester(address,uint256)': EventFragment
+    'UnregisteredRootForAll(uint256)': EventFragment
+    'UnregisteredRootForAttester(address,uint256)': EventFragment
+  }
 
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RegisteredRootForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RegisteredRootForAttester"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "UnregisteredRootForAll"): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "UnregisteredRootForAttester"
-  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment
+  getEvent(nameOrSignatureOrTopic: 'RegisteredRootForAll'): EventFragment
+  getEvent(nameOrSignatureOrTopic: 'RegisteredRootForAttester'): EventFragment
+  getEvent(nameOrSignatureOrTopic: 'UnregisteredRootForAll'): EventFragment
+  getEvent(nameOrSignatureOrTopic: 'UnregisteredRootForAttester'): EventFragment
 }
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
   { previousOwner: string; newOwner: string }
->;
+>
 
 export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
+  TypedEventFilter<OwnershipTransferredEvent>
 
 export type RegisteredRootForAllEvent = TypedEvent<
   [BigNumber],
   { root: BigNumber }
->;
+>
 
 export type RegisteredRootForAllEventFilter =
-  TypedEventFilter<RegisteredRootForAllEvent>;
+  TypedEventFilter<RegisteredRootForAllEvent>
 
 export type RegisteredRootForAttesterEvent = TypedEvent<
   [string, BigNumber],
   { attester: string; root: BigNumber }
->;
+>
 
 export type RegisteredRootForAttesterEventFilter =
-  TypedEventFilter<RegisteredRootForAttesterEvent>;
+  TypedEventFilter<RegisteredRootForAttesterEvent>
 
 export type UnregisteredRootForAllEvent = TypedEvent<
   [BigNumber],
   { root: BigNumber }
->;
+>
 
 export type UnregisteredRootForAllEventFilter =
-  TypedEventFilter<UnregisteredRootForAllEvent>;
+  TypedEventFilter<UnregisteredRootForAllEvent>
 
 export type UnregisteredRootForAttesterEvent = TypedEvent<
   [string, BigNumber],
   { attester: string; root: BigNumber }
->;
+>
 
 export type UnregisteredRootForAttesterEventFilter =
-  TypedEventFilter<UnregisteredRootForAttesterEvent>;
+  TypedEventFilter<UnregisteredRootForAttesterEvent>
 
 export interface AvailableRootsRegistry extends BaseContract {
-  contractName: "AvailableRootsRegistry";
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  contractName: 'AvailableRootsRegistry'
+  connect(signerOrProvider: Signer | Provider | string): this
+  attach(addressOrName: string): this
+  deployed(): Promise<this>
 
-  interface: AvailableRootsRegistryInterface;
+  interface: AvailableRootsRegistryInterface
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TEvent>>
 
   listeners<TEvent extends TypedEvent>(
     eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
+  ): Array<TypedListener<TEvent>>
+  listeners(eventName?: string): Array<Listener>
   removeAllListeners<TEvent extends TypedEvent>(
     eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  ): this
+  removeAllListeners(eventName?: string): this
+  off: OnEvent<this>
+  on: OnEvent<this>
+  once: OnEvent<this>
+  removeListener: OnEvent<this>
 
   functions: {
     _roots(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<[boolean]>
 
     initialize(
       owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     isRootAvailableForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<[boolean]>
 
     isRootAvailableForMe(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<[boolean]>
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
+    owner(overrides?: CallOverrides): Promise<[string]>
 
     registerRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     registerRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     unregisterRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    ): Promise<ContractTransaction>
 
     unregisterRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-  };
+    ): Promise<ContractTransaction>
+  }
 
   _roots(
     arg0: string,
     arg1: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<boolean>
 
   initialize(
     owner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   isRootAvailableForAttester(
     attester: string,
     root: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<boolean>
 
   isRootAvailableForMe(
     root: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<boolean>
 
-  owner(overrides?: CallOverrides): Promise<string>;
+  owner(overrides?: CallOverrides): Promise<string>
 
   registerRootForAll(
     root: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   registerRootForAttester(
     attester: string,
     root: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   unregisterRootForAll(
     root: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   unregisterRootForAttester(
     attester: string,
     root: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction>
 
   callStatic: {
     _roots(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<boolean>
 
-    initialize(owner: string, overrides?: CallOverrides): Promise<void>;
+    initialize(owner: string, overrides?: CallOverrides): Promise<void>
 
     isRootAvailableForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<boolean>
 
     isRootAvailableForMe(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<boolean>
 
-    owner(overrides?: CallOverrides): Promise<string>;
+    owner(overrides?: CallOverrides): Promise<string>
 
     registerRootForAll(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<void>
 
     registerRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<void>
 
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+    renounceOwnership(overrides?: CallOverrides): Promise<void>
 
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<void>
 
     unregisterRootForAll(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<void>
 
     unregisterRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
-  };
+    ): Promise<void>
+  }
 
   filters: {
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
+    ): OwnershipTransferredEventFilter
     OwnershipTransferred(
       previousOwner?: string | null,
       newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
+    ): OwnershipTransferredEventFilter
 
-    "RegisteredRootForAll(uint256)"(
+    'RegisteredRootForAll(uint256)'(
       root?: null
-    ): RegisteredRootForAllEventFilter;
-    RegisteredRootForAll(root?: null): RegisteredRootForAllEventFilter;
+    ): RegisteredRootForAllEventFilter
+    RegisteredRootForAll(root?: null): RegisteredRootForAllEventFilter
 
-    "RegisteredRootForAttester(address,uint256)"(
+    'RegisteredRootForAttester(address,uint256)'(
       attester?: null,
       root?: null
-    ): RegisteredRootForAttesterEventFilter;
+    ): RegisteredRootForAttesterEventFilter
     RegisteredRootForAttester(
       attester?: null,
       root?: null
-    ): RegisteredRootForAttesterEventFilter;
+    ): RegisteredRootForAttesterEventFilter
 
-    "UnregisteredRootForAll(uint256)"(
+    'UnregisteredRootForAll(uint256)'(
       root?: null
-    ): UnregisteredRootForAllEventFilter;
-    UnregisteredRootForAll(root?: null): UnregisteredRootForAllEventFilter;
+    ): UnregisteredRootForAllEventFilter
+    UnregisteredRootForAll(root?: null): UnregisteredRootForAllEventFilter
 
-    "UnregisteredRootForAttester(address,uint256)"(
+    'UnregisteredRootForAttester(address,uint256)'(
       attester?: null,
       root?: null
-    ): UnregisteredRootForAttesterEventFilter;
+    ): UnregisteredRootForAttesterEventFilter
     UnregisteredRootForAttester(
       attester?: null,
       root?: null
-    ): UnregisteredRootForAttesterEventFilter;
-  };
+    ): UnregisteredRootForAttesterEventFilter
+  }
 
   estimateGas: {
     _roots(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     initialize(
       owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     isRootAvailableForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     isRootAvailableForMe(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
+    owner(overrides?: CallOverrides): Promise<BigNumber>
 
     registerRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     registerRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     unregisterRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber>
 
     unregisterRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-  };
+    ): Promise<BigNumber>
+  }
 
   populateTransaction: {
     _roots(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     initialize(
       owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     isRootAvailableForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     isRootAvailableForMe(
       root: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>
 
     registerRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     registerRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     unregisterRootForAll(
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    ): Promise<PopulatedTransaction>
 
     unregisterRootForAttester(
       attester: string,
       root: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-  };
+    ): Promise<PopulatedTransaction>
+  }
 }

@@ -1,23 +1,15 @@
 import { VerifierOpts } from './verifier'
 import { AuthRequest, ClaimRequest, SignatureRequest } from './common-types'
-import { Provider } from '@ethersproject/abstract-provider'
+import { SismoConnectProvider } from './verifier/libs/onchain-provider'
 
 export type VerifyParamsSismoConnect = {
   claims?: ClaimRequest[]
   auths?: AuthRequest[]
-  signature?: SignatureRequest;
+  signature?: SignatureRequest
   namespace?: string
 }
 
-//////////////////
-
-export type SismoConnectServerConfig = {
-  appId: string
-  devMode?: {
-    enabled?: boolean
-  }
-  options?: {
-    provider?: Provider
-    verifier?: VerifierOpts
-  }
+export type SismoConnectServerOptions = {
+  provider?: SismoConnectProvider
+  verifier?: VerifierOpts
 }

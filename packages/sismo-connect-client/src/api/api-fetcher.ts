@@ -1,14 +1,13 @@
-
 export type QueryOptions = {
-  query: string;
-  variables?: any;
+  query: string
+  variables?: any
 }
 
 export class ApiFetcher {
-  private _url: string;
+  private _url: string
 
   constructor(url: string) {
-    this._url = url;
+    this._url = url
   }
 
   public async getWithQuery<T>(opts: QueryOptions) {
@@ -22,7 +21,7 @@ export class ApiFetcher {
         variables: opts.variables,
       }),
     })
-    .then(res => res.json())
-    .then(res => res.data)
+      .then((res) => res.json())
+      .then((res) => res.data)
   }
 }

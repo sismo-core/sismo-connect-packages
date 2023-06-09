@@ -2,11 +2,10 @@ import React, { useEffect } from "react";
 import './SismoConnectButton.css';
 import { Logo } from "../Logo/Logo";
 import { Loader } from "../Loader";
-import { SismoConnectResponse, SismoConnectClientConfig, ClaimRequest, AuthRequest, SignatureRequest } from "@sismo-core/sismo-connect-client";
+import { SismoConnectResponse, SismoConnectConfig, ClaimRequest, AuthRequest, SignatureRequest } from "@sismo-core/sismo-connect-client";
 import { useSismoConnect } from "../../hooks/useSismoConnect";
 
 type ButtonProps = {
-  appId?: string;
   claim?: ClaimRequest;
   claims?: ClaimRequest[];
   auth?: AuthRequest;
@@ -14,7 +13,7 @@ type ButtonProps = {
   signature?: SignatureRequest;
   onResponse?: (response: SismoConnectResponse) => void;
   onResponseBytes?: (responseBytes: string) => void;
-  config?: SismoConnectClientConfig;
+  config: SismoConnectConfig;
   // [Deprecated]
   callbackPath?: string;
   callbackUrl?: string;
@@ -27,7 +26,6 @@ type ButtonProps = {
 };
 
 export const SismoConnectButton = ({
-  appId,
   claims,
   claim,
   auths,
@@ -46,12 +44,6 @@ export const SismoConnectButton = ({
   loading,
   overrideStyle,
 }: ButtonProps) => {
-  if (!appId && !config) {
-    throw new Error("please add at least one appId or a config props in ZkConnectButton")
-  }
-  if (appId && config && appId !== config.appId) {
-    throw new Error("the 'appId' props of your ZkConnectButton is different from the 'appId' in your configuration. Please add the same 'appId' props as in your configuration or remove the 'appId' prop")
-  }
   if (!claims && !auths && !signature && !claim && !auth) {
     throw new Error("Please specify at least one claimRequest or authRequest or signatureRequest");
   }
@@ -64,9 +56,7 @@ export const SismoConnectButton = ({
   }
 
   const { sismoConnect, response, responseBytes } = useSismoConnect({ 
-    config: config || {
-      appId
-    }
+    config
   });
 
   useEffect(() => {

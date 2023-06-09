@@ -1,3 +1,4 @@
+import * as leakedHandles from 'leaked-handles'
 import { sismoConnectSimpleClaimResponseMock } from './mocks'
 import { BigNumber } from '@ethersproject/bignumber'
 import { HydraS2VerifierMocked } from './hydras2-verifier-mocked'
@@ -14,6 +15,10 @@ import {
   decodeProofData,
   encodeProofData,
 } from '../src/verifier/utils/proofData'
+
+leakedHandles.set({
+  debugSockets: true,
+})
 
 describe('Sismo Connect Verifier', () => {
   let appId: string
@@ -34,14 +39,14 @@ describe('Sismo Connect Verifier', () => {
   let proofIdentifier: string
   let vaultIdentifier: string
 
-  let commitmentMapperPubKey: [BigNumber, BigNumber];
+  let commitmentMapperPubKey: [BigNumber, BigNumber]
 
   let expectVerifyClaimToThrow: (
     proof: SismoConnectProof,
     expectedError: string
   ) => Promise<void>
 
-  beforeAll(() => {
+  beforeAll(async () => {
     appId = '0x112a692a2005259c25f6094161007967'
     groupId = '0x682544d549b8a461d7fe3e589846bb7b'
     namespace = 'main'
@@ -50,19 +55,25 @@ describe('Sismo Connect Verifier', () => {
     claimType = ClaimType.GTE
 
     claimRequest = {
-        groupId,
-        groupTimestamp,
-        value,
-        claimType
-    };
+      groupId,
+      groupTimestamp,
+      value,
+      claimType,
+    }
 
-    const snarkProof = decodeProofData(sismoConnectSimpleClaimResponseMock.proofs[0].proofData);
+    const snarkProof = decodeProofData(
+      sismoConnectSimpleClaimResponseMock.proofs[0].proofData
+    )
 
     proofPublicInputs = {
       destinationIdentifier: BigNumber.from(snarkProof.input[0]).toHexString(),
       extraData: BigNumber.from(snarkProof.input[1]).toHexString(),
-      commitmentMapperPubKeyX: BigNumber.from(snarkProof.input[2]).toHexString(),
-      commitmentMapperPubKeyY: BigNumber.from(snarkProof.input[3]).toHexString(),
+      commitmentMapperPubKeyX: BigNumber.from(
+        snarkProof.input[2]
+      ).toHexString(),
+      commitmentMapperPubKeyY: BigNumber.from(
+        snarkProof.input[3]
+      ).toHexString(),
       registryTreeRoot: BigNumber.from(snarkProof.input[4]).toHexString(),
       requestIdentifier: BigNumber.from(snarkProof.input[5]).toString(),
       proofIdentifier: BigNumber.from(snarkProof.input[6]).toString(),
@@ -71,8 +82,12 @@ describe('Sismo Connect Verifier', () => {
       claimType: BigNumber.from(snarkProof.input[9]).toString(),
       vaultIdentifier: BigNumber.from(snarkProof.input[10]).toHexString(),
       vaultNamespace: BigNumber.from(snarkProof.input[11]).toHexString(),
-      sourceVerificationEnabled: BigNumber.from(snarkProof.input[12]).toHexString(),
-      destinationVerificationEnabled: BigNumber.from(snarkProof.input[13]).toHexString(),
+      sourceVerificationEnabled: BigNumber.from(
+        snarkProof.input[12]
+      ).toHexString(),
+      destinationVerificationEnabled: BigNumber.from(
+        snarkProof.input[13]
+      ).toHexString(),
     }
 
     commitmentMapperPubKey = [
@@ -90,7 +105,7 @@ describe('Sismo Connect Verifier', () => {
       value,
       claimType,
       isSelectableByUser: false,
-      extraData: "",
+      extraData: '',
       proofId: BigNumber.from(proofPublicInputs.proofIdentifier).toHexString(),
       proofData: encodeProofData(
         snarkProof.a,
@@ -100,7 +115,7 @@ describe('Sismo Connect Verifier', () => {
       ),
     }
 
-    proof = sismoConnectSimpleClaimResponseMock.proofs[0];
+    proof = sismoConnectSimpleClaimResponseMock.proofs[0]
 
     vaultIdentifier = proofPublicInputs.vaultIdentifier
     proofIdentifier = proofPublicInputs.proofIdentifier
@@ -145,7 +160,9 @@ describe('Sismo Connect Verifier', () => {
 
     describe('validateInput', () => {
       it('Should throw with incorrect input claimType', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         invalidProof.claims = invalidProof.claims as ClaimRequest[]
 
         invalidProof.claims[0].claimType = ClaimType.EQ
@@ -159,7 +176,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('Should throw with incorrect proof value', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         invalidProof.claims = invalidProof.claims as ClaimRequest[]
         invalidProof.claims[0].value = 2
         await expectVerifyClaimToThrow(
@@ -169,7 +188,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('Should throw with incorrect input requestIdentifier', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.input[5] = '1'
         const proofEncoded = encodeProofData(
@@ -198,7 +219,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('Should throw with incorrect input commitmentMapperPubKeyX', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.input[2] = '0x1'
         const proofEncoded = encodeProofData(
@@ -220,7 +243,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('Should throw with incorrect input commitmentMapperPubKeyX', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.input[3] = '0x1'
         const proofEncoded = encodeProofData(
@@ -242,7 +267,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('should throw with incorrect input sourceVerificationEnabled', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.input[12] = '123456789'
         const proofEncoded = encodeProofData(
@@ -260,7 +287,9 @@ describe('Sismo Connect Verifier', () => {
       })
 
       it('Should throw with incorrect accountsTreeValue', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.input[8] = '123456789'
         const proofEncoded = encodeProofData(
@@ -285,7 +314,9 @@ describe('Sismo Connect Verifier', () => {
 
     describe('proof validity', () => {
       it('Should return false', async () => {
-        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
+        const invalidProof = JSON.parse(
+          JSON.stringify(proof)
+        ) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.a[0] = '123456789'
         const proofEncoded = encodeProofData(
@@ -296,13 +327,9 @@ describe('Sismo Connect Verifier', () => {
         )
         invalidProof.proofData = proofEncoded
 
-        await expect(
-          hydraS2VerifierMocked.verifyClaimProof({
-            appId,
-            namespace,
-            proof: invalidProof,
-          })
-        ).rejects.toThrow('Snark Proof Invalid!')
+        invalidProof.claims = invalidProof.claims as ClaimRequest[]
+
+        await expectVerifyClaimToThrow(invalidProof, 'Snark Proof Invalid!')
       })
 
       it('Should return true', async () => {

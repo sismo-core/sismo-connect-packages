@@ -1,34 +1,40 @@
-import { SismoConnect, SismoConnectClient, SismoConnectClientConfig, SismoConnectResponse } from "@sismo-core/sismo-connect-client";
-import { useEffect, useMemo, useState } from "react";
+import {
+  SismoConnect,
+  SismoConnectClient,
+  SismoConnectConfig,
+  SismoConnectResponse,
+} from '@sismo-core/sismo-connect-client'
+import { useEffect, useMemo, useState } from 'react'
 
 export type SismoConnectHook = {
-    response: SismoConnectResponse | null,
-    responseBytes: string,
-    sismoConnect: SismoConnectClient
-};
+  response: SismoConnectResponse | null
+  responseBytes: string
+  sismoConnect: SismoConnectClient
+}
 
 export type SismoConnectProps = {
-    config: SismoConnectClientConfig
-};
+  config: SismoConnectConfig
+}
 
-export const useSismoConnect = ({ config }: SismoConnectProps): SismoConnectHook => {
-    const [response, setResponse] = useState(null);
-    const [responseBytes, setResponseBytes] = useState(null);
-    
-    const sismoConnect = useMemo(() => {
-        return SismoConnect(config)
-    }, [config]);
+export const useSismoConnect = ({
+  config,
+}: SismoConnectProps): SismoConnectHook => {
+  const [response, setResponse] = useState(null)
+  const [responseBytes, setResponseBytes] = useState(null)
 
-    useEffect(() => {
-        const sismoConnectResponse = sismoConnect.getResponse();
-        const sismoConnectResponseBytes = sismoConnect.getResponseBytes();
-        if (sismoConnectResponse) setResponse(sismoConnectResponse);
-        if (sismoConnectResponseBytes) setResponseBytes(sismoConnectResponseBytes);
-    }, []);
+  const sismoConnect = useMemo(() => SismoConnect({ config }), [config])
 
-    return {
-        response,
-        responseBytes,
-        sismoConnect
-    };
-};
+  useEffect(() => {
+    if (!sismoConnect) return
+    const sismoConnectResponse = sismoConnect.getResponse()
+    const sismoConnectResponseBytes = sismoConnect.getResponseBytes()
+    if (sismoConnectResponse) setResponse(sismoConnectResponse)
+    if (sismoConnectResponseBytes) setResponseBytes(sismoConnectResponseBytes)
+  }, [sismoConnect])
+
+  return {
+    response,
+    responseBytes,
+    sismoConnect,
+  }
+}
