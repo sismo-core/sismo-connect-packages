@@ -19,7 +19,7 @@ import {
   AvailableRootsRegistryContractFactory,
 } from './libs/contracts'
 import { HydraS2Verifier, HydraS2VerifierOpts } from './hydras2-verifier'
-import { OnChainProvider } from './libs/onchain-provider'
+import { SismoConnectProvider } from './libs/onchain-provider'
 
 export type VerifierOpts = {
   hydraS2?: HydraS2VerifierOpts
@@ -39,17 +39,17 @@ export class SismoConnectVerifier {
   private hydraS2Verifier: HydraS2Verifier
   private _availableRootsRegistry: AvailableRootsRegistryContract
 
-  constructor(onChainProvider: OnChainProvider, opts?: VerifierOpts) {
+  constructor(provider: SismoConnectProvider, opts?: VerifierOpts) {
     this._availableRootsRegistry =
       AvailableRootsRegistryContractFactory.connect({
         address:
           opts?.availableRootsRegistryAddress ||
           GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
-        onChainProvider,
+        provider,
       })
 
     this.hydraS2Verifier = new HydraS2Verifier(
-      onChainProvider,
+      provider,
       this._availableRootsRegistry,
       {
         ...opts?.hydraS2,

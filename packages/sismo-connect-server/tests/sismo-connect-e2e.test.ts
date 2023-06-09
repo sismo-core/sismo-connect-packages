@@ -10,7 +10,7 @@ import {
 import { sismoConnectSimpleClaimResponseMock } from './mocks'
 import { BigNumber } from '@ethersproject/bignumber'
 import { decodeProofData } from '../src/verifier/utils/proofData'
-import { OnchainProviderMock } from '../src/verifier/libs/onchain-provider'
+import { JsonRpcProviderMock } from '../src/verifier/libs/onchain-provider'
 
 describe('SismoConnect', () => {
   let verifiedClaim: VerifiedClaim
@@ -49,7 +49,7 @@ describe('SismoConnect', () => {
         appId,
       },
       options: {
-        onChainProvider: new OnchainProviderMock(),
+        provider: new JsonRpcProviderMock(),
         verifier: {
           hydraS2: {
             commitmentMapperPubKeys: commitmentMapperPubKey,

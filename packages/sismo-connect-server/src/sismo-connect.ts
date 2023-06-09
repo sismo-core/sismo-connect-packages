@@ -9,8 +9,8 @@ import {
 } from './common-types'
 import { SismoConnectVerifier } from './verifier'
 import {
-  OnChainProvider,
-  OnchainProviderProd,
+  SismoConnectProvider,
+  JsonRpcProvider,
 } from './verifier/libs/onchain-provider'
 
 export const SismoConnect = ({
@@ -50,11 +50,11 @@ export class SismoConnectServer {
     }
 
     //By default use public gnosis provider
-    const onChainProvider: OnChainProvider =
-      options?.onChainProvider ??
-      new OnchainProviderProd({ url: 'https://rpc.gnosis.gateway.fm' })
+    const sismoConnectProvider: SismoConnectProvider =
+      options?.provider ??
+      new JsonRpcProvider({ url: 'https://rpc.gnosis.gateway.fm' })
 
-    this._verifier = new SismoConnectVerifier(onChainProvider, {
+    this._verifier = new SismoConnectVerifier(sismoConnectProvider, {
       ...(options?.verifier ?? {}),
       isImpersonationMode,
     })

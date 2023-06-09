@@ -3,7 +3,7 @@ import {
   HydraS2Verifier,
   HydraS2VerifierOpts,
 } from '../src/verifier/hydras2-verifier'
-import { OnchainProviderMock } from '../src/verifier/libs/onchain-provider'
+import { JsonRpcProviderMock } from '../src/verifier/libs/onchain-provider'
 import { AvailableRootsRegistryContractMock } from '../src/verifier/libs/contracts'
 
 type VerifierMockedParams = {
@@ -12,7 +12,7 @@ type VerifierMockedParams = {
 
 export class HydraS2VerifierMocked extends HydraS2Verifier {
   constructor(mockedParams: VerifierMockedParams, opts?: HydraS2VerifierOpts) {
-    const onChainProvider = new OnchainProviderMock()
+    const provider = new JsonRpcProviderMock()
     const availableRootsRegistry = new AvailableRootsRegistryContractMock(true)
     opts = opts || {}
     const pubKeysAsStrings = mockedParams.commitmentMapperPubKey.map((x) =>
@@ -20,6 +20,6 @@ export class HydraS2VerifierMocked extends HydraS2Verifier {
     )
     opts.commitmentMapperPubKeys = [pubKeysAsStrings[0], pubKeysAsStrings[1]]
 
-    super(onChainProvider, availableRootsRegistry, opts)
+    super(provider, availableRootsRegistry, opts)
   }
 }

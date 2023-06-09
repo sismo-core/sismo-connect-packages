@@ -1,15 +1,15 @@
 {
-  "name": "zk-connect-sdk",
+  "name": "sismo-connect-sdk",
   "version": "1.0.8",
-  "description": "zkConnect package",
+  "description": "Sismo Connect packages",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "yarn && yarn build:zk-connect-client && yarn build:zk-connect-server && yarn build:zk-connect-react",
-    "build:zk-connect-client": "cd packages/zk-connect-client && yarn && yarn build",
-    "build:zk-connect-server": "cd packages/zk-connect-server && yarn && yarn build",
-    "build:zk-connect-react": "cd packages/zk-connect-react && yarn && yarn build",
+    "build": "yarn && yarn build:sismo-connect-client && yarn build:sismo-connect-server && yarn build:sismo-connect-react",
+    "build:sismo-connect-client": "cd packages/sismo-connect-client && yarn && yarn build",
+    "build:sismo-connect-server": "cd packages/sismo-connect-server && yarn && yarn build",
+    "build:sismo-connect-react": "cd packages/sismo-connect-react && yarn && yarn build",
     "prepare": "husky install",
     "eslint": "eslint --max-warnings=0",
     "prettier": "prettier --write 'packages/**/src/**/*.ts'"
@@ -32,7 +32,7 @@
   "engines": {
     "npm": "USE YARN INSTEAD OF NPM"
   },
-  "repository": "git@github.com:sismo-core/zk-connect-packages.git",
+  "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
   "author": "gabin@sismo.io",
   "license": "MIT",
   "dependencies": {},

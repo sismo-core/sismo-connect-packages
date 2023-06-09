@@ -1,11 +1,11 @@
 import { Provider } from '@ethersproject/abstract-provider'
 import { ethers } from 'ethers'
 
-export interface OnChainProvider {
+export interface SismoConnectProvider {
   getProvider(): Provider | undefined
 }
 
-export class OnchainProviderProd implements OnChainProvider {
+export class JsonRpcProvider implements SismoConnectProvider {
   private _provider: Provider
 
   constructor({ url }: { url: string }) {
@@ -20,7 +20,7 @@ export class OnchainProviderProd implements OnChainProvider {
   }
 }
 
-export class OnchainProviderMock implements OnChainProvider {
+export class JsonRpcProviderMock implements SismoConnectProvider {
   constructor() {}
 
   public getProvider(): undefined {

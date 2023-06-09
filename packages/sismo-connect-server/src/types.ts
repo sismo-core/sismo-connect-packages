@@ -1,6 +1,6 @@
 import { VerifierOpts } from './verifier'
 import { AuthRequest, ClaimRequest, SignatureRequest } from './common-types'
-import { OnChainProvider } from './verifier/libs/onchain-provider'
+import { SismoConnectProvider } from './verifier/libs/onchain-provider'
 
 export type VerifyParamsSismoConnect = {
   claims?: ClaimRequest[]
@@ -10,6 +10,6 @@ export type VerifyParamsSismoConnect = {
 }
 
 export type SismoConnectServerOptions = {
-  onChainProvider?: OnChainProvider
+  provider?: SismoConnectProvider
   verifier?: VerifierOpts
 }

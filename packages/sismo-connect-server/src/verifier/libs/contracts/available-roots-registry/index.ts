@@ -1,7 +1,7 @@
 import { BigNumberish, Contract } from 'ethers'
 import { Provider } from '@ethersproject/abstract-provider'
 import ContractABI from '../commons/abis/AvailableRootsRegistry.json'
-import { OnChainProvider } from '../../onchain-provider'
+import { SismoConnectProvider } from '../../onchain-provider'
 
 export class AvailableRootsRegistryContractProd
   implements AvailableRootsRegistryContract
@@ -37,17 +37,18 @@ export interface AvailableRootsRegistryContract {
 
 export class AvailableRootsRegistryContractFactory {
   public static connect(options?: {
-    onChainProvider: OnChainProvider
+    provider: SismoConnectProvider
     address: string
   }): AvailableRootsRegistryContract {
     if (options === undefined) {
       return new AvailableRootsRegistryContractMock(true)
     } else {
-      if (options.onChainProvider.getProvider() === undefined) {
+      const providerObject = options.provider.getProvider()
+      if (providerObject === undefined) {
         return new AvailableRootsRegistryContractMock(true)
       } else {
         return new AvailableRootsRegistryContractProd({
-          provider: options.onChainProvider.getProvider(),
+          provider: providerObject,
           address: options.address,
         })
       }

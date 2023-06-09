@@ -4,16 +4,16 @@ import {
   SNARK_FIELD,
 } from '@sismo-core/hydra-s2'
 import {
-  GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
   GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+  IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY,
 } from '../constants'
 import {
   AvailableRootsRegistryContract,
   CommitmentMapperRegistryContract,
   CommitmentMapperRegistryContractProd,
 } from './libs/contracts'
-import { OnChainProvider } from './libs/onchain-provider'
-import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
+import { SismoConnectProvider } from './libs/onchain-provider'
+import { BigNumber } from '@ethersproject/bignumber'
 import { encodeRequestIdentifier } from './utils/encodeRequestIdentifier'
 import { encodeAccountsTreeValue } from './utils/encodeAccountsTreeValue'
 import {
@@ -60,7 +60,7 @@ export type VerifyParams = {
 }
 
 export type HydraS2VerifierOpts = {
-  onChainProvider?: OnChainProvider
+  provider?: SismoConnectProvider
   commitmentMapperRegistryAddress?: string
   isImpersonationMode?: boolean
   commitmentMapperPubKeys?: [string, string]
@@ -71,7 +71,7 @@ export class HydraS2Verifier {
   private _availableRootsRegistry: AvailableRootsRegistryContract
 
   constructor(
-    onChainProvider: OnChainProvider,
+    provider: SismoConnectProvider,
     availableRootsRegistry: AvailableRootsRegistryContract,
     opts?: HydraS2VerifierOpts
   ) {
@@ -84,8 +84,8 @@ export class HydraS2Verifier {
       if (opts?.isImpersonationMode) {
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractDev(
-            '0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256',
-            '0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74'
+            IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY[0],
+            IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY[1]
           )
       } else {
         const address =
@@ -94,7 +94,7 @@ export class HydraS2Verifier {
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractProd({
             address: address,
-            provider: onChainProvider.getProvider(),
+            provider: provider.getProvider(),
           })
       }
     }
