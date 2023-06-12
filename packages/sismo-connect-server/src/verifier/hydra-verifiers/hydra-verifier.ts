@@ -50,18 +50,23 @@ export type HydraVerifierOpts = {
   provider?: SismoConnectProvider
   commitmentMapperRegistryAddress?: string
   isImpersonationMode?: boolean
+  registryRoot?: string
   commitmentMapperPubKeys?: [string, string]
 }
 
 export abstract class HydraVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract
   private _availableRootsRegistry: AvailableRootsRegistryContract
+  private _registryRoot: string;
 
   constructor(
     provider: SismoConnectProvider,
     availableRootsRegistry: AvailableRootsRegistryContract,
     opts?: HydraVerifierOpts
   ) {
+    if (opts?.registryRoot) {
+      this._registryRoot = BigNumber.from(opts.registryRoot).toHexString();
+    }
     if (opts?.commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(
         opts.commitmentMapperPubKeys[0],
@@ -447,6 +452,10 @@ export abstract class HydraVerifier {
   }
 
   protected isRootAvailable = async (registryTreeRoot: string) => {
-    return this._availableRootsRegistry.isRootAvailable(registryTreeRoot)
-  }
+    if (this._registryRoot) {
+      registryTreeRoot = BigNumber.from(registryTreeRoot).toHexString();
+      return registryTreeRoot === this._registryRoot;
+    }
+    return this._availableRootsRegistry.isRootAvailable(registryTreeRoot);
+  };
 }
