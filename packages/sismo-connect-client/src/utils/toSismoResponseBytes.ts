@@ -65,7 +65,7 @@ const formatResponseToEncode = (sismoConnectResponse: SismoConnectResponse) => {
             }
           }) ?? [],
         proofData: proof.proofData as Hex,
-        provingScheme: toBytes32(proof?.provingScheme ?? 'hydra-s2.1'),
+        provingScheme: toBytes32(proof?.provingScheme ?? 'hydra-s3.1'),
         extraData: toBytes(proof.extraData ?? ''),
       }
     }),

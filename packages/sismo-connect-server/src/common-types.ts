@@ -1,6 +1,6 @@
-import { BigNumberish } from "@ethersproject/bignumber";
+import { BigNumberish } from '@ethersproject/bignumber'
 
-export const SISMO_CONNECT_VERSION = `sismo-connect-v1.1`;
+export const SISMO_CONNECT_VERSION = `sismo-connect-v1.1`
 
 export type SismoConnectRequest = {
   namespace?: string
@@ -37,8 +37,8 @@ export type VaultConfig = {
 }
 
 export enum ProvingScheme {
-  HYDRA_S2 = "hydra-s2.1",
-  HYDRA_S3 = "hydra-s3.1",
+  HYDRA_S2 = 'hydra-s2.1',
+  HYDRA_S3 = 'hydra-s3.1',
 }
 
 export enum ClaimType {

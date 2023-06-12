@@ -18,16 +18,17 @@ import {
 } from './libs/contracts'
 import { SismoConnectProvider } from './libs/onchain-provider'
 
-import { HydraVerifierOpts } from './hydra-verifiers/hydra-verifier'
-import { HydraS2Verifier } from './hydra-verifiers/hydras2-verifier'
 import { HydraS3Verifier } from './hydra-verifiers/hydras3-verifier'
 
-export type VerifierOpts = {
-  hydraS2?: HydraVerifierOpts
-  hydraS3?: HydraVerifierOpts
+export type VerifierParams = {
+  provider: SismoConnectProvider
+  hydraS3?: {
+    registryRoot?: string
+    availableRootsRegistryAddress?: string
+    commitmentMapperRegistryAddress?: string
+    commitmentMapperPubKeys?: [string, string]
+  }
   isImpersonationMode?: boolean
-  availableRootsRegistryAddress?: string
-  isDevMode?: boolean
 }
 
 export type VerifyParams = {
@@ -39,32 +40,25 @@ export type VerifyParams = {
 }
 
 export class SismoConnectVerifier {
-  private hydraS2Verifier: HydraS2Verifier
   private _availableRootsRegistry: AvailableRootsRegistryContract
   private hydraS3Verifier: HydraS3Verifier
 
-  constructor(provider: SismoConnectProvider, opts?: VerifierOpts) {
+  constructor({ provider, isImpersonationMode, hydraS3 }: VerifierParams) {
     this._availableRootsRegistry =
-    AvailableRootsRegistryContractFactory.connect({
-      address:
-        opts?.availableRootsRegistryAddress ||
-        GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
-      provider,
-    })
+      AvailableRootsRegistryContractFactory.connect({
+        address:
+          hydraS3?.availableRootsRegistryAddress ||
+          GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
+        provider,
+      })
 
-    this.hydraS2Verifier = new HydraS2Verifier(
-      provider, 
-      this._availableRootsRegistry,
-      {
-      ...opts?.hydraS2,
-      isImpersonationMode: opts?.isImpersonationMode,
-    })
-    this.hydraS3Verifier = new HydraS3Verifier(
-      provider, 
-      this._availableRootsRegistry,
-      {
-      ...opts?.hydraS3,
-      isImpersonationMode: opts?.isImpersonationMode,
+    this.hydraS3Verifier = new HydraS3Verifier({
+      provider,
+      isImpersonationMode,
+      availableRootsRegistry: this._availableRootsRegistry,
+      registryRoot: hydraS3?.registryRoot,
+      commitmentMapperRegistryAddress: hydraS3?.commitmentMapperRegistryAddress,
+      commitmentMapperPubKeys: hydraS3?.commitmentMapperPubKeys,
     })
   }
 
@@ -348,14 +342,13 @@ export class SismoConnectVerifier {
   ): Promise<void> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return this.hydraS2Verifier.verifySignedMessageProof({
-          proof,
-          signedMessage,
-        })
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
       case ProvingScheme.HYDRA_S3:
         return this.hydraS3Verifier.verifySignedMessageProof({
           proof,
-          signedMessage
+          signedMessage,
         })
       default:
         throw new Error(
@@ -370,14 +363,13 @@ export class SismoConnectVerifier {
   ): Promise<VerifiedAuth> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return this.hydraS2Verifier.verifyAuthProof({
-          proof,
-          signedMessage,
-        })
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
       case ProvingScheme.HYDRA_S3:
         return this.hydraS3Verifier.verifyAuthProof({
           proof,
-          signedMessage
+          signedMessage,
         })
       default:
         throw new Error(
@@ -394,12 +386,9 @@ export class SismoConnectVerifier {
   ): Promise<VerifiedClaim> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return await this.hydraS2Verifier.verifyClaimProof({
-          appId,
-          signedMessage,
-          namespace,
-          proof,
-        })
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
       case ProvingScheme.HYDRA_S3:
         return await this.hydraS3Verifier.verifyClaimProof({
           appId,

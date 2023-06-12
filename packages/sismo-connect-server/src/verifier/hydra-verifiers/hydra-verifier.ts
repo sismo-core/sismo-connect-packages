@@ -1,20 +1,31 @@
-import { CommitmentMapperRegistryContractDev } from '../libs/contracts/commitment-mapper-registry/dev';
+import { CommitmentMapperRegistryContractDev } from '../libs/contracts/commitment-mapper-registry/dev'
 import {
   IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY,
-  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
-} from "../../constants";
+  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+} from '../../constants'
 import { BigNumber } from '@ethersproject/bignumber'
 
-import { ethers } from "ethers";
-import { keccak256 } from "ethers/lib/utils";
-import { ProofDecoded, decodeProofData } from '../utils/proofData';
-import { AvailableRootsRegistryContract, CommitmentMapperRegistryContract, CommitmentMapperRegistryContractProd } from '../libs/contracts';
-import { isHexlify } from '../utils/isHexlify';
-import { encodeRequestIdentifier } from '../utils/encodeRequestIdentifier';
-import { encodeAccountsTreeValue } from '../utils/encodeAccountsTreeValue';
-import { SNARK_FIELD } from '@sismo-core/hydra-s2';
-import { SismoConnectProvider } from '../libs/onchain-provider';
-import { AuthType, ClaimType, SismoConnectProof, VerifiedAuth, VerifiedClaim, resolveSismoIdentifier } from '../../common-types';
+import { ethers } from 'ethers'
+import { keccak256 } from 'ethers/lib/utils'
+import { ProofDecoded, decodeProofData } from '../utils/proofData'
+import {
+  AvailableRootsRegistryContract,
+  CommitmentMapperRegistryContract,
+  CommitmentMapperRegistryContractProd,
+} from '../libs/contracts'
+import { isHexlify } from '../utils/isHexlify'
+import { encodeRequestIdentifier } from '../utils/encodeRequestIdentifier'
+import { encodeAccountsTreeValue } from '../utils/encodeAccountsTreeValue'
+import { SismoConnectProvider } from '../libs/onchain-provider'
+import {
+  AuthType,
+  ClaimType,
+  SismoConnectProof,
+  VerifiedAuth,
+  VerifiedClaim,
+  resolveSismoIdentifier,
+} from '../../common-types'
+import { SNARK_FIELD } from '@sismo-core/hydra-s3'
 
 export type SnarkProof = {
   a: string[]
@@ -46,8 +57,9 @@ export type VerifyParams = {
   proof: SismoConnectProof
 }
 
-export type HydraVerifierOpts = {
-  provider?: SismoConnectProvider
+export type HydraVerifierParams = {
+  availableRootsRegistry: AvailableRootsRegistryContract
+  provider: SismoConnectProvider
   commitmentMapperRegistryAddress?: string
   isImpersonationMode?: boolean
   registryRoot?: string
@@ -57,23 +69,26 @@ export type HydraVerifierOpts = {
 export abstract class HydraVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract
   private _availableRootsRegistry: AvailableRootsRegistryContract
-  private _registryRoot: string;
+  private _registryRoot: string
 
-  constructor(
-    provider: SismoConnectProvider,
-    availableRootsRegistry: AvailableRootsRegistryContract,
-    opts?: HydraVerifierOpts
-  ) {
-    if (opts?.registryRoot) {
-      this._registryRoot = BigNumber.from(opts.registryRoot).toHexString();
+  constructor({
+    provider,
+    isImpersonationMode,
+    availableRootsRegistry,
+    registryRoot,
+    commitmentMapperRegistryAddress,
+    commitmentMapperPubKeys,
+  }: HydraVerifierParams) {
+    if (registryRoot) {
+      this._registryRoot = BigNumber.from(registryRoot).toHexString()
     }
-    if (opts?.commitmentMapperPubKeys) {
+    if (commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(
-        opts.commitmentMapperPubKeys[0],
-        opts.commitmentMapperPubKeys[1]
+        commitmentMapperPubKeys[0],
+        commitmentMapperPubKeys[1]
       )
     } else {
-      if (opts?.isImpersonationMode) {
+      if (isImpersonationMode) {
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractDev(
             IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY[0],
@@ -81,7 +96,7 @@ export abstract class HydraVerifier {
           )
       } else {
         const address =
-          opts?.commitmentMapperRegistryAddress ??
+          commitmentMapperRegistryAddress ??
           GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractProd({
@@ -115,10 +130,8 @@ export abstract class HydraVerifier {
       await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     }
 
-    if (
-      !await this._verifyProof(snarkProof)
-    ) {
-      throw new Error("Snark Proof Invalid!");
+    if (!(await this._verifyProof(snarkProof))) {
+      throw new Error('Snark Proof Invalid!')
     }
 
     return {
@@ -137,9 +150,7 @@ export abstract class HydraVerifier {
   }): Promise<void> {
     const snarkProof = decodeProofData(proof.proofData)
     await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
-    if (
-      !await this._verifyProof(snarkProof)
-    ) {
+    if (!(await this._verifyProof(snarkProof))) {
       throw new Error('Snark Proof Invalid!')
     }
   }
@@ -159,9 +170,7 @@ export abstract class HydraVerifier {
       await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     }
 
-    if (
-      !await this._verifyProof(snarkProof)
-    ) {
+    if (!(await this._verifyProof(snarkProof))) {
       throw new Error('Snark Proof Invalid!')
     }
 
@@ -453,9 +462,9 @@ export abstract class HydraVerifier {
 
   protected isRootAvailable = async (registryTreeRoot: string) => {
     if (this._registryRoot) {
-      registryTreeRoot = BigNumber.from(registryTreeRoot).toHexString();
-      return registryTreeRoot === this._registryRoot;
+      registryTreeRoot = BigNumber.from(registryTreeRoot).toHexString()
+      return registryTreeRoot === this._registryRoot
     }
-    return this._availableRootsRegistry.isRootAvailable(registryTreeRoot);
-  };
+    return this._availableRootsRegistry.isRootAvailable(registryTreeRoot)
+  }
 }

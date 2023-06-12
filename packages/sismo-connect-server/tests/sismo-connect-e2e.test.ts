@@ -51,7 +51,7 @@ describe('SismoConnect', () => {
       options: {
         provider: new JsonRpcProviderMock(),
         verifier: {
-          hydraS2: {
+          hydraS3: {
             commitmentMapperPubKeys: commitmentMapperPubKey,
           },
         },

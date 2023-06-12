@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-server",
-  "version": "0.0.12-beta.4",
+  "version": "0.0.12-beta.6",
   "description": "sismoConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -41,8 +41,6 @@
   "license": "MIT",
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@sismo-core/hydra-s2": "^1.0.0",
-    "leaked-handles": "^5.2.0",
     "@sismo-core/hydra-s3": "^0.0.2"
   },
   "lint-staged": {
