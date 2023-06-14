@@ -1,4 +1,4 @@
-import { SNARK_FIELD } from '@sismo-core/hydra-s2'
+import { SNARK_FIELD } from '@sismo-core/hydra-s3'
 import { BigNumber, ethers } from 'ethers'
 
 export const encodeAccountsTreeValue = (

@@ -1,26 +1,21 @@
-import * as leakedHandles from 'leaked-handles'
 import { sismoConnectSimpleClaimResponseMock } from './mocks'
 import { BigNumber } from '@ethersproject/bignumber'
-import { HydraS2VerifierMocked } from './hydras2-verifier-mocked'
-import { encodeRequestIdentifier } from '../src/verifier/utils/encodeRequestIdentifier'
-import { encodeAccountsTreeValue } from '../src/verifier/utils/encodeAccountsTreeValue'
-import { ProofPublicInputs } from '../src/verifier/hydras2-verifier'
 import {
-  ClaimRequest,
   ClaimType,
   VerifiedClaim,
   SismoConnectProof,
+  ClaimRequest,
 } from '../src'
 import {
   decodeProofData,
   encodeProofData,
 } from '../src/verifier/utils/proofData'
+import { HydraS3VerifierMocked } from './hydras3-verifier-mocked'
+import { encodeRequestIdentifier } from '../src/verifier/utils/encodeRequestIdentifier'
+import { ProofPublicInputs } from '../src/verifier/hydra-verifiers'
+import { encodeAccountsTreeValue } from '../src/verifier/utils/encodeAccountsTreeValue'
 
-leakedHandles.set({
-  debugSockets: true,
-})
-
-describe('Sismo Connect Verifier', () => {
+describe('HydraS3 Verifier test', () => {
   let appId: string
   let groupId: string
   let groupTimestamp: number | 'latest'
@@ -31,22 +26,18 @@ describe('Sismo Connect Verifier', () => {
   let verifiedClaim: VerifiedClaim
   let proof: SismoConnectProof
 
-  let hydraS2VerifierMocked: HydraS2VerifierMocked
+  let hydraS3VerifierMocked: HydraS3VerifierMocked
   let namespace: string
 
-  let claimRequest: ClaimRequest
-
   let proofIdentifier: string
-  let vaultIdentifier: string
-
-  let commitmentMapperPubKey: [BigNumber, BigNumber]
+  let commitmentMapperPubKey: [BigNumber, BigNumber];
 
   let expectVerifyClaimToThrow: (
     proof: SismoConnectProof,
     expectedError: string
   ) => Promise<void>
 
-  beforeAll(async () => {
+  beforeAll(() => {
     appId = '0x112a692a2005259c25f6094161007967'
     groupId = '0x682544d549b8a461d7fe3e589846bb7b'
     namespace = 'main'
@@ -54,16 +45,7 @@ describe('Sismo Connect Verifier', () => {
     value = 1
     claimType = ClaimType.GTE
 
-    claimRequest = {
-      groupId,
-      groupTimestamp,
-      value,
-      claimType,
-    }
-
-    const snarkProof = decodeProofData(
-      sismoConnectSimpleClaimResponseMock.proofs[0].proofData
-    )
+    const snarkProof = decodeProofData(sismoConnectSimpleClaimResponseMock.proofs[0].proofData);
 
     proofPublicInputs = {
       destinationIdentifier: BigNumber.from(snarkProof.input[0]).toHexString(),
@@ -95,9 +77,11 @@ describe('Sismo Connect Verifier', () => {
       BigNumber.from(snarkProof.input[3]),
     ]
 
-    hydraS2VerifierMocked = new HydraS2VerifierMocked({
+    hydraS3VerifierMocked = new HydraS3VerifierMocked({
       commitmentMapperPubKey,
     })
+
+    const proofId = BigNumber.from(snarkProof.input[6]).toHexString();
 
     verifiedClaim = {
       groupId,
@@ -105,8 +89,8 @@ describe('Sismo Connect Verifier', () => {
       value,
       claimType,
       isSelectableByUser: false,
-      extraData: '',
-      proofId: BigNumber.from(proofPublicInputs.proofIdentifier).toHexString(),
+      extraData: "",
+      proofId: proofId,
       proofData: encodeProofData(
         snarkProof.a,
         snarkProof.b,
@@ -115,9 +99,7 @@ describe('Sismo Connect Verifier', () => {
       ),
     }
 
-    proof = sismoConnectSimpleClaimResponseMock.proofs[0]
-
-    vaultIdentifier = proofPublicInputs.vaultIdentifier
+    proof = sismoConnectSimpleClaimResponseMock.proofs[0];
     proofIdentifier = proofPublicInputs.proofIdentifier
 
     expectVerifyClaimToThrow = async (
@@ -125,7 +107,7 @@ describe('Sismo Connect Verifier', () => {
       errorMessage: string
     ) => {
       await expect(
-        hydraS2VerifierMocked.verifyClaimProof({
+        hydraS3VerifierMocked.verifyClaimProof({
           namespace,
           appId,
           proof,
@@ -308,15 +290,9 @@ describe('Sismo Connect Verifier', () => {
       })
     })
 
-    /********************************************************************************************************/
-    /****************************************** PROOF VALIDITY **********************************************/
-    /********************************************************************************************************/
-
     describe('proof validity', () => {
       it('Should return false', async () => {
-        const invalidProof = JSON.parse(
-          JSON.stringify(proof)
-        ) as SismoConnectProof
+        const invalidProof = JSON.parse(JSON.stringify(proof)) as SismoConnectProof
         const proofDecoded = decodeProofData(invalidProof.proofData)
         proofDecoded.a[0] = '123456789'
         const proofEncoded = encodeProofData(
@@ -327,18 +303,23 @@ describe('Sismo Connect Verifier', () => {
         )
         invalidProof.proofData = proofEncoded
 
-        invalidProof.claims = invalidProof.claims as ClaimRequest[]
-
-        await expectVerifyClaimToThrow(invalidProof, 'Snark Proof Invalid!')
+        await expect(
+            hydraS3VerifierMocked.verifyClaimProof({
+            appId,
+            namespace,
+            proof: invalidProof,
+          })
+        ).rejects.toThrow('Snark Proof Invalid!')
       })
 
       it('Should return true', async () => {
-        const isVerified = await hydraS2VerifierMocked.verifyClaimProof({
-          appId,
-          namespace,
-          proof,
-        })
-        expect(isVerified).toEqual(verifiedClaim)
+        throw new Error("Not implemented yet");
+        // const isVerified = await hydraS3VerifierMocked.verifyClaimProof({
+        //   appId,
+        //   namespace,
+        //   proof,
+        // })
+        // expect(isVerified).toEqual(verifiedClaim)
       })
     })
   })

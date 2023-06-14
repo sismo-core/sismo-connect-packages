@@ -10,20 +10,24 @@ import {
   SignatureRequest,
   SismoConnectProof,
   AuthType,
-  SismoConnectConfig,
 } from '../common-types'
-import { ethers } from 'ethers'
 import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from '../constants'
 import {
   AvailableRootsRegistryContract,
   AvailableRootsRegistryContractFactory,
 } from './libs/contracts'
-import { HydraS2Verifier, HydraS2VerifierOpts } from './hydras2-verifier'
 import { SismoConnectProvider } from './libs/onchain-provider'
 
-export type VerifierOpts = {
-  hydraS2?: HydraS2VerifierOpts
-  availableRootsRegistryAddress?: string
+import { HydraS3Verifier } from './hydra-verifiers/hydras3-verifier'
+
+export type VerifierParams = {
+  provider: SismoConnectProvider
+  hydraS3?: {
+    registryRoot?: string
+    availableRootsRegistryAddress?: string
+    commitmentMapperRegistryAddress?: string
+    commitmentMapperPubKeys?: [string, string]
+  }
   isImpersonationMode?: boolean
 }
 
@@ -36,26 +40,26 @@ export type VerifyParams = {
 }
 
 export class SismoConnectVerifier {
-  private hydraS2Verifier: HydraS2Verifier
   private _availableRootsRegistry: AvailableRootsRegistryContract
+  private hydraS3Verifier: HydraS3Verifier
 
-  constructor(provider: SismoConnectProvider, opts?: VerifierOpts) {
+  constructor({ provider, isImpersonationMode, hydraS3 }: VerifierParams) {
     this._availableRootsRegistry =
       AvailableRootsRegistryContractFactory.connect({
         address:
-          opts?.availableRootsRegistryAddress ||
+          hydraS3?.availableRootsRegistryAddress ||
           GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS,
         provider,
       })
 
-    this.hydraS2Verifier = new HydraS2Verifier(
+    this.hydraS3Verifier = new HydraS3Verifier({
       provider,
-      this._availableRootsRegistry,
-      {
-        ...opts?.hydraS2,
-        isImpersonationMode: opts?.isImpersonationMode,
-      }
-    )
+      isImpersonationMode,
+      availableRootsRegistry: this._availableRootsRegistry,
+      registryRoot: hydraS3?.registryRoot,
+      commitmentMapperRegistryAddress: hydraS3?.commitmentMapperRegistryAddress,
+      commitmentMapperPubKeys: hydraS3?.commitmentMapperPubKeys,
+    })
   }
 
   async verify({
@@ -338,7 +342,11 @@ export class SismoConnectVerifier {
   ): Promise<void> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return this.hydraS2Verifier.verifySignedMessageProof({
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
+      case ProvingScheme.HYDRA_S3:
+        return this.hydraS3Verifier.verifySignedMessageProof({
           proof,
           signedMessage,
         })
@@ -355,7 +363,11 @@ export class SismoConnectVerifier {
   ): Promise<VerifiedAuth> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return this.hydraS2Verifier.verifyAuthProof({
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
+      case ProvingScheme.HYDRA_S3:
+        return this.hydraS3Verifier.verifyAuthProof({
           proof,
           signedMessage,
         })
@@ -374,7 +386,11 @@ export class SismoConnectVerifier {
   ): Promise<VerifiedClaim> {
     switch (proof.provingScheme) {
       case ProvingScheme.HYDRA_S2:
-        return await this.hydraS2Verifier.verifyClaimProof({
+        throw new Error(
+          `Proof version deprecated. Please update your client package to the latest version and regenerate the proof.`
+        )
+      case ProvingScheme.HYDRA_S3:
+        return await this.hydraS3Verifier.verifyClaimProof({
           appId,
           signedMessage,
           namespace,
