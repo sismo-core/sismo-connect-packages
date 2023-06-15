@@ -59,6 +59,7 @@ export class SismoConnectServer {
 
     this._verifier = new SismoConnectVerifier({
       provider: sismoConnectProvider,
+      isImpersonationMode,
       hydraS3: options?.verifier?.hydraS3,
     })
   }
