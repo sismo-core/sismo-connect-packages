@@ -54,6 +54,7 @@ export enum AuthType {
   GITHUB,
   TWITTER,
   EVM_ACCOUNT,
+  TELEGRAM,
 }
 
 export type SismoConnectResponse = Pick<

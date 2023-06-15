@@ -267,8 +267,6 @@ export abstract class HydraVerifier {
       destinationVerificationEnabled: input[13],
     }
 
-    const proofIdentifier = proofPublicInputs.proofIdentifier
-
     //Multiple auths in of proof not supported yet
     const auth = proof.auths[0]
 
@@ -276,21 +274,20 @@ export abstract class HydraVerifier {
       throw new Error(`proof isAnon is not supported yet`)
     }
 
-    if (
-      auth.authType === AuthType.VAULT &&
-      !BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)
-    ) {
-      throw new Error(
-        `userId "${BigNumber.from(
-          auth.userId
-        ).toHexString()}" mismatch with proof input vaultIdentifier ${BigNumber.from(
-          proofPublicInputs.vaultIdentifier
-        ).toHexString()}`
-      )
+    if (auth.authType === AuthType.VAULT) {
+      if (!BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)) {
+        throw new Error(
+          `userId "${BigNumber.from(
+            auth.userId
+          ).toHexString()}" mismatch with proof input vaultIdentifier ${BigNumber.from(
+            proofPublicInputs.vaultIdentifier
+          ).toHexString()}`
+        )
+      }
+      return
     }
 
     if (
-      auth.authType !== AuthType.VAULT &&
       !BigNumber.from(auth.userId).eq(proofPublicInputs.destinationIdentifier)
     ) {
       throw new Error(
@@ -303,11 +300,35 @@ export abstract class HydraVerifier {
     }
 
     if (
-      auth.authType !== AuthType.VAULT &&
       !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq('1')
     ) {
+      throw new Error(`proof input destinationVerificationEnabled must be 1`)
+    }
+
+    const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] =
+      await this.getCommitmentMapperPubKey()
+
+    if (
+      !commitmentMapperPubKeyX.eq(proofPublicInputs.commitmentMapperPubKeyX)
+    ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 1`
+        `commitmentMapperPubKeyX "${BigNumber.from(
+          commitmentMapperPubKeyX
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(
+          proofPublicInputs.commitmentMapperPubKeyX
+        ).toHexString()}"`
+      )
+    }
+
+    if (
+      !commitmentMapperPubKeyY.eq(proofPublicInputs.commitmentMapperPubKeyY)
+    ) {
+      throw new Error(
+        `commitmentMapperPubKeyY "${BigNumber.from(
+          commitmentMapperPubKeyY
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(
+          proofPublicInputs.commitmentMapperPubKeyY
+        ).toHexString()}"`
       )
     }
   }
