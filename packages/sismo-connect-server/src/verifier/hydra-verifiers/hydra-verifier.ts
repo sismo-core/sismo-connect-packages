@@ -1,33 +1,31 @@
-import { CommitmentMapperRegistryContractDev } from './libs/contracts/commitment-mapper-registry/dev'
+import { CommitmentMapperRegistryContractDev } from '../libs/contracts/commitment-mapper-registry/dev'
 import {
-  HydraS2Verifier as HydraS2VerifierPS,
-  SNARK_FIELD,
-} from '@sismo-core/hydra-s2'
-import {
-  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
   IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY,
-} from '../constants'
+  GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS,
+} from '../../constants'
+import { BigNumber } from '@ethersproject/bignumber'
+
+import { ethers } from 'ethers'
+import { keccak256 } from 'ethers/lib/utils'
+import { ProofDecoded, decodeProofData } from '../utils/proofData'
 import {
   AvailableRootsRegistryContract,
   CommitmentMapperRegistryContract,
   CommitmentMapperRegistryContractProd,
-} from './libs/contracts'
-import { SismoConnectProvider } from './libs/onchain-provider'
-import { BigNumber } from '@ethersproject/bignumber'
-import { encodeRequestIdentifier } from './utils/encodeRequestIdentifier'
-import { encodeAccountsTreeValue } from './utils/encodeAccountsTreeValue'
+} from '../libs/contracts'
+import { isHexlify } from '../utils/isHexlify'
+import { encodeRequestIdentifier } from '../utils/encodeRequestIdentifier'
+import { encodeAccountsTreeValue } from '../utils/encodeAccountsTreeValue'
+import { SismoConnectProvider } from '../libs/onchain-provider'
 import {
   AuthType,
   ClaimType,
+  SismoConnectProof,
   VerifiedAuth,
   VerifiedClaim,
-  SismoConnectProof,
   resolveSismoIdentifier,
-} from '../common-types'
-import { ethers } from 'ethers'
-import { keccak256 } from 'ethers/lib/utils'
-import { decodeProofData } from './utils/proofData'
-import { isHexlify } from './utils/isHexlify'
+} from '../../common-types'
+import { SNARK_FIELD } from '@sismo-core/hydra-s3'
 
 export type SnarkProof = {
   a: string[]
@@ -59,29 +57,38 @@ export type VerifyParams = {
   proof: SismoConnectProof
 }
 
-export type HydraS2VerifierOpts = {
-  provider?: SismoConnectProvider
+export type HydraVerifierParams = {
+  availableRootsRegistry: AvailableRootsRegistryContract
+  provider: SismoConnectProvider
   commitmentMapperRegistryAddress?: string
   isImpersonationMode?: boolean
+  registryRoot?: string
   commitmentMapperPubKeys?: [string, string]
 }
 
-export class HydraS2Verifier {
+export abstract class HydraVerifier {
   private _commitmentMapperRegistry: CommitmentMapperRegistryContract
   private _availableRootsRegistry: AvailableRootsRegistryContract
+  private _registryRoot: string
 
-  constructor(
-    provider: SismoConnectProvider,
-    availableRootsRegistry: AvailableRootsRegistryContract,
-    opts?: HydraS2VerifierOpts
-  ) {
-    if (opts?.commitmentMapperPubKeys) {
+  constructor({
+    provider,
+    isImpersonationMode,
+    availableRootsRegistry,
+    registryRoot,
+    commitmentMapperRegistryAddress,
+    commitmentMapperPubKeys,
+  }: HydraVerifierParams) {
+    if (registryRoot) {
+      this._registryRoot = BigNumber.from(registryRoot).toHexString()
+    }
+    if (commitmentMapperPubKeys) {
       this._commitmentMapperRegistry = new CommitmentMapperRegistryContractDev(
-        opts.commitmentMapperPubKeys[0],
-        opts.commitmentMapperPubKeys[1]
+        commitmentMapperPubKeys[0],
+        commitmentMapperPubKeys[1]
       )
     } else {
-      if (opts?.isImpersonationMode) {
+      if (isImpersonationMode) {
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractDev(
             IMPERSONATION_COMMITMENT_MAPPER_PUB_KEY[0],
@@ -89,7 +96,7 @@ export class HydraS2Verifier {
           )
       } else {
         const address =
-          opts?.commitmentMapperRegistryAddress ??
+          commitmentMapperRegistryAddress ??
           GNOSIS_COMMITMENT_MAPPER_REGISTRY_ADDRESS
         this._commitmentMapperRegistry =
           new CommitmentMapperRegistryContractProd({
@@ -101,6 +108,8 @@ export class HydraS2Verifier {
 
     this._availableRootsRegistry = availableRootsRegistry
   }
+
+  protected abstract _verifyProof(snarkProof: ProofDecoded)
 
   async verifyClaimProof({
     appId,
@@ -121,14 +130,7 @@ export class HydraS2Verifier {
       await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     }
 
-    const isVerified = await HydraS2VerifierPS.verifyProof(
-      snarkProof.a,
-      snarkProof.b,
-      snarkProof.c,
-      snarkProof.input
-    )
-
-    if (!isVerified) {
+    if (!(await this._verifyProof(snarkProof))) {
       throw new Error('Snark Proof Invalid!')
     }
 
@@ -148,14 +150,7 @@ export class HydraS2Verifier {
   }): Promise<void> {
     const snarkProof = decodeProofData(proof.proofData)
     await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
-    if (
-      !(await HydraS2VerifierPS.verifyProof(
-        snarkProof.a,
-        snarkProof.b,
-        snarkProof.c,
-        snarkProof.input
-      ))
-    ) {
+    if (!(await this._verifyProof(snarkProof))) {
       throw new Error('Snark Proof Invalid!')
     }
   }
@@ -175,14 +170,7 @@ export class HydraS2Verifier {
       await this._matchPublicInputWithSignedMessage({ proof, signedMessage })
     }
 
-    if (
-      !(await HydraS2VerifierPS.verifyProof(
-        snarkProof.a,
-        snarkProof.b,
-        snarkProof.c,
-        snarkProof.input
-      ))
-    ) {
+    if (!(await this._verifyProof(snarkProof))) {
       throw new Error('Snark Proof Invalid!')
     }
 
@@ -279,8 +267,6 @@ export class HydraS2Verifier {
       destinationVerificationEnabled: input[13],
     }
 
-    const proofIdentifier = proofPublicInputs.proofIdentifier
-
     //Multiple auths in of proof not supported yet
     const auth = proof.auths[0]
 
@@ -288,21 +274,20 @@ export class HydraS2Verifier {
       throw new Error(`proof isAnon is not supported yet`)
     }
 
-    if (
-      auth.authType === AuthType.VAULT &&
-      !BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)
-    ) {
-      throw new Error(
-        `userId "${BigNumber.from(
-          auth.userId
-        ).toHexString()}" mismatch with proof input vaultIdentifier ${BigNumber.from(
-          proofPublicInputs.vaultIdentifier
-        ).toHexString()}`
-      )
+    if (auth.authType === AuthType.VAULT) {
+      if (!BigNumber.from(auth.userId).eq(proofPublicInputs.vaultIdentifier)) {
+        throw new Error(
+          `userId "${BigNumber.from(
+            auth.userId
+          ).toHexString()}" mismatch with proof input vaultIdentifier ${BigNumber.from(
+            proofPublicInputs.vaultIdentifier
+          ).toHexString()}`
+        )
+      }
+      return
     }
 
     if (
-      auth.authType !== AuthType.VAULT &&
       !BigNumber.from(auth.userId).eq(proofPublicInputs.destinationIdentifier)
     ) {
       throw new Error(
@@ -315,11 +300,35 @@ export class HydraS2Verifier {
     }
 
     if (
-      auth.authType !== AuthType.VAULT &&
       !BigNumber.from(proofPublicInputs.destinationVerificationEnabled).eq('1')
     ) {
+      throw new Error(`proof input destinationVerificationEnabled must be 1`)
+    }
+
+    const [commitmentMapperPubKeyX, commitmentMapperPubKeyY] =
+      await this.getCommitmentMapperPubKey()
+
+    if (
+      !commitmentMapperPubKeyX.eq(proofPublicInputs.commitmentMapperPubKeyX)
+    ) {
       throw new Error(
-        `on proofId "${proofIdentifier}" proof input destinationVerificationEnabled must be 1`
+        `commitmentMapperPubKeyX "${BigNumber.from(
+          commitmentMapperPubKeyX
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyX "${BigNumber.from(
+          proofPublicInputs.commitmentMapperPubKeyX
+        ).toHexString()}"`
+      )
+    }
+
+    if (
+      !commitmentMapperPubKeyY.eq(proofPublicInputs.commitmentMapperPubKeyY)
+    ) {
+      throw new Error(
+        `commitmentMapperPubKeyY "${BigNumber.from(
+          commitmentMapperPubKeyY
+        ).toHexString()}" mismatch with proof input commitmentMapperPubKeyY "${BigNumber.from(
+          proofPublicInputs.commitmentMapperPubKeyY
+        ).toHexString()}"`
       )
     }
   }
@@ -473,6 +482,10 @@ export class HydraS2Verifier {
   }
 
   protected isRootAvailable = async (registryTreeRoot: string) => {
+    if (this._registryRoot) {
+      registryTreeRoot = BigNumber.from(registryTreeRoot).toHexString()
+      return registryTreeRoot === this._registryRoot
+    }
     return this._availableRootsRegistry.isRootAvailable(registryTreeRoot)
   }
 }

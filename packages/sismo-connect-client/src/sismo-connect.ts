@@ -139,6 +139,10 @@ export class SismoConnectClient {
       url += `&vault=${JSON.stringify(this._sismoConnectConfig.vault)}`
     }
 
+    if (this._sismoConnectConfig.displayRawResponse) {
+      url += `&displayRawResponse=true`
+    }
+
     if (callbackPath) {
       url += `&callbackPath=${callbackPath}`
     }

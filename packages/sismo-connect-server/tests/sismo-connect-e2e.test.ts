@@ -6,11 +6,13 @@ import {
   SismoConnectResponse,
   SismoConnectServer,
   SISMO_CONNECT_VERSION,
+  AuthRequest,
+  AuthType,
 } from '../src'
-import { sismoConnectSimpleClaimResponseMock } from './mocks'
 import { BigNumber } from '@ethersproject/bignumber'
 import { decodeProofData } from '../src/verifier/utils/proofData'
 import { JsonRpcProviderMock } from '../src/verifier/libs/onchain-provider'
+import { sismoConnectSimpleClaimResponseMock } from './mocks'
 
 describe('SismoConnect', () => {
   let verifiedClaim: VerifiedClaim
@@ -20,21 +22,27 @@ describe('SismoConnect', () => {
   let groupId: string
   let namespace: string
   let claimRequest: ClaimRequest
+  let authRequests: AuthRequest[]
   let groupTimestamp: number | 'latest'
   let value: number
   let claimType: ClaimType
   let commitmentMapperPubKey: [string, string]
+  let signedMessage: string
+
 
   beforeEach(async () => {
-    appId = '0x112a692a2005259c25f6094161007967'
-    groupId = '0x682544d549b8a461d7fe3e589846bb7b'
-    namespace = 'main'
-    sismoConnectResponse = sismoConnectSimpleClaimResponseMock
-    groupTimestamp = 'latest'
-    value = 1
-    claimType = ClaimType.GTE
+    appId = '0xf4977993e52606cfd67b7a1cde717069';
+    groupId = '0x8543f5652418334ff011c1888fd8d96f';
+    namespace = 'main';
+    groupTimestamp = 'latest';
+    value = 1;
+    claimType = ClaimType.GTE;
+    signedMessage = 'Hello';
 
-    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData)
+    sismoConnectResponse = sismoConnectSimpleClaimResponseMock;
+    
+    const snarkProof = decodeProofData(sismoConnectResponse.proofs[0].proofData);
+
     commitmentMapperPubKey = [
       BigNumber.from(snarkProof.input[2]).toHexString(),
       BigNumber.from(snarkProof.input[3]).toHexString(),
@@ -44,6 +52,12 @@ describe('SismoConnect', () => {
       groupId,
     }
 
+    authRequests = [{
+      authType: AuthType.VAULT
+    }, {
+      authType: AuthType.TWITTER
+    }]
+
     sismoConnect = SismoConnect({
       config: {
         appId,
@@ -51,7 +65,7 @@ describe('SismoConnect', () => {
       options: {
         provider: new JsonRpcProviderMock(),
         verifier: {
-          hydraS2: {
+          hydraS3: {
             commitmentMapperPubKeys: commitmentMapperPubKey,
           },
         },
@@ -216,6 +230,8 @@ describe('SismoConnect', () => {
         await expect(
           sismoConnect.verify(invalidSismoConnectResponse, {
             claims: [claimRequest],
+            signature: { message: signedMessage },
+            auths: authRequests,
             namespace,
           })
         ).rejects.toEqual(
@@ -235,6 +251,8 @@ describe('SismoConnect', () => {
           sismoConnectResponse,
           {
             claims: [claimRequest],
+            auths: authRequests,
+            signature: { message: signedMessage },
             namespace: 'main',
           }
         )
@@ -245,8 +263,12 @@ describe('SismoConnect', () => {
 
     describe('verify without claim', () => {
       it('should throw with no claimRequest, no authRequest and no signedMessage', async () => {
+        const sismoConnectResponseWithoutSignature = {
+          ...sismoConnectResponse,
+          signedMessage: undefined
+        } as SismoConnectResponse
         await expect(
-          sismoConnect.verify(sismoConnectResponse, {
+          sismoConnect.verify(sismoConnectResponseWithoutSignature, {
             namespace,
           })
         ).rejects.toEqual(

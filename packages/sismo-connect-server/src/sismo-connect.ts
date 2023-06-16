@@ -1,5 +1,8 @@
-import { SismoConnectServerOptions, VerifyParamsSismoConnect } from './types'
-import { ethers } from 'ethers'
+import {
+  SISMO_SERVER_COMPATIBLE_VERSIONS,
+  SismoConnectServerOptions,
+  VerifyParamsSismoConnect,
+} from './types'
 import {
   RequestBuilder,
   SismoConnectResponse,
@@ -54,9 +57,10 @@ export class SismoConnectServer {
       options?.provider ??
       new JsonRpcProvider({ url: 'https://rpc.gnosis.gateway.fm' })
 
-    this._verifier = new SismoConnectVerifier(sismoConnectProvider, {
-      ...(options?.verifier ?? {}),
+    this._verifier = new SismoConnectVerifier({
+      provider: sismoConnectProvider,
       isImpersonationMode,
+      hydraS3: options?.verifier?.hydraS3,
     })
   }
 
@@ -89,7 +93,10 @@ export class SismoConnectServer {
     }
 
     namespace = namespace ?? 'main'
-    if (sismoConnectResponse.version !== SISMO_CONNECT_VERSION) {
+
+    if (
+      !SISMO_SERVER_COMPATIBLE_VERSIONS.includes(sismoConnectResponse.version)
+    ) {
       throw new Error(
         `version of the sismoConnectResponse "${sismoConnectResponse.version}" not compatible with this version "${SISMO_CONNECT_VERSION}"`
       )
