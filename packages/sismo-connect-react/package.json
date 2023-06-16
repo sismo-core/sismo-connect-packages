@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-react",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "sismoConnect React package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -44,6 +44,6 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@sismo-core/sismo-connect-client": "0.0.12"
+    "@sismo-core/sismo-connect-client": "0.0.13"
   }
 }
