@@ -49,15 +49,15 @@ yarn add @sismo-core/sismo-connect-client
 ### Import
 Import the package in your frontend:
 ```typescript
-import { SismoConnect, SismoConnectClientConfig } from "@sismo-core/sismo-connect-client";
+import { SismoConnect, SismoConnectConfig } from "@sismo-core/sismo-connect-client";
 
-const config: SismoConnectClientConfig = {
+const config: SismoConnectConfig = {
   // you will need to register an appId in the Factory
   appId: "0x8f347ca31790557391cec39b06f02dc2", 
 }
 
 // create a new SismoConnect instance with the client configuration
-const sismoConnect = SismoConnect(config);
+const sismoConnect = SismoConnect({ config });
 ```
 See the full documentation [here](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/client).
 
