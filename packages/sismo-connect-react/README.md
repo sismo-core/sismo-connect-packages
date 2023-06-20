@@ -46,9 +46,9 @@ yarn add @sismo-core/sismo-connect-react
 ### Import
 Import the Sismo Connect React package in your frontend:
 ```typescript
-import { SismoConnectClientConfig } from "@sismo-core/sismo-connect-react";
+import { SismoConnectConfig } from "@sismo-core/sismo-connect-react";
 
-export const sismoConnectConfig: SismoConnectClientConfig = {
+export const sismoConnectConfig: SismoConnectConfig = {
   appId: "0x8f347ca31790557391cec39b06f02dc2",
 };
 ```
