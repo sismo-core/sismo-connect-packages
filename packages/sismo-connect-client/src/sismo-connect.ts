@@ -21,6 +21,8 @@ export const SismoConnect = ({
   return new SismoConnectClient({ config })
 }
 
+let sismoConnectResponse: SismoConnectResponse = null
+
 export class SismoConnectClient {
   private _sdk: Sdk
   private _sismoConnectConfig: SismoConnectConfig
@@ -156,6 +158,14 @@ export class SismoConnectClient {
     return url
   }
 
+  private _removeUrlParams = (url: URL) => {
+    url.searchParams.delete('sismoConnectResponseCompressed')
+    const updatedUrl =
+      url.origin + url.pathname + url.searchParams.toString() + url.hash
+    const stateObj = { url: updatedUrl }
+    history.replaceState(stateObj, '', updatedUrl)
+  }
+
   public getResponse = (): SismoConnectResponse | null => {
     if (!window)
       throw new Error(`getResponse is not available outside of a browser`)
@@ -164,8 +174,14 @@ export class SismoConnectClient {
       const compressedResponse = url.searchParams.get(
         'sismoConnectResponseCompressed'
       )
+      this._removeUrlParams(url)
       const uncompressedResponse = unCompressResponse(compressedResponse)
-      return JSON.parse(uncompressedResponse) as SismoConnectResponse
+      sismoConnectResponse = JSON.parse(
+        uncompressedResponse
+      ) as SismoConnectResponse
+      return sismoConnectResponse
+    } else if (sismoConnectResponse) {
+      return sismoConnectResponse
     }
     return null
   }
@@ -182,10 +198,13 @@ export class SismoConnectClient {
       const compressedResponse = url.searchParams.get(
         'sismoConnectResponseCompressed'
       )
+      this._removeUrlParams(url)
       const uncompressedResponse = unCompressResponse(compressedResponse)
-      const sismoConnectResponse = JSON.parse(
+      sismoConnectResponse = JSON.parse(
         uncompressedResponse
       ) as SismoConnectResponse
+      return toSismoConnectResponseBytes(sismoConnectResponse)
+    } else if (sismoConnectResponse) {
       return toSismoConnectResponseBytes(sismoConnectResponse)
     }
     return null
