@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-server",
-  "version": "0.0.16",
+  "version": "0.0.17-beta.2",
   "description": "sismoConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -21,6 +21,7 @@
     "jest": "^29.4.3",
     "rollup": "^3.15.0",
     "rollup-plugin-dts": "^5.1.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
@@ -41,7 +42,7 @@
   "license": "MIT",
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@sismo-core/hydra-s3": "^1.0.0"
+    "@sismo-core/hydra-s3": "1.0.3-beta.0"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",

@@ -1034,22 +1034,23 @@
     ethers "^5.6.1"
     ffjavascript "^0.2.55"
 
-"@sismo-core/hydra-s3@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@sismo-core/hydra-s3/-/hydra-s3-1.0.0.tgz#8beac7b973a476f2e5d44c3c0048a1cb8fe5f3ca"
-  integrity sha512-8/HEHDJ1Adw/pB90gYfFwyiIbYclEvuA4Lf//M0fjZOdyOB6sJKJ5at5PPxe+VhFAk5kFbQWeHIN3JZRDDENsw==
+"@sismo-core/hydra-s3@1.0.3-beta.0":
+  version "1.0.3-beta.0"
+  resolved "https://registry.yarnpkg.com/@sismo-core/hydra-s3/-/hydra-s3-1.0.3-beta.0.tgz#39976113677418bc3504bb202ae9b69a65f6f7fe"
+  integrity sha512-cclXY5a5A26i92eVIGjs2N3akAyPVBegqWSO9mVVZwb2NpFSHfSOzKOuFWwP4MsTnZ+FXMLeeqUBQyw84Tl9Wg==
   dependencies:
     "@sismo-core/crypto" "^1.1.4"
-    "@sismo-core/kv-merkle-tree" "^1.0.4"
+    "@sismo-core/kv-merkle-tree" "^1.1.0"
     snarkjs "^0.7.0"
 
-"@sismo-core/kv-merkle-tree@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@sismo-core/kv-merkle-tree/-/kv-merkle-tree-1.0.4.tgz#c2ad6e89fc9b4ff235bea1efdbaad9ff92271ffa"
-  integrity sha512-FBIT4DuRngTZJxo0Z1L5MGb1LxK3VN9yZy6TloXQDz20j3QpTmb/hO6nfZ3pEROOwmgzlxZ3ZAHSXHx3uNJBOg==
+"@sismo-core/kv-merkle-tree@^1.1.0":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@sismo-core/kv-merkle-tree/-/kv-merkle-tree-1.1.1.tgz#963e039654ac1cf6eda1fc7cb60eaf845f15e0fc"
+  integrity sha512-72QdScVNPmhR8IORRKFlV3QZ2Z3i4MN5CG8HzEaP+6IcGzOrvv3SGji4VRgctIUZAFYKmlHxx0uaZPZjR83zSQ==
   dependencies:
     "@sismo-core/crypto" "^1.0.1"
     ethers "^5.6.1"
+    pako "^2.1.0"
     tslib "^2.4.0"
 
 "@tsconfig/node10@^1.0.7":
@@ -2747,6 +2748,11 @@ p-try@^2.0.0:
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-2.2.0.tgz#cb2868540e313d61de58fafbe35ce9004d5540e6"
   integrity sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
 
+pako@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
+  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
+
 parse-json@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/parse-json/-/parse-json-5.2.0.tgz#c76fc66dee54231c962b22bcc8a72cf2f99753cd"
@@ -2893,6 +2899,11 @@ rollup-plugin-dts@^5.1.1:
     magic-string "^0.29.0"
   optionalDependencies:
     "@babel/code-frame" "^7.18.6"
+
+rollup-plugin-peer-deps-external@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-peer-deps-external/-/rollup-plugin-peer-deps-external-2.2.4.tgz#8a420bbfd6dccc30aeb68c9bf57011f2f109570d"
+  integrity sha512-AWdukIM1+k5JDdAqV/Cxd+nejvno2FVLVeZ74NKggm3Q5s9cbbcOgUPGdbxPi4BXu7xGaZ8HG12F+thImYu/0g==
 
 rollup@^3.15.0:
   version "3.15.0"

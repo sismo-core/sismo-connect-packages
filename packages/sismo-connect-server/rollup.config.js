@@ -3,6 +3,8 @@ import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import json from '@rollup/plugin-json';
 import dts from "rollup-plugin-dts";
+import external from 'rollup-plugin-peer-deps-external';
+import pkg from './package.json';
 
 export default [
   {
@@ -20,11 +22,17 @@ export default [
       },
     ],
     plugins: [
+      external(),
       resolve(),
       commonjs(),
       json(),
       typescript(),
     ],
+    external: [
+      "@ethersproject/bignumber",
+      "@sismo-core/hydra-s3",
+      ...Object.keys(pkg.devDependencies || {})
+    ]
   },
   {
     input: "lib/esm/types/index.d.ts",
