@@ -43,12 +43,6 @@ export class SismoConnectServer {
 
     const isImpersonationMode: boolean = config.vault?.impersonate?.length > 0;
 
-    if (isImpersonationMode) {
-      console.warn(
-        `Sismo Connect redirects to the Impersonation Vault. The generated proofs are based on impersonated accounts: ${config.vault.impersonate}. Never use this mode in production!`
-      );
-    }
-
     //By default use public gnosis provider
     const sismoConnectProvider: SismoConnectProvider =
       options?.provider ?? new JsonRpcProvider({ url: "https://rpc.gnosis.gateway.fm" });
