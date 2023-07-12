@@ -217,6 +217,9 @@ export class RequestBuilder {
       authRequest.isAnon = false;
       authRequest.isOptional = authRequest.isOptional ?? false;
       authRequest.userId = authRequest.userId ?? "0";
+      if (authRequest.authType === AuthType.EVM_ACCOUNT) {
+        authRequest.userId = authRequest.userId.toLowerCase();
+      }
       authRequest.extraData = authRequest.extraData ?? "";
 
       if (authRequest.userId === "0") {
