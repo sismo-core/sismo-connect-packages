@@ -53,6 +53,10 @@ describe("SismoConnectResponse", () => {
     response = new SismoConnectResponse(rawResponse);
   });
 
+  it("should be N N-1 compatible", () => {
+    expect(JSON.stringify(rawResponse)).toEqual(JSON.stringify(response));
+  });
+
   it("should return the response as a json", () => {
     expect(response.toJson()).toEqual(rawResponse);
   });

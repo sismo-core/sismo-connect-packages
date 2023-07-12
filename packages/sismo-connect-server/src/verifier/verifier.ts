@@ -12,6 +12,7 @@ import {
   AuthType,
   authTypeLabels,
   claimTypeLabels,
+  SismoConnectResponseInterface,
 } from "../common-types";
 import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from "../constants";
 import {
@@ -34,7 +35,7 @@ export type VerifierParams = {
 };
 
 export type VerifyParams = {
-  sismoConnectResponse: SismoConnectResponse;
+  sismoConnectResponse: SismoConnectResponseInterface;
   claims?: ClaimRequest[];
   auths?: AuthRequest[];
   signature?: SignatureRequest;
@@ -107,7 +108,7 @@ export class SismoConnectVerifier {
   }
 
   private async _checkRequiredRequests(
-    sismoConnectResponse: SismoConnectResponse,
+    sismoConnectResponse: SismoConnectResponseInterface,
     claimRequests: ClaimRequest[],
     authRequests: AuthRequest[]
   ) {
@@ -186,7 +187,7 @@ export class SismoConnectVerifier {
 
   private async _checkProofMatchRequest(
     proof: SismoConnectProof,
-    response: SismoConnectResponse,
+    response: SismoConnectResponseInterface,
     claimRequests: ClaimRequest[],
     authRequests: AuthRequest[],
     signatureRequest: SignatureRequest

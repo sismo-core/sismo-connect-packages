@@ -1,11 +1,11 @@
-import { SismoConnectResponse } from "../src";
+import { SismoConnectResponseInterface } from "../src";
 
 export const commitmentMapperPubKey = [
   "3602196582082511412345093208859330584743530098298494929484637038525722574265",
   "14672613011011178056703002414016466661118036128791343632962870104486584019450",
 ];
 
-export const sismoConnectSimpleClaimResponseMock: SismoConnectResponse = {
+export const sismoConnectSimpleClaimResponseMock: SismoConnectResponseInterface = {
   appId: "0xf4977993e52606cfd67b7a1cde717069",
   namespace: "main",
   version: "sismo-connect-v1.1",

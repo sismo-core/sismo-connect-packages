@@ -9,6 +9,7 @@ import {
   AuthRequest,
   AuthType,
   claimTypeLabels,
+  SismoConnectResponseInterface,
 } from "../src";
 import { BigNumber } from "@ethersproject/bignumber";
 import { decodeProofData } from "../src/verifier/utils/proofData";
@@ -18,7 +19,7 @@ import { sismoConnectSimpleClaimResponseMock } from "./mocks";
 describe("SismoConnect", () => {
   let verifiedClaim: VerifiedClaim;
   let sismoConnect: SismoConnectServer;
-  let sismoConnectResponse: SismoConnectResponse;
+  let sismoConnectResponse: SismoConnectResponseInterface;
   let appId: string;
   let groupId: string;
   let namespace: string;

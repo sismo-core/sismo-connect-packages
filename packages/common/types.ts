@@ -85,19 +85,13 @@ export class SismoConnectResponse implements SismoConnectResponseInterface {
   appId: string;
   signedMessage?: string;
   proofs: SismoConnectProof[];
-  auths: Auth[];
-  claims: Auth[];
 
   constructor(params: SismoConnectResponseInterface) {
     Object.assign(this, params);
-    this.auths = params.proofs.reduce((auths: Auth[], proof) => {
-      if (proof.auths) {
-        return [...auths, ...proof.auths];
-      } else {
-        return auths;
-      }
-    }, []);
-    this.claims = params.proofs.reduce((auths: Auth[], proof) => {
+  }
+
+  public getAuths(): Auth[] {
+    return this.proofs.reduce((auths: Auth[], proof) => {
       if (proof.auths) {
         return [...auths, ...proof.auths];
       } else {
@@ -121,14 +115,21 @@ export class SismoConnectResponse implements SismoConnectResponseInterface {
   }
 
   public getUserId(authType: AuthType): string | undefined {
-    const userId = this.auths.find((verifiedAuth) => verifiedAuth.authType === authType)?.userId;
+    const auths = this.getAuths();
+    if (auths?.length === 0) return undefined;
+    const userId = auths.find((verifiedAuth) => verifiedAuth.authType === authType)?.userId;
+    if (typeof userId !== "string") return undefined;
     return resolveSismoIdentifier(userId, authType);
   }
 
   public getUserIds(authType: AuthType): string[] {
-    return this.auths
+    const auths = this.getAuths();
+    return auths
       .filter((verifiedAuth) => verifiedAuth.authType === authType && verifiedAuth.userId)
-      .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[];
+      .map((auth) => {
+        if (typeof auth.userId !== "string") return undefined;
+        return resolveSismoIdentifier(auth.userId, authType);
+      }) as string[];
   }
 
   public getSignedMessage(): string | undefined {

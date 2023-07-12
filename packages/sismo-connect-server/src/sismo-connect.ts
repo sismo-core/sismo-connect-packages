@@ -9,6 +9,7 @@ import {
   SismoConnectVerifiedResult,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
+  SismoConnectResponseInterface,
 } from "./common-types";
 import { SismoConnectVerifier } from "./verifier";
 import { SismoConnectProvider, JsonRpcProvider } from "./verifier/libs/onchain-provider";
@@ -55,7 +56,7 @@ export class SismoConnectServer {
   }
 
   public verify = async (
-    sismoConnectResponse: SismoConnectResponse,
+    sismoConnectResponse: SismoConnectResponseInterface,
     { auths, claims, signature, namespace }: VerifyParamsSismoConnect = {}
   ): Promise<SismoConnectVerifiedResult> => {
     if (!sismoConnectResponse) {
