@@ -1,6 +1,13 @@
 {
-    "trailingComma": "es5",
     "tabWidth": 2,
-    "semi": false,
-    "singleQuote": true
-}
+    "printWidth": 100,
+    "overrides": [
+      {
+        "files": "*.sol",
+        "options": {
+          "tabWidth": 2,
+          "printWidth": 100
+        }
+      }
+    ]
+  }
