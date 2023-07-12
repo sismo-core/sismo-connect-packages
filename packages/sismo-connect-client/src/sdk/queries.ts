@@ -12,7 +12,7 @@ export const getGroupFromIdQuery = `
       }
     }
   }
-`
+`;
 
 export const getGroupFromNameQuery = `
   query getGroup($name: String!) {
@@ -28,4 +28,4 @@ export const getGroupFromNameQuery = `
       }
     }
   }
-`
+`;
