@@ -3,38 +3,38 @@ import { BigNumberish } from "@ethersproject/bignumber";
 export const SISMO_CONNECT_VERSION = `sismo-connect-v1.1`;
 
 export type SismoConnectRequest = {
-  namespace?: string
-  auths?: AuthRequest[]
-  claims?: ClaimRequest[]
-  signature?: SignatureRequest
+  namespace?: string;
+  auths?: AuthRequest[];
+  claims?: ClaimRequest[];
+  signature?: SignatureRequest;
 
-  callbackPath?: string
-  version: string
-}
+  callbackPath?: string;
+  version: string;
+};
 
 export type SignatureRequest = {
-  message: string
-  isSelectableByUser?: boolean
-  extraData?: any
-}
+  message: string;
+  isSelectableByUser?: boolean;
+  extraData?: any;
+};
 
 export enum Vault {
-  Main = 'main',
-  Dev = 'dev',
-  Demo = 'demo',
+  Main = "main",
+  Dev = "dev",
+  Demo = "demo",
 }
 
 export type SismoConnectConfig = {
-  appId: string
-  vault?: VaultConfig // default Vault.Main
-  displayRawResponse?: boolean //
-  sismoApiUrl?: string // api to fetch group informations, prod API by default
-  vaultAppBaseUrl?: string // here for debugging purposes, determined by vaultEnv field if not specified
-}
+  appId: string;
+  vault?: VaultConfig; // default Vault.Main
+  displayRawResponse?: boolean; //
+  sismoApiUrl?: string; // api to fetch group informations, prod API by default
+  vaultAppBaseUrl?: string; // here for debugging purposes, determined by vaultEnv field if not specified
+};
 
 export type VaultConfig = {
-  impersonate: string[]
-}
+  impersonate: string[];
+};
 
 export enum ProvingScheme {
   HYDRA_S2 = "hydra-s2.1",
@@ -49,6 +49,14 @@ export enum ClaimType {
   LTE,
 }
 
+export const claimTypeLabels: { [claimType in ClaimType]: string } = {
+  [ClaimType.GTE]: "GTE",
+  [ClaimType.GT]: "GT",
+  [ClaimType.EQ]: "EQ",
+  [ClaimType.LT]: "LT",
+  [ClaimType.LTE]: "LTE",
+};
+
 export enum AuthType {
   VAULT,
   GITHUB,
@@ -57,224 +65,216 @@ export enum AuthType {
   TELEGRAM,
 }
 
-export type SismoConnectResponse = Pick<
-  SismoConnectRequest,
-  'namespace' | 'version'
-> & {
-  appId: string
-  signedMessage?: string
-  proofs: SismoConnectProof[]
-}
+export const authTypeLabels: { [authType in AuthType]: string } = {
+  [AuthType.VAULT]: "Vault",
+  [AuthType.GITHUB]: "Github",
+  [AuthType.TWITTER]: "Twitter",
+  [AuthType.EVM_ACCOUNT]: "EVM Account",
+  [AuthType.TELEGRAM]: "Telegram",
+};
+
+export type SismoConnectResponse = Pick<SismoConnectRequest, "namespace" | "version"> & {
+  appId: string;
+  signedMessage?: string;
+  proofs: SismoConnectProof[];
+};
 
 export type SismoConnectProof = {
-  auths?: Auth[]
-  claims?: Claim[]
-  provingScheme: string
-  proofData: string
-  extraData: any
-}
+  auths?: Auth[];
+  claims?: Claim[];
+  provingScheme: string;
+  proofData: string;
+  extraData: any;
+};
 
 export type AuthRequest = {
-  authType: AuthType
-  isAnon?: boolean //false
-  userId?: string
-  isOptional?: boolean
-  isSelectableByUser?: boolean
-  extraData?: any
-}
+  authType: AuthType;
+  isAnon?: boolean; //false
+  userId?: string;
+  isOptional?: boolean;
+  isSelectableByUser?: boolean;
+  extraData?: any;
+};
 
-export type Auth = Omit<AuthRequest, 'isOptional'>
+export type Auth = Omit<AuthRequest, "isOptional">;
 
 export type ClaimRequest = {
-  claimType?: ClaimType
-  groupId?: string
-  groupTimestamp?: number | 'latest'
-  value?: number
+  claimType?: ClaimType;
+  groupId?: string;
+  groupTimestamp?: number | "latest";
+  value?: number;
 
-  isOptional?: boolean
-  isSelectableByUser?: boolean
+  isOptional?: boolean;
+  isSelectableByUser?: boolean;
 
-  extraData?: any
-}
+  extraData?: any;
+};
 
-export type Claim = Omit<ClaimRequest, 'isOptional'>
+export type Claim = Omit<ClaimRequest, "isOptional">;
 
 export type VerifiedClaim = Claim & {
-  proofId: string
-  proofData: string
-}
+  proofId: string;
+  proofData: string;
+};
 
 export type VerifiedAuth = Auth & {
-  proofData: string
-}
+  proofData: string;
+};
 
 export class SismoConnectVerifiedResult {
-  public auths: VerifiedAuth[]
-  public claims: VerifiedClaim[]
-  public signedMessage: string | undefined
-  public response: SismoConnectResponse
+  public auths: VerifiedAuth[];
+  public claims: VerifiedClaim[];
+  public signedMessage: string | undefined;
+  public response: SismoConnectResponse;
 
   constructor({
     response,
     claims,
     auths,
   }: {
-    response: SismoConnectResponse
-    claims: VerifiedClaim[]
-    auths: VerifiedAuth[]
+    response: SismoConnectResponse;
+    claims: VerifiedClaim[];
+    auths: VerifiedAuth[];
   }) {
-    this.response = response
-    this.claims = claims
-    this.auths = auths
-    this.signedMessage = response.signedMessage
+    this.response = response;
+    this.claims = claims;
+    this.auths = auths;
+    this.signedMessage = response.signedMessage;
   }
 
   public getUserId(authType: AuthType): string | undefined {
-    const userId = this.auths.find(
-      (verifiedAuth) => verifiedAuth.authType === authType
-    )?.userId
-    return resolveSismoIdentifier(userId, authType)
+    const userId = this.auths.find((verifiedAuth) => verifiedAuth.authType === authType)?.userId;
+    return resolveSismoIdentifier(userId, authType);
   }
 
   public getUserIds(authType: AuthType): string[] {
     return this.auths
-      .filter(
-        (verifiedAuth) =>
-          verifiedAuth.authType === authType && verifiedAuth.userId
-      )
-      .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[]
+      .filter((verifiedAuth) => verifiedAuth.authType === authType && verifiedAuth.userId)
+      .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[];
   }
 
   public getSignedMessage(): string | undefined {
-    return this.signedMessage
+    return this.signedMessage;
   }
 }
 
 const startsWithHexadecimal = (str) => {
-  let hexRegex = /^0x[0-9a-fA-F]{6}/
-  return hexRegex.test(str)
-}
+  let hexRegex = /^0x[0-9a-fA-F]{6}/;
+  return hexRegex.test(str);
+};
 
-export const resolveSismoIdentifier = (
-  sismoIdentifier: string,
-  authType: AuthType
-) => {
-  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT)
-    return sismoIdentifier
-  if (!startsWithHexadecimal(sismoIdentifier)) return sismoIdentifier
+export const resolveSismoIdentifier = (sismoIdentifier: string, authType: AuthType) => {
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return sismoIdentifier;
+  if (!startsWithHexadecimal(sismoIdentifier)) return sismoIdentifier;
 
   const removeLeadingZeros = (str) => {
-    let arr = str.split('')
-    while (arr.length > 1 && arr[0] === '0') {
-      arr.shift()
+    let arr = str.split("");
+    while (arr.length > 1 && arr[0] === "0") {
+      arr.shift();
     }
-    return arr.join('')
-  }
-  sismoIdentifier = sismoIdentifier.substring(6)
-  sismoIdentifier = removeLeadingZeros(sismoIdentifier)
-  return sismoIdentifier
-}
+    return arr.join("");
+  };
+  sismoIdentifier = sismoIdentifier.substring(6);
+  sismoIdentifier = removeLeadingZeros(sismoIdentifier);
+  return sismoIdentifier;
+};
 
 export const toSismoIdentifier = (identifier: string, authType: AuthType) => {
-  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT)
-    return identifier
-  if (startsWithHexadecimal(identifier)) return identifier
+  if (authType === AuthType.EVM_ACCOUNT || authType === AuthType.VAULT) return identifier;
+  if (startsWithHexadecimal(identifier)) return identifier;
 
-  let prefix = ''
+  let prefix = "";
   if (authType === AuthType.GITHUB) {
-    prefix = '0x1001'
+    prefix = "0x1001";
   }
   if (authType === AuthType.TWITTER) {
-    prefix = '0x1002'
+    prefix = "0x1002";
   }
   if (authType === AuthType.TELEGRAM) {
-    prefix = '0x1003'
+    prefix = "0x1003";
   }
-  identifier = '0'.repeat(36 - identifier.length) + identifier
-  identifier = prefix + identifier
-  return identifier
-}
+  identifier = "0".repeat(36 - identifier.length) + identifier;
+  identifier = prefix + identifier;
+  return identifier;
+};
 
 export class RequestBuilder {
   static buildAuths(auths: AuthRequest[] | AuthRequest): AuthRequest[] {
     if (!auths) {
-      return []
+      return [];
     }
     if (!(auths as any).length) {
-      auths = [auths as AuthRequest]
+      auths = [auths as AuthRequest];
     }
-    auths = auths as AuthRequest[]
+    auths = auths as AuthRequest[];
 
     for (let authRequest of auths) {
-      if (authRequest.isAnon) throw new Error('isAnon not supported yet')
+      if (authRequest.isAnon) throw new Error("isAnon not supported yet");
       if (typeof authRequest.authType === undefined) {
-        throw new Error('you must provide a authType')
+        throw new Error("you must provide a authType");
       }
 
-      authRequest.isAnon = false
-      authRequest.isOptional = authRequest.isOptional ?? false
-      authRequest.userId = authRequest.userId ?? '0'
-      authRequest.extraData = authRequest.extraData ?? ''
+      authRequest.isAnon = false;
+      authRequest.isOptional = authRequest.isOptional ?? false;
+      authRequest.userId = authRequest.userId ?? "0";
+      authRequest.extraData = authRequest.extraData ?? "";
 
-      if (authRequest.userId === '0') {
-        authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? true
+      if (authRequest.userId === "0") {
+        authRequest.isSelectableByUser = authRequest.isSelectableByUser ?? true;
       } else {
-        authRequest.isSelectableByUser = false
+        authRequest.isSelectableByUser = false;
       }
 
       if (authRequest.authType === AuthType.VAULT) {
-        authRequest.isSelectableByUser = false
-        authRequest.userId = '0'
+        authRequest.isSelectableByUser = false;
+        authRequest.userId = "0";
       }
 
-      if (authRequest.userId !== '0') {
-        authRequest.userId = toSismoIdentifier(
-          authRequest.userId,
-          authRequest.authType
-        )
+      if (authRequest.userId !== "0") {
+        authRequest.userId = toSismoIdentifier(authRequest.userId, authRequest.authType);
       }
     }
 
-    return auths
+    return auths;
   }
 
   static buildClaims(claims: ClaimRequest[] | ClaimRequest): ClaimRequest[] {
     if (!claims) {
-      return []
+      return [];
     }
     if ((claims as ClaimRequest)?.groupId) {
-      claims = [claims as ClaimRequest]
+      claims = [claims as ClaimRequest];
     }
-    claims = claims as AuthRequest[]
+    claims = claims as AuthRequest[];
 
     for (let claimRequest of claims) {
       if (typeof claimRequest.claimType === undefined) {
-        throw new Error('you must provide a claimType')
+        throw new Error("you must provide a claimType");
       }
       if (typeof claimRequest.groupId === undefined) {
-        throw new Error('you must provide a groupId')
+        throw new Error("you must provide a groupId");
       }
 
-      claimRequest.claimType = claimRequest.claimType ?? ClaimType.GTE
-      claimRequest.extraData = claimRequest.extraData ?? ''
-      claimRequest.groupTimestamp = claimRequest.groupTimestamp ?? 'latest'
-      claimRequest.value = claimRequest.value ?? 1
+      claimRequest.claimType = claimRequest.claimType ?? ClaimType.GTE;
+      claimRequest.extraData = claimRequest.extraData ?? "";
+      claimRequest.groupTimestamp = claimRequest.groupTimestamp ?? "latest";
+      claimRequest.value = claimRequest.value ?? 1;
     }
 
-    return claims
+    return claims;
   }
 
   static buildSignature(signature: SignatureRequest) {
     if (!signature) {
-      return null
+      return null;
     }
     if (typeof signature.message === undefined) {
-      throw new Error('you must provide a message')
+      throw new Error("you must provide a message");
     }
 
-    signature.isSelectableByUser = signature.isSelectableByUser ?? false
-    signature.extraData = signature.extraData ?? ''
+    signature.isSelectableByUser = signature.isSelectableByUser ?? false;
+    signature.extraData = signature.extraData ?? "";
 
-    return signature
+    return signature;
   }
 }

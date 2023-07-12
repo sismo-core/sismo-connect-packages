@@ -8,6 +8,7 @@ import {
   AuthType,
   AuthRequest,
   VerifiedAuth,
+  claimTypeLabels,
 } from "../src";
 import { decodeProofData, encodeProofData } from "../src/verifier/utils/proofData";
 import { ethers } from "ethers";
@@ -209,13 +210,14 @@ describe("HydraS3 Verifier test", () => {
         invalidProof.claims = invalidProof.claims as ClaimRequest[];
 
         invalidProof.claims[0].claimType = ClaimType.EQ;
-        const claimTypeFromInput = claimProofPublicInputs.claimType === "0";
 
         await expectVerifyClaimToThrow(
           invalidProof,
           `on proofId "${proofIdentifier}" claimType "${
-            invalidProof.claims[0].claimType
-          }" mismatch with proof input claimType "${!claimTypeFromInput}"`
+            claimTypeLabels[invalidProof.claims[0].claimType]
+          }" mismatch with proof input claimType "${
+            claimTypeLabels[claimProofPublicInputs.claimType]
+          }"`
         );
       });
 

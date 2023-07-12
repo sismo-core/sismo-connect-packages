@@ -23,6 +23,7 @@ import {
   SismoConnectProof,
   VerifiedAuth,
   VerifiedClaim,
+  claimTypeLabels,
   resolveSismoIdentifier,
 } from "../../common-types";
 import { SNARK_FIELD } from "@sismo-core/hydra-s3";
@@ -345,7 +346,9 @@ export abstract class HydraVerifier {
     const claimTypeFromProof = claim.claimType === ClaimType.EQ;
     if (claimTypFromInput !== claimTypeFromProof) {
       throw new Error(
-        `on proofId "${proofIdentifier}" claimType "${claim.claimType}" mismatch with proof input claimType "${claimTypFromInput}"`
+        `on proofId "${proofIdentifier}" claimType "${
+          claimTypeLabels[claim.claimType]
+        }" mismatch with proof input claimType "${claimTypeLabels[proofPublicInputs.claimType]}"`
       );
     }
 

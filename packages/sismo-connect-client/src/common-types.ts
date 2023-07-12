@@ -49,6 +49,14 @@ export enum ClaimType {
   LTE,
 }
 
+export const claimTypeLabels: { [claimType in ClaimType]: string } = {
+  [ClaimType.GTE]: "GTE",
+  [ClaimType.GT]: "GT",
+  [ClaimType.EQ]: "EQ",
+  [ClaimType.LT]: "LT",
+  [ClaimType.LTE]: "LTE",
+};
+
 export enum AuthType {
   VAULT,
   GITHUB,
@@ -56,6 +64,14 @@ export enum AuthType {
   EVM_ACCOUNT,
   TELEGRAM,
 }
+
+export const authTypeLabels: { [authType in AuthType]: string } = {
+  [AuthType.VAULT]: "Vault",
+  [AuthType.GITHUB]: "Github",
+  [AuthType.TWITTER]: "Twitter",
+  [AuthType.EVM_ACCOUNT]: "EVM Account",
+  [AuthType.TELEGRAM]: "Telegram",
+};
 
 export type SismoConnectResponse = Pick<SismoConnectRequest, "namespace" | "version"> & {
   appId: string;
