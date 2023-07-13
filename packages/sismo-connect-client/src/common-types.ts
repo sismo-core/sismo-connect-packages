@@ -183,14 +183,14 @@ export class SismoConnectVerifiedResult {
   public auths: VerifiedAuth[];
   public claims: VerifiedClaim[];
   public signedMessage: string | undefined;
-  public response: SismoConnectResponse;
+  public response: SismoConnectResponseInterface;
 
   constructor({
     response,
     claims,
     auths,
   }: {
-    response: SismoConnectResponse;
+    response: SismoConnectResponseInterface;
     claims: VerifiedClaim[];
     auths: VerifiedAuth[];
   }) {
@@ -209,6 +209,12 @@ export class SismoConnectVerifiedResult {
     return this.auths
       .filter((verifiedAuth) => verifiedAuth.authType === authType && verifiedAuth.userId)
       .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[];
+  }
+
+  public getClaims(groupId: `0x${string}`): VerifiedClaim[] {
+    return this.claims.filter(
+      (verifiedClaims) => verifiedClaims.groupId === groupId && verifiedClaims.groupId
+    );
   }
 
   public getSignedMessage(): string | undefined {

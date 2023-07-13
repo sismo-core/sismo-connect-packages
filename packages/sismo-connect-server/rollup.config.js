@@ -20,12 +20,7 @@ export default [
         sourcemap: true,
       },
     ],
-    external: [
-      "@ethersproject/bignumber",
-      "@sismo-core/hydra-s3",
-      "viem",
-      ...Object.keys(pkg.devDependencies || {}),
-    ],
+    external: ["@ethersproject/bignumber", "viem", ...Object.keys(pkg.devDependencies || {})],
     plugins: [resolve(), commonjs(), json(), typescript()],
   },
   {

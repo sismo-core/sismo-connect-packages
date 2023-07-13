@@ -211,6 +211,12 @@ export class SismoConnectVerifiedResult {
       .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[];
   }
 
+  public getClaims(groupId: `0x${string}`): VerifiedClaim[] {
+    return this.claims.filter(
+      (verifiedClaims) => verifiedClaims.groupId === groupId && verifiedClaims.groupId
+    );
+  }
+
   public getSignedMessage(): string | undefined {
     return this.signedMessage;
   }
