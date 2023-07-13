@@ -9,6 +9,7 @@ import {
   SismoConnectVerifiedResult,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
+  SismoConnectResponseInterface,
 } from "./common-types";
 import { SismoConnectVerifier } from "./verifier";
 import { SismoConnectProvider, JsonRpcProvider } from "./verifier/libs/onchain-provider";
@@ -43,12 +44,6 @@ export class SismoConnectServer {
 
     const isImpersonationMode: boolean = config.vault?.impersonate?.length > 0;
 
-    if (isImpersonationMode) {
-      console.warn(
-        `Sismo Connect redirects to the Impersonation Vault. The generated proofs are based on impersonated accounts: ${config.vault.impersonate}. Never use this mode in production!`
-      );
-    }
-
     //By default use public gnosis provider
     const sismoConnectProvider: SismoConnectProvider =
       options?.provider ?? new JsonRpcProvider({ url: "https://rpc.gnosis.gateway.fm" });
@@ -61,7 +56,7 @@ export class SismoConnectServer {
   }
 
   public verify = async (
-    sismoConnectResponse: SismoConnectResponse,
+    sismoConnectResponse: SismoConnectResponseInterface,
     { auths, claims, signature, namespace }: VerifyParamsSismoConnect = {}
   ): Promise<SismoConnectVerifiedResult> => {
     if (!sismoConnectResponse) {

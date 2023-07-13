@@ -2,6 +2,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import dts from "rollup-plugin-dts";
+import pkg from "./package.json";
 
 export default [
   {
@@ -18,25 +19,23 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [
-      resolve(),
-      commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
-    ],
+    plugins: [resolve(), commonjs(), typescript({ tsconfig: "./tsconfig.json" })],
     external: [
+      "@ethersproject/bignumber",
       "viem",
       "js-base64",
-      "pako"
-    ]
+      "pako",
+      ...Object.keys(pkg.devDependencies || {}),
+    ],
   },
   {
     input: "lib/esm/types/index.d.ts",
     output: [
       {
-        file: "lib/index.d.ts", 
-        format: "esm" 
-      }
+        file: "lib/index.d.ts",
+        format: "esm",
+      },
     ],
     plugins: [dts.default()],
-  }
+  },
 ];

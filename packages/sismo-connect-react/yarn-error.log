@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /Users/dev/.cache/node/corepack/yarn/1.22.19/bin/yarn.js upgrade @sismo-core/sismo-connec-client@0.0.12-beta.14
+  /usr/local/bin/node /Users/dev/.cache/node/corepack/yarn/1.22.19/bin/yarn.js add @simsmo-core/sismo-connect-client@0.0.17-beta.5
 
 PATH: 
   /opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/dev/.cargo/bin:/Users/dev/.foundry/bin
@@ -8,28 +8,28 @@ Yarn version:
   1.22.19
 
 Node version: 
-  16.20.0
+  18.16.1
 
 Platform: 
   darwin arm64
 
 Trace: 
-  Error: https://registry.npmjs.org/@sismo-core%2fsismo-connec-client: Not found
-      at Request.params.callback [as _callback] (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:66145:18)
-      at Request.self.callback (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:140890:22)
+  Error: https://registry.npmjs.org/@simsmo-core%2fsismo-connect-client: Not found
+      at params.callback [as _callback] (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:66145:18)
+      at self.callback (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
       at Request.<anonymous> (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:141862:10)
       at Request.emit (node:events:513:28)
       at IncomingMessage.<anonymous> (/Users/dev/.cache/node/corepack/yarn/1.22.19/lib/cli.js:141784:12)
       at Object.onceWrapper (node:events:627:28)
       at IncomingMessage.emit (node:events:525:35)
-      at endReadableNT (node:internal/streams/readable:1358:12)
-      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
 
 npm manifest: 
   {
     "name": "@sismo-core/sismo-connect-react",
-    "version": "0.0.14-beta.10",
+    "version": "0.0.17-beta.4",
     "description": "sismoConnect React package",
     "main": "lib/cjs/index.js",
     "module": "lib/esm/index.js",
@@ -59,9 +59,6 @@ npm manifest:
       "lib",
       "src"
     ],
-    "engines": {
-      "npm": "USE YARN INSTEAD OF NPM"
-    },
     "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
     "author": "leo@sismo.io",
     "license": "MIT",
@@ -73,7 +70,7 @@ npm manifest:
     },
     "peerDependencies": {},
     "dependencies": {
-      "@sismo-core/sismo-connect-client": "0.0.12-beta.12"
+      "@sismo-core/sismo-connect-client": "0.0.17-beta.4"
     }
   }
 
@@ -226,10 +223,10 @@ Lockfile:
       "@noble/hashes" "~1.3.0"
       "@scure/base" "~1.1.0"
   
-  "@sismo-core/sismo-connect-client@0.0.12-beta.12":
-    version "0.0.12-beta.12"
-    resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.12-beta.12.tgz#99792ab9a527356adef82d74435a4a9dab05e7b3"
-    integrity sha512-alIbo5p7MLKM8+vJC4ZkRgeJ9/75M9BoreJo4BuRpi3nqttqoDglJNQn7BUCzeaOuGdmhlYT5BgfTqiG0JrFuQ==
+  "@sismo-core/sismo-connect-client@0.0.17-beta.4":
+    version "0.0.17-beta.4"
+    resolved "https://registry.yarnpkg.com/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.17-beta.4.tgz#39968c5dc1245437b073735fe26b0b49d625439d"
+    integrity sha512-9qSUzoKkAGoAuuV+NANBe+bXq02PijVJ5wvbrhcQt6jr03bn2MfxVVfOhOzeTHrQ7vlg7Uyf3lJHmtJWymAa0w==
     dependencies:
       "@ethersproject/bignumber" "5.7.0"
       js-base64 "^3.7.5"

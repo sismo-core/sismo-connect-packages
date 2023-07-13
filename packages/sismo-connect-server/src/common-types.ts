@@ -1,4 +1,4 @@
-import { BigNumberish } from "@ethersproject/bignumber";
+import { toSismoConnectResponseBytes } from "./utils/toSismoResponseBytes";
 
 export const SISMO_CONNECT_VERSION = `sismo-connect-v1.1`;
 
@@ -49,6 +49,14 @@ export enum ClaimType {
   LTE,
 }
 
+export const claimTypeLabels: { [claimType in ClaimType]: string } = {
+  [ClaimType.GTE]: "GTE",
+  [ClaimType.GT]: "GT",
+  [ClaimType.EQ]: "EQ",
+  [ClaimType.LT]: "LT",
+  [ClaimType.LTE]: "LTE",
+};
+
 export enum AuthType {
   VAULT,
   GITHUB,
@@ -57,11 +65,77 @@ export enum AuthType {
   TELEGRAM,
 }
 
-export type SismoConnectResponse = Pick<SismoConnectRequest, "namespace" | "version"> & {
+export const authTypeLabels: { [authType in AuthType]: string } = {
+  [AuthType.VAULT]: "Vault",
+  [AuthType.GITHUB]: "Github",
+  [AuthType.TWITTER]: "Twitter",
+  [AuthType.EVM_ACCOUNT]: "EVM Account",
+  [AuthType.TELEGRAM]: "Telegram",
+};
+
+export type SismoConnectResponseInterface = Pick<SismoConnectRequest, "namespace" | "version"> & {
   appId: string;
   signedMessage?: string;
   proofs: SismoConnectProof[];
 };
+
+export class SismoConnectResponse implements SismoConnectResponseInterface {
+  namespace?: string;
+  version: string;
+  appId: string;
+  signedMessage?: string;
+  proofs: SismoConnectProof[];
+
+  constructor(params: SismoConnectResponseInterface) {
+    Object.assign(this, params);
+  }
+
+  public getAuths(): Auth[] {
+    return this.proofs.reduce((auths: Auth[], proof) => {
+      if (proof.auths) {
+        return [...auths, ...proof.auths];
+      } else {
+        return auths;
+      }
+    }, []);
+  }
+
+  public toJson(): SismoConnectResponseInterface {
+    return {
+      namespace: this.namespace,
+      version: this.version,
+      appId: this.appId,
+      signedMessage: this.signedMessage,
+      proofs: this.proofs,
+    };
+  }
+
+  public toBytes(): string {
+    return toSismoConnectResponseBytes(this);
+  }
+
+  public getUserId(authType: AuthType): string | undefined {
+    const auths = this.getAuths();
+    if (auths?.length === 0) return undefined;
+    const userId = auths.find((verifiedAuth) => verifiedAuth.authType === authType)?.userId;
+    if (typeof userId !== "string") return undefined;
+    return resolveSismoIdentifier(userId, authType);
+  }
+
+  public getUserIds(authType: AuthType): string[] {
+    const auths = this.getAuths();
+    return auths
+      .filter((verifiedAuth) => verifiedAuth.authType === authType && verifiedAuth.userId)
+      .map((auth) => {
+        if (typeof auth.userId !== "string") return undefined;
+        return resolveSismoIdentifier(auth.userId, authType);
+      }) as string[];
+  }
+
+  public getSignedMessage(): string | undefined {
+    return this.signedMessage;
+  }
+}
 
 export type SismoConnectProof = {
   auths?: Auth[];
@@ -109,14 +183,14 @@ export class SismoConnectVerifiedResult {
   public auths: VerifiedAuth[];
   public claims: VerifiedClaim[];
   public signedMessage: string | undefined;
-  public response: SismoConnectResponse;
+  public response: SismoConnectResponseInterface;
 
   constructor({
     response,
     claims,
     auths,
   }: {
-    response: SismoConnectResponse;
+    response: SismoConnectResponseInterface;
     claims: VerifiedClaim[];
     auths: VerifiedAuth[];
   }) {
@@ -135,6 +209,12 @@ export class SismoConnectVerifiedResult {
     return this.auths
       .filter((verifiedAuth) => verifiedAuth.authType === authType && verifiedAuth.userId)
       .map((auth) => resolveSismoIdentifier(auth.userId, authType)) as string[];
+  }
+
+  public getClaims(groupId: `0x${string}`): VerifiedClaim[] {
+    return this.claims.filter(
+      (verifiedClaims) => verifiedClaims.groupId === groupId && verifiedClaims.groupId
+    );
   }
 
   public getSignedMessage(): string | undefined {
@@ -201,6 +281,9 @@ export class RequestBuilder {
       authRequest.isAnon = false;
       authRequest.isOptional = authRequest.isOptional ?? false;
       authRequest.userId = authRequest.userId ?? "0";
+      if (authRequest.authType === AuthType.EVM_ACCOUNT) {
+        authRequest.userId = authRequest.userId.toLowerCase();
+      }
       authRequest.extraData = authRequest.extraData ?? "";
 
       if (authRequest.userId === "0") {

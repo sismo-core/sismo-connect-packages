@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-server",
-  "version": "0.0.16",
+  "version": "0.0.17-beta.6",
   "description": "sismoConnect server package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -33,15 +33,13 @@
     "lib",
     "src"
   ],
-  "engines": {
-    "npm": "USE YARN INSTEAD OF NPM"
-  },
   "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@sismo-core/hydra-s3": "^1.0.0"
+    "@sismo-core/hydra-s3": "^1.0.0",
+    "viem": "^1.2.13"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",

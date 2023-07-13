@@ -8,6 +8,8 @@ import {
   SISMO_CONNECT_VERSION,
   AuthRequest,
   AuthType,
+  claimTypeLabels,
+  SismoConnectResponseInterface,
 } from "../src";
 import { BigNumber } from "@ethersproject/bignumber";
 import { decodeProofData } from "../src/verifier/utils/proofData";
@@ -17,7 +19,7 @@ import { sismoConnectSimpleClaimResponseMock } from "./mocks";
 describe("SismoConnect", () => {
   let verifiedClaim: VerifiedClaim;
   let sismoConnect: SismoConnectServer;
-  let sismoConnectResponse: SismoConnectResponse;
+  let sismoConnectResponse: SismoConnectResponseInterface;
   let appId: string;
   let groupId: string;
   let namespace: string;
@@ -181,7 +183,11 @@ describe("SismoConnect", () => {
           })
         ).rejects.toEqual(
           Error(
-            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+            `A required proof is missing for the claimRequest with groupId ${
+              claimRequest.groupId
+            }, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${
+              claimTypeLabels[claimRequest.claimType as ClaimType]
+            }`
           )
         );
       });
@@ -200,7 +206,11 @@ describe("SismoConnect", () => {
           })
         ).rejects.toEqual(
           Error(
-            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+            `A required proof is missing for the claimRequest with groupId ${
+              claimRequest.groupId
+            }, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${
+              claimTypeLabels[claimRequest.claimType as ClaimType]
+            }`
           )
         );
       });
@@ -219,7 +229,11 @@ describe("SismoConnect", () => {
           })
         ).rejects.toEqual(
           Error(
-            `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+            `A required proof is missing for the claimRequest with groupId ${
+              claimRequest.groupId
+            }, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${
+              claimTypeLabels[claimRequest.claimType as ClaimType]
+            }`
           )
         );
       });

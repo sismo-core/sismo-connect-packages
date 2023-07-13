@@ -10,6 +10,9 @@ import {
   SignatureRequest,
   SismoConnectProof,
   AuthType,
+  authTypeLabels,
+  claimTypeLabels,
+  SismoConnectResponseInterface,
 } from "../common-types";
 import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from "../constants";
 import {
@@ -32,7 +35,7 @@ export type VerifierParams = {
 };
 
 export type VerifyParams = {
-  sismoConnectResponse: SismoConnectResponse;
+  sismoConnectResponse: SismoConnectResponseInterface;
   claims?: ClaimRequest[];
   auths?: AuthRequest[];
   signature?: SignatureRequest;
@@ -105,7 +108,7 @@ export class SismoConnectVerifier {
   }
 
   private async _checkRequiredRequests(
-    sismoConnectResponse: SismoConnectResponse,
+    sismoConnectResponse: SismoConnectResponseInterface,
     claimRequests: ClaimRequest[],
     authRequests: AuthRequest[]
   ) {
@@ -131,7 +134,11 @@ export class SismoConnectVerifier {
           });
           if (!proofFounded) {
             throw new Error(
-              `A required proof is missing for the claimRequest with groupId ${claimRequest.groupId}, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${claimRequest.claimType}`
+              `A required proof is missing for the claimRequest with groupId ${
+                claimRequest.groupId
+              }, groupTimestamp ${claimRequest.groupTimestamp} and claimType ${
+                claimTypeLabels[claimRequest.claimType]
+              }`
             );
           }
         }
@@ -162,7 +169,9 @@ export class SismoConnectVerifier {
           });
           if (!proofFounded) {
             throw new Error(
-              `A required proof is missing for the authRequest with authType ${authRequest.authType}`
+              `A required proof is missing for the authRequest with authType ${
+                authTypeLabels[authRequest.authType]
+              }`
             );
           }
         }
@@ -178,7 +187,7 @@ export class SismoConnectVerifier {
 
   private async _checkProofMatchRequest(
     proof: SismoConnectProof,
-    response: SismoConnectResponse,
+    response: SismoConnectResponseInterface,
     claimRequests: ClaimRequest[],
     authRequests: AuthRequest[],
     signatureRequest: SignatureRequest
@@ -231,14 +240,16 @@ export class SismoConnectVerifier {
 
         if (!claimRequest) {
           throw new Error(
-            `No claimRequest found for groupId ${groupId}, groupTimestamp ${groupTimestamp} and claimType ${claimType}`
+            `No claimRequest found for groupId ${groupId}, groupTimestamp ${groupTimestamp} and claimType ${claimTypeLabels[claimType]}`
           );
         }
 
         const requestedClaimType = claimRequest.claimType;
         if (requestedClaimType !== claim.claimType) {
           throw new Error(
-            `The proof claimType ${claim.claimType} does not match the requested claimType ${requestedClaimType}`
+            `The proof claimType ${
+              claimTypeLabels[claim.claimType]
+            } does not match the requested claimType ${claimTypeLabels[requestedClaimType]}`
           );
         }
         const requestedValue = claimRequest.value;
@@ -305,7 +316,9 @@ export class SismoConnectVerifier {
         });
 
         if (!authRequest) {
-          throw new Error(`No authRequest found for authType ${authType} and isAnon ${isAnon}`);
+          throw new Error(
+            `No authRequest found for authType ${authTypeLabels[authType]} and isAnon ${isAnon}`
+          );
         }
         const requestedUserId = authRequest.userId;
         if (requestedUserId !== "0") {

@@ -9,15 +9,13 @@ type VerifierMockedParams = {
 
 export class HydraS3VerifierMocked extends HydraS3Verifier {
   constructor(mockedParams: VerifierMockedParams) {
-    const provider = new JsonRpcProviderMock()
-    const availableRootsRegistry = new AvailableRootsRegistryContractMock(true)
-    const pubKeysAsStrings = mockedParams.commitmentMapperPubKey.map((x) =>
-      x.toHexString()
-    )
+    const provider = new JsonRpcProviderMock();
+    const availableRootsRegistry = new AvailableRootsRegistryContractMock(true);
+    const pubKeysAsStrings = mockedParams.commitmentMapperPubKey.map((x) => x.toHexString());
     super({
       provider,
       availableRootsRegistry,
-      commitmentMapperPubKeys: [pubKeysAsStrings[0], pubKeysAsStrings[1]]
-    })
+      commitmentMapperPubKeys: [pubKeysAsStrings[0], pubKeysAsStrings[1]],
+    });
   }
 }
