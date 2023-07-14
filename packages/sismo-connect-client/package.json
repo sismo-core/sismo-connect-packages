@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-client",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Sismo Connect client package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -32,9 +32,6 @@
     "lib",
     "src"
   ],
-  "engines": {
-    "npm": "USE YARN INSTEAD OF NPM"
-  },
   "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
   "author": "leo@sismo.io",
   "license": "MIT",
