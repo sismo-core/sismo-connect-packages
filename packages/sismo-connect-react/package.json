@@ -1,6 +1,6 @@
 {
   "name": "@sismo-core/sismo-connect-react",
-  "version": "0.0.16",
+  "version": "0.0.18",
   "description": "sismoConnect React package",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -30,9 +30,6 @@
     "lib",
     "src"
   ],
-  "engines": {
-    "npm": "USE YARN INSTEAD OF NPM"
-  },
   "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
   "author": "leo@sismo.io",
   "license": "MIT",
@@ -44,6 +41,6 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@sismo-core/sismo-connect-client": "0.0.16"
+    "@sismo-core/sismo-connect-client": "0.0.18"
   }
 }

@@ -49,18 +49,6 @@ export class SismoConnectClient {
       this._sismoConnectConfig.displayRawResponse = false
     }
 
-    if (this._sismoConnectConfig.displayRawResponse) {
-      console.warn(
-        'Sismo Connect displayRawResponse is true. Never use this mode in production!'
-      )
-    }
-
-    if (isImpersonationMode) {
-      console.warn(
-        `Sismo Connect redirects to the Impersonation Vault. The generated proofs are based on impersonated accounts: ${this._sismoConnectConfig.vault.impersonate}. Never use this mode in production!`
-      )
-    }
-
     this._sdk = new Sdk(this._sismoConnectConfig.sismoApiUrl)
   }
 
