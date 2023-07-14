@@ -2,7 +2,7 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
       "outDir": "./lib",
-      "declarationDir": "./types"
+      "declarationDir": "./types",
     },
     "include": [
       "src",
@@ -10,5 +10,5 @@
     ],
     "exclude": [
       "node_modules"
-    ]
+    ],
 }
