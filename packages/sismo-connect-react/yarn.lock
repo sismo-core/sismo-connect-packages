@@ -143,10 +143,10 @@
     "@noble/hashes" "~1.3.0"
     "@scure/base" "~1.1.0"
 
-"@sismo-core/sismo-connect-client@0.0.18":
-  version "0.0.18"
-  resolved "https://registry.npmjs.org/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.18.tgz#81792b1bfa4f7b52a33fc54441fdaa371f473a0e"
-  integrity sha512-peZsp6Fm6JSXrzbosfJuFeFNy411TKtLjTM2cT5gP6qZxoWjSu/oqlo7H57DzFiq2ZWhQp/nAVxcD32eheqRyw==
+"@sismo-core/sismo-connect-client@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.npmjs.org/@sismo-core/sismo-connect-client/-/sismo-connect-client-0.0.19.tgz#8c756bd865f5812ee2a00cdbe62c5cceff69e53e"
+  integrity sha512-YTQ9/b4k6z5i9q6CzecNG3+GM8JOvRa8uhCPIV6DkvqBjkpN0w6g+7nXM8EMjJnU7rHJAjWHbgg5GFurFHF42w==
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
     js-base64 "^3.7.5"
