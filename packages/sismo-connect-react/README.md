@@ -34,8 +34,11 @@ You can learn more on Sismo Connect [here](https://docs.sismo.io/discover-sismo-
 - [Node.js](https://nodejs.org/en/download/) >= 18.15.0 (Latest LTS version)
 
 ## Usage
+
 ### Installation
+
 Install the Sismo Connect React package in your frontend with npm or yarn:
+
 ```bash
 # with npm
 npm install @sismo-core/sismo-connect-react
@@ -44,7 +47,9 @@ yarn add @sismo-core/sismo-connect-react
 ```
 
 ### Import
+
 Import the Sismo Connect React package in your frontend:
+
 ```typescript
 import { SismoConnectConfig } from "@sismo-core/sismo-connect-react";
 
@@ -52,6 +57,7 @@ export const sismoConnectConfig: SismoConnectConfig = {
   appId: "0x8f347ca31790557391cec39b06f02dc2",
 };
 ```
+
 See the full documentation [here](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/react).
 
 ## License

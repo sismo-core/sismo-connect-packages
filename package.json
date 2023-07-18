@@ -14,8 +14,8 @@
     "prepare:client": "cd ./packages/sismo-connect-client && yarn",
     "prepare:server": "cd ./packages/sismo-connect-server && yarn",
     "eslint": "eslint --max-warnings=0",
-    "prettier": "prettier --write 'packages/**/src/**/*.ts'",
-    "prettier:check": "prettier --check 'packages/**/src/**/*.ts'",
+    "prettier": "prettier --write 'packages/**/*'",
+    "prettier:check": "prettier --check 'packages/**/*'",
     "test": "yarn test:client && yarn test:server",
     "test:client": "cd ./packages/sismo-connect-client && yarn test",
     "test:server": "cd ./packages/sismo-connect-server && yarn test"

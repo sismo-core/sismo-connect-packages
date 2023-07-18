@@ -1,14 +1,9 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-      "outDir": "./lib",
-      "declarationDir": "./types",
-    },
-    "include": [
-      "src",
-      "./rollup.config.js"
-    ],
-    "exclude": [
-      "node_modules"
-    ],
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+    "declarationDir": "./types"
+  },
+  "include": ["src", "./rollup.config.js"],
+  "exclude": ["node_modules"]
 }

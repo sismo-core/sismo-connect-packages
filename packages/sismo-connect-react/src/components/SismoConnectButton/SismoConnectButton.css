@@ -1,24 +1,24 @@
 .sismoConnectButton {
-    color: #FFFFFF;
-    background: #1C2847;
-    border: 1px solid #3F4973;
-    border-radius: 10px;
-    padding: 15px 25px;
-    cursor: pointer;
-    display: inline-flex;
-    padding: 15px 25px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+  color: #ffffff;
+  background: #1c2847;
+  border: 1px solid #3f4973;
+  border-radius: 10px;
+  padding: 15px 25px;
+  cursor: pointer;
+  display: inline-flex;
+  padding: 15px 25px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .sismoConnectButtonText {
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 27px;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 27px;
 }
 
 .sismoConnectButtonLogo {
-    width: 18.66px;
-    height: 24px;
+  width: 18.66px;
+  height: 24px;
 }

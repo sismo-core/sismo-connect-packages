@@ -1,8 +1,14 @@
 import React, { useEffect } from "react";
-import './SismoConnectButton.css';
+import "./SismoConnectButton.css";
 import { Logo } from "../Logo/Logo";
 import { Loader } from "../Loader";
-import { SismoConnectResponse, SismoConnectConfig, ClaimRequest, AuthRequest, SignatureRequest } from "@sismo-core/sismo-connect-client";
+import {
+  SismoConnectResponse,
+  SismoConnectConfig,
+  ClaimRequest,
+  AuthRequest,
+  SignatureRequest,
+} from "@sismo-core/sismo-connect-client";
 import { useSismoConnect } from "../../hooks/useSismoConnect";
 
 type ButtonProps = {
@@ -55,8 +61,8 @@ export const SismoConnectButton = ({
     throw new Error("You can't use both auth and auths props");
   }
 
-  const { sismoConnect, response, responseBytes } = useSismoConnect({ 
-    config
+  const { sismoConnect, response, responseBytes } = useSismoConnect({
+    config,
   });
 
   useEffect(() => {
@@ -68,13 +74,13 @@ export const SismoConnectButton = ({
     if (!responseBytes || !onResponseBytes) return;
     onResponseBytes(responseBytes);
   }, [responseBytes]);
-  
+
   return (
     <button
       className="sismoConnectButton"
       style={{
         cursor: verifying || loading ? "default" : "cursor",
-        ...overrideStyle
+        ...overrideStyle,
       }}
       onClick={() => {
         if (verifying || loading) return;
@@ -86,27 +92,18 @@ export const SismoConnectButton = ({
           signature,
           callbackPath,
           callbackUrl,
-          namespace
-        })
+          namespace,
+        });
       }}
     >
-      {
-        verifying || loading ? 
+      {verifying || loading ? (
         <Loader />
-        :
-        <div 
-          className="sismoConnectButtonLogo"
-        >
-          <Logo/>
+      ) : (
+        <div className="sismoConnectButtonLogo">
+          <Logo />
         </div>
-      }
-      <div
-        className="sismoConnectButtonText"
-      >
-        {
-          text || "Sign in with Sismo"
-        }
-      </div>
+      )}
+      <div className="sismoConnectButtonText">{text || "Sign in with Sismo"}</div>
     </button>
   );
-}
+};
