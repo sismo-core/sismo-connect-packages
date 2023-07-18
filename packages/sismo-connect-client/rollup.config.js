@@ -18,25 +18,17 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [
-      resolve(),
-      commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
-    ],
-    external: [
-      "viem",
-      "js-base64",
-      "pako"
-    ]
+    plugins: [resolve(), commonjs(), typescript({ tsconfig: "./tsconfig.json" })],
+    external: ["viem", "js-base64", "pako"],
   },
   {
     input: "lib/esm/types/index.d.ts",
     output: [
       {
-        file: "lib/index.d.ts", 
-        format: "esm" 
-      }
+        file: "lib/index.d.ts",
+        format: "esm",
+      },
     ],
     plugins: [dts.default()],
-  }
+  },
 ];

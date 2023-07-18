@@ -23,7 +23,6 @@
   </p>
 </div>
 
-
 Sismo Connect Solidity is a Solidity library that allows you to verify the zk-proofs of your Sismo Connect Application onchain and simplify the use of the [sismo-connect-onchain-verifier](https://github.com/sismo-core/sismo-connect-onchain-verifier).
 
 Here is the link to the full documentation of the library: [Sismo Connect Solidity Library](https://docs.sismo.io/build-with-sismo-connect/technical-documentation/solidity)
@@ -52,6 +51,7 @@ echo $'sismo-connect-solidity/=lib/sismo-connect-packages/packages/sismo-connect
 ```
 
 ### Import the library
+
 In your solidity file:
 
 ```solidity
