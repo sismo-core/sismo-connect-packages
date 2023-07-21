@@ -33,9 +33,9 @@ const formatResponseToEncode = (sismoConnectResponse: SismoConnectResponse) => {
     appId: toBytes16(sismoConnectResponse.appId),
     namespace: toBytes16(sismoConnectResponse?.namespace ?? "main"),
     version: toBytes32(sismoConnectResponse.version),
-    signedMessage:
-      hexlify(sismoConnectResponse.signedMessage) ??
-      toBytes("0x0000000000000000000000000000000000000000000000000000000000000000"),
+    signedMessage: sismoConnectResponse?.signedMessage
+      ? hexlify(sismoConnectResponse.signedMessage)
+      : toBytes("0x0000000000000000000000000000000000000000000000000000000000000000"),
     proofs: sismoConnectResponse.proofs?.map((proof) => {
       return {
         claims:
