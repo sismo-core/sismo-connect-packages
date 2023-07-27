@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./SismoConnectButton.css";
-import { Logo } from "../Logo/Logo";
+import { LogoThemeDark, LogoThemeBlack, LogoThemeLight } from "../Logo";
 import { Loader } from "../Loader";
 import {
   SismoConnectResponse,
@@ -29,6 +29,8 @@ type ButtonProps = {
   loading?: boolean;
   text?: string;
   overrideStyle?: React.CSSProperties;
+  disabled?: boolean;
+  theme?: "light" | "dark" | "black";
 };
 
 export const SismoConnectButton = ({
@@ -49,6 +51,8 @@ export const SismoConnectButton = ({
   text,
   loading,
   overrideStyle,
+  disabled,
+  theme = "dark",
 }: ButtonProps) => {
   if (!claims && !auths && !signature && !claim && !auth) {
     throw new Error("Please specify at least one claimRequest or authRequest or signatureRequest");
@@ -77,13 +81,33 @@ export const SismoConnectButton = ({
 
   return (
     <button
-      className="sismoConnectButton"
       style={{
-        cursor: verifying || loading ? "default" : "cursor",
+        borderRadius: "10px",
+        padding: "0px 25px",
+        height: "59px",
+        display: "inline-flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "10px",
+        fontFamily: "Sarala-Regular, Arial, sans-serif",
+        fontWeight: "400",
+        fontSize: "18px",
+        lineHeight: "normal",
+        cursor: verifying || loading || disabled ? "default" : "cursor",
+        opacity: disabled ? 0.6 : 1,
+        backgroundColor: theme === "light" ? "#FDFCF8" : theme === "black" ? "#000" : "#1c2847",
+        border:
+          theme === "light"
+            ? "1px solid  #1C2847"
+            : theme === "black"
+            ? "1px solid #000"
+            : "1px solid  #3f4973",
+        color: theme === "light" ? "#0A101F" : theme === "black" ? "#ffffff" : "#ffffff",
         ...overrideStyle,
       }}
+      disabled={disabled}
       onClick={() => {
-        if (verifying || loading) return;
+        if (verifying || loading || disabled) return;
         sismoConnect.request({
           claims,
           auths,
@@ -99,11 +123,35 @@ export const SismoConnectButton = ({
       {verifying || loading ? (
         <Loader />
       ) : (
-        <div className="sismoConnectButtonLogo">
-          <Logo />
+        <div
+          style={{
+            width: "18.66px",
+            height: "24px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
+          {theme === "light" ? (
+            <LogoThemeLight />
+          ) : theme === "black" ? (
+            <LogoThemeBlack />
+          ) : (
+            <LogoThemeDark />
+          )}
         </div>
       )}
-      <div className="sismoConnectButtonText">{text || "Sign in with Sismo"}</div>
+      <div
+        style={{
+          fontFamily: "inherit",
+          fontWeight: "inherit",
+          fontSize: "inherit",
+          lineHeight: "inherit",
+        }}
+      >
+        {text || "Sign in with Sismo"}
+      </div>
     </button>
   );
 };
