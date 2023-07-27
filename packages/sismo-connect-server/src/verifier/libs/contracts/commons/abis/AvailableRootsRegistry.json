@@ -542,18 +542,10 @@
     "absolutePath": "src/periphery/AvailableRootsRegistry.sol",
     "id": 32749,
     "exportedSymbols": {
-      "AvailableRootsRegistry": [
-        32748
-      ],
-      "IAvailableRootsRegistry": [
-        32978
-      ],
-      "Initializable": [
-        29876
-      ],
-      "Ownable": [
-        29707
-      ]
+      "AvailableRootsRegistry": [32748],
+      "IAvailableRootsRegistry": [32978],
+      "Initializable": [29876],
+      "Ownable": [29707]
     },
     "nodeType": "SourceUnit",
     "src": "32:2488:37",
@@ -563,12 +555,7 @@
         "nodeType": "PragmaDirective",
         "src": "32:24:37",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".14"
-        ]
+        "literals": ["solidity", "^", "0.8", ".14"]
       },
       {
         "id": 32615,
@@ -1198,9 +1185,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              32957
-            ],
+            "baseFunctions": [32957],
             "documentation": {
               "id": 32645,
               "nodeType": "StructuredDocumentation",
@@ -1231,9 +1216,7 @@
                 "modifierName": {
                   "id": 32649,
                   "name": "reinitializer",
-                  "nameLocations": [
-                    "1408:13:37"
-                  ],
+                  "nameLocations": ["1408:13:37"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 29811,
                   "src": "1408:13:37"
@@ -1357,9 +1340,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              32963
-            ],
+            "baseFunctions": [32963],
             "documentation": {
               "id": 32677,
               "nodeType": "StructuredDocumentation",
@@ -1376,9 +1357,7 @@
                 "modifierName": {
                   "id": 32681,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "1803:9:37"
-                  ],
+                  "nameLocations": ["1803:9:37"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 29626,
                   "src": "1803:9:37"
@@ -1501,9 +1480,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              32969
-            ],
+            "baseFunctions": [32969],
             "documentation": {
               "id": 32690,
               "nodeType": "StructuredDocumentation",
@@ -1520,9 +1497,7 @@
                 "modifierName": {
                   "id": 32694,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "1986:9:37"
-                  ],
+                  "nameLocations": ["1986:9:37"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 29626,
                   "src": "1986:9:37"
@@ -1634,9 +1609,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              32977
-            ],
+            "baseFunctions": [32977],
             "documentation": {
               "id": 32703,
               "nodeType": "StructuredDocumentation",
@@ -2107,9 +2080,7 @@
             "baseName": {
               "id": 32621,
               "name": "IAvailableRootsRegistry",
-              "nameLocations": [
-                "682:23:37"
-              ],
+              "nameLocations": ["682:23:37"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 32978,
               "src": "682:23:37"
@@ -2122,9 +2093,7 @@
             "baseName": {
               "id": 32623,
               "name": "Initializable",
-              "nameLocations": [
-                "707:13:37"
-              ],
+              "nameLocations": ["707:13:37"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 29876,
               "src": "707:13:37"
@@ -2137,9 +2106,7 @@
             "baseName": {
               "id": 32625,
               "name": "Ownable",
-              "nameLocations": [
-                "722:7:37"
-              ],
+              "nameLocations": ["722:7:37"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 29707,
               "src": "722:7:37"
@@ -2159,13 +2126,7 @@
           "text": " @title Attesters Groups Registry\n @author Sismo\n @notice This contract stores that data required by attesters to be available so they can verify user claims\n This contract is deployed behind a proxy and this implementation is focused on storing merkle roots\n For more information: https://available-roots-registry.docs.sismo.io"
         },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          32748,
-          29707,
-          30228,
-          29876,
-          32978
-        ],
+        "linearizedBaseContracts": [32748, 29707, 30228, 29876, 32978],
         "name": "AvailableRootsRegistry",
         "nameLocation": "656:22:37",
         "scope": 32749,

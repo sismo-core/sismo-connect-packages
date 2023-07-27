@@ -12,329 +12,287 @@ import {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers'
-import { FunctionFragment, Result, EventFragment } from '@ethersproject/abi'
-import { Listener, Provider } from '@ethersproject/providers'
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common'
+} from "ethers";
+import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import { Listener, Provider } from "@ethersproject/providers";
+import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
 export interface CommitmentMapperRegistryInterface extends utils.Interface {
-  contractName: 'CommitmentMapperRegistry'
+  contractName: "CommitmentMapperRegistry";
   functions: {
-    'getAddress()': FunctionFragment
-    'getEdDSAPubKey()': FunctionFragment
-    'initialize(address,uint256[2],address)': FunctionFragment
-    'owner()': FunctionFragment
-    'renounceOwnership()': FunctionFragment
-    'transferOwnership(address)': FunctionFragment
-    'updateCommitmentMapperAddress(address)': FunctionFragment
-    'updateCommitmentMapperEdDSAPubKey(uint256[2])': FunctionFragment
-  }
+    "getAddress()": FunctionFragment;
+    "getEdDSAPubKey()": FunctionFragment;
+    "initialize(address,uint256[2],address)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "updateCommitmentMapperAddress(address)": FunctionFragment;
+    "updateCommitmentMapperEdDSAPubKey(uint256[2])": FunctionFragment;
+  };
 
-  encodeFunctionData(functionFragment: 'getAddress', values?: undefined): string
+  encodeFunctionData(functionFragment: "getAddress", values?: undefined): string;
+  encodeFunctionData(functionFragment: "getEdDSAPubKey", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'getEdDSAPubKey',
-    values?: undefined
-  ): string
-  encodeFunctionData(
-    functionFragment: 'initialize',
+    functionFragment: "initialize",
     values: [string, [BigNumberish, BigNumberish], string]
-  ): string
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
+  encodeFunctionData(functionFragment: "transferOwnership", values: [string]): string;
+  encodeFunctionData(functionFragment: "updateCommitmentMapperAddress", values: [string]): string;
   encodeFunctionData(
-    functionFragment: 'renounceOwnership',
-    values?: undefined
-  ): string
-  encodeFunctionData(
-    functionFragment: 'transferOwnership',
-    values: [string]
-  ): string
-  encodeFunctionData(
-    functionFragment: 'updateCommitmentMapperAddress',
-    values: [string]
-  ): string
-  encodeFunctionData(
-    functionFragment: 'updateCommitmentMapperEdDSAPubKey',
+    functionFragment: "updateCommitmentMapperEdDSAPubKey",
     values: [[BigNumberish, BigNumberish]]
-  ): string
+  ): string;
 
-  decodeFunctionResult(functionFragment: 'getAddress', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: "getAddress", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getEdDSAPubKey", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "updateCommitmentMapperAddress", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'getEdDSAPubKey',
+    functionFragment: "updateCommitmentMapperEdDSAPubKey",
     data: BytesLike
-  ): Result
-  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result
-  decodeFunctionResult(
-    functionFragment: 'renounceOwnership',
-    data: BytesLike
-  ): Result
-  decodeFunctionResult(
-    functionFragment: 'transferOwnership',
-    data: BytesLike
-  ): Result
-  decodeFunctionResult(
-    functionFragment: 'updateCommitmentMapperAddress',
-    data: BytesLike
-  ): Result
-  decodeFunctionResult(
-    functionFragment: 'updateCommitmentMapperEdDSAPubKey',
-    data: BytesLike
-  ): Result
+  ): Result;
 
   events: {
-    'OwnershipTransferred(address,address)': EventFragment
-    'UpdatedCommitmentMapperAddress(address)': EventFragment
-    'UpdatedCommitmentMapperEdDSAPubKey(uint256[2])': EventFragment
-  }
+    "OwnershipTransferred(address,address)": EventFragment;
+    "UpdatedCommitmentMapperAddress(address)": EventFragment;
+    "UpdatedCommitmentMapperEdDSAPubKey(uint256[2])": EventFragment;
+  };
 
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment
-  getEvent(
-    nameOrSignatureOrTopic: 'UpdatedCommitmentMapperAddress'
-  ): EventFragment
-  getEvent(
-    nameOrSignatureOrTopic: 'UpdatedCommitmentMapperEdDSAPubKey'
-  ): EventFragment
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UpdatedCommitmentMapperAddress"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UpdatedCommitmentMapperEdDSAPubKey"): EventFragment;
 }
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
   { previousOwner: string; newOwner: string }
->
+>;
 
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>
+export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
 
-export type UpdatedCommitmentMapperAddressEvent = TypedEvent<
-  [string],
-  { newAddress: string }
->
+export type UpdatedCommitmentMapperAddressEvent = TypedEvent<[string], { newAddress: string }>;
 
 export type UpdatedCommitmentMapperAddressEventFilter =
-  TypedEventFilter<UpdatedCommitmentMapperAddressEvent>
+  TypedEventFilter<UpdatedCommitmentMapperAddressEvent>;
 
 export type UpdatedCommitmentMapperEdDSAPubKeyEvent = TypedEvent<
   [[BigNumber, BigNumber]],
   { newEdDSAPubKey: [BigNumber, BigNumber] }
->
+>;
 
 export type UpdatedCommitmentMapperEdDSAPubKeyEventFilter =
-  TypedEventFilter<UpdatedCommitmentMapperEdDSAPubKeyEvent>
+  TypedEventFilter<UpdatedCommitmentMapperEdDSAPubKeyEvent>;
 
 export interface CommitmentMapperRegistry extends BaseContract {
-  contractName: 'CommitmentMapperRegistry'
-  connect(signerOrProvider: Signer | Provider | string): this
-  attach(addressOrName: string): this
-  deployed(): Promise<this>
+  contractName: "CommitmentMapperRegistry";
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
-  interface: CommitmentMapperRegistryInterface
+  interface: CommitmentMapperRegistryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>
+  ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
     eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>
-  listeners(eventName?: string): Array<Listener>
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this
-  removeAllListeners(eventName?: string): this
-  off: OnEvent<this>
-  on: OnEvent<this>
-  once: OnEvent<this>
-  removeListener: OnEvent<this>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
   functions: {
-    getAddress(overrides?: CallOverrides): Promise<[string]>
+    getAddress(overrides?: CallOverrides): Promise<[string]>;
 
-    getEdDSAPubKey(overrides?: CallOverrides): Promise<[[BigNumber, BigNumber]]>
+    getEdDSAPubKey(overrides?: CallOverrides): Promise<[[BigNumber, BigNumber]]>;
 
     initialize(
       owner: string,
       commitmentMapperEdDSAPubKey: [BigNumberish, BigNumberish],
       commitmentMapperAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>
+    ): Promise<ContractTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<[string]>
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>
+    ): Promise<ContractTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>
+    ): Promise<ContractTransaction>;
 
     updateCommitmentMapperAddress(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>
+    ): Promise<ContractTransaction>;
 
     updateCommitmentMapperEdDSAPubKey(
       newEdDSAPubKey: [BigNumberish, BigNumberish],
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>
-  }
+    ): Promise<ContractTransaction>;
+  };
 
-  getAddress(overrides?: CallOverrides): Promise<string>
+  getAddress(overrides?: CallOverrides): Promise<string>;
 
-  getEdDSAPubKey(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>
+  getEdDSAPubKey(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>;
 
   initialize(
     owner: string,
     commitmentMapperEdDSAPubKey: [BigNumberish, BigNumberish],
     commitmentMapperAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>
+  ): Promise<ContractTransaction>;
 
-  owner(overrides?: CallOverrides): Promise<string>
+  owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>
+  ): Promise<ContractTransaction>;
 
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>
+  ): Promise<ContractTransaction>;
 
   updateCommitmentMapperAddress(
     newAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>
+  ): Promise<ContractTransaction>;
 
   updateCommitmentMapperEdDSAPubKey(
     newEdDSAPubKey: [BigNumberish, BigNumberish],
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>
+  ): Promise<ContractTransaction>;
 
   callStatic: {
-    getAddress(overrides?: CallOverrides): Promise<string>
+    getAddress(overrides?: CallOverrides): Promise<string>;
 
-    getEdDSAPubKey(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>
+    getEdDSAPubKey(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>;
 
     initialize(
       owner: string,
       commitmentMapperEdDSAPubKey: [BigNumberish, BigNumberish],
       commitmentMapperAddress: string,
       overrides?: CallOverrides
-    ): Promise<void>
+    ): Promise<void>;
 
-    owner(overrides?: CallOverrides): Promise<string>
+    owner(overrides?: CallOverrides): Promise<string>;
 
-    renounceOwnership(overrides?: CallOverrides): Promise<void>
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>
+    transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
 
-    updateCommitmentMapperAddress(
-      newAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>
+    updateCommitmentMapperAddress(newAddress: string, overrides?: CallOverrides): Promise<void>;
 
     updateCommitmentMapperEdDSAPubKey(
       newEdDSAPubKey: [BigNumberish, BigNumberish],
       overrides?: CallOverrides
-    ): Promise<void>
-  }
+    ): Promise<void>;
+  };
 
   filters: {
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
-    ): OwnershipTransferredEventFilter
+    ): OwnershipTransferredEventFilter;
     OwnershipTransferred(
       previousOwner?: string | null,
       newOwner?: string | null
-    ): OwnershipTransferredEventFilter
+    ): OwnershipTransferredEventFilter;
 
-    'UpdatedCommitmentMapperAddress(address)'(
+    "UpdatedCommitmentMapperAddress(address)"(
       newAddress?: null
-    ): UpdatedCommitmentMapperAddressEventFilter
-    UpdatedCommitmentMapperAddress(
-      newAddress?: null
-    ): UpdatedCommitmentMapperAddressEventFilter
+    ): UpdatedCommitmentMapperAddressEventFilter;
+    UpdatedCommitmentMapperAddress(newAddress?: null): UpdatedCommitmentMapperAddressEventFilter;
 
-    'UpdatedCommitmentMapperEdDSAPubKey(uint256[2])'(
+    "UpdatedCommitmentMapperEdDSAPubKey(uint256[2])"(
       newEdDSAPubKey?: null
-    ): UpdatedCommitmentMapperEdDSAPubKeyEventFilter
+    ): UpdatedCommitmentMapperEdDSAPubKeyEventFilter;
     UpdatedCommitmentMapperEdDSAPubKey(
       newEdDSAPubKey?: null
-    ): UpdatedCommitmentMapperEdDSAPubKeyEventFilter
-  }
+    ): UpdatedCommitmentMapperEdDSAPubKeyEventFilter;
+  };
 
   estimateGas: {
-    getAddress(overrides?: CallOverrides): Promise<BigNumber>
+    getAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getEdDSAPubKey(overrides?: CallOverrides): Promise<BigNumber>
+    getEdDSAPubKey(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
       owner: string,
       commitmentMapperEdDSAPubKey: [BigNumberish, BigNumberish],
       commitmentMapperAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>
+    ): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>
+    ): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>
+    ): Promise<BigNumber>;
 
     updateCommitmentMapperAddress(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>
+    ): Promise<BigNumber>;
 
     updateCommitmentMapperEdDSAPubKey(
       newEdDSAPubKey: [BigNumberish, BigNumberish],
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>
-  }
+    ): Promise<BigNumber>;
+  };
 
   populateTransaction: {
-    getAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>
+    getAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getEdDSAPubKey(overrides?: CallOverrides): Promise<PopulatedTransaction>
+    getEdDSAPubKey(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
       owner: string,
       commitmentMapperEdDSAPubKey: [BigNumberish, BigNumberish],
       commitmentMapperAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>
+    ): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>
+    ): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>
+    ): Promise<PopulatedTransaction>;
 
     updateCommitmentMapperAddress(
       newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>
+    ): Promise<PopulatedTransaction>;
 
     updateCommitmentMapperEdDSAPubKey(
       newEdDSAPubKey: [BigNumberish, BigNumberish],
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>
-  }
+    ): Promise<PopulatedTransaction>;
+  };
 }

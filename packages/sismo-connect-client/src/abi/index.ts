@@ -1,1 +1,1 @@
-export * from './sismo-connect'
+export * from "./sismo-connect";

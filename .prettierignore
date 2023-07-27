@@ -1,0 +1,9 @@
+**/node_modules
+**/lib
+**/*.svg
+**/*.prettierignore
+**/*.sol
+**/*.npmrc
+**/*.toml
+**/*.txt
+**/yarn.lock

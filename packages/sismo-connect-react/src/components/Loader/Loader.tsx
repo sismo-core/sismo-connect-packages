@@ -1,6 +1,6 @@
 import React from "react";
-import './Loader.css';
+import "./Loader.css";
 
 export const Loader = () => {
   return <div className="sismoConnectButtonLoader" />;
-}
+};
