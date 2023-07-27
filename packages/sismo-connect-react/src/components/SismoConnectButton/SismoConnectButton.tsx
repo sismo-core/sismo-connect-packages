@@ -93,7 +93,7 @@ export const SismoConnectButton = ({
         fontWeight: "400",
         fontSize: "18px",
         lineHeight: "normal",
-        cursor: verifying || loading || disabled ? "default" : "cursor",
+        cursor: verifying || loading || disabled ? "default" : "pointer",
         opacity: disabled ? 0.6 : 1,
         backgroundColor: theme === "light" ? "#FDFCF8" : theme === "black" ? "#000" : "#1c2847",
         border:
