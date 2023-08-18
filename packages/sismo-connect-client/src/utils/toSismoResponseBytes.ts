@@ -192,6 +192,6 @@ export const toSismoConnectResponseBytes = (sismoConnectResponse: SismoConnectRe
         type: "tuple",
       },
     ],
-    [formatResponseToEncode(sismoConnectResponse)],
+    [formatResponseToEncode(sismoConnectResponse)]
   );
 };
