@@ -24,8 +24,7 @@
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "tslib": "2.4.0",
-    "typescript": "^4.9.5",
-    "@sismo-core/sismo-connect-common": "*"
+    "typescript": "^4.9.5"
   },
   "publishConfig": {
     "access": "public"
@@ -42,6 +41,7 @@
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
+    "@sismo-core/sismo-connect-common": "*",
     "@ethersproject/bignumber": "5.7.0",
     "js-base64": "^3.7.5",
     "pako": "^2.1.0",

@@ -21,8 +21,7 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "tslib": "^2.5.0",
-    "typescript": "^4.9.5",
-    "@sismo-core/sismo-connect-client": "*"
+    "typescript": "^4.9.5"
   },
   "publishConfig": {
     "access": "public"
@@ -38,6 +37,9 @@
   },
   "author": "leo@sismo.io",
   "license": "MIT",
+  "dependencies": {
+    "@sismo-core/sismo-connect-client": "*"
+  },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
     "src/**/*.{ts,tsx,js,jsx}": [
