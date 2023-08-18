@@ -21,7 +21,8 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "@sismo-core/sismo-connect-client": "*"
   },
   "publishConfig": {
     "access": "public"
@@ -30,7 +31,11 @@
     "lib",
     "src"
   ],
-  "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sismo-core/sismo-connect-packages.git",
+    "directory": "packages/sismo-connect-react"
+  },
   "author": "leo@sismo.io",
   "license": "MIT",
   "lint-staged": {
@@ -38,9 +43,5 @@
     "src/**/*.{ts,tsx,js,jsx}": [
       "eslint --max-warnings=0"
     ]
-  },
-  "peerDependencies": {},
-  "dependencies": {
-    "@sismo-core/sismo-connect-client": "0.0.23"
   }
 }

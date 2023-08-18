@@ -9,3 +9,6 @@ package-lock.json
 build
 cache
 out
+
+# lerna
+lerna-debug.log

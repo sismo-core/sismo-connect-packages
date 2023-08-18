@@ -2,13 +2,12 @@ import {
   ClaimRequest,
   ClaimType,
   VerifiedClaim,
-  SismoConnect,
   SismoConnectResponse,
-  SismoConnectServer,
   SISMO_CONNECT_VERSION,
   AuthRequest,
   AuthType,
-} from "../src";
+} from "@sismo-core/sismo-connect-common";
+import { SismoConnect, SismoConnectServer } from "../src";
 import { BigNumber } from "@ethersproject/bignumber";
 import { decodeProofData } from "../src/verifier/utils/proofData";
 import { JsonRpcProviderMock } from "../src/verifier/libs/onchain-provider";

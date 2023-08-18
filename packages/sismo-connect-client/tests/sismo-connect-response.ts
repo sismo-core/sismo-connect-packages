@@ -1,4 +1,4 @@
-import { SismoConnectResponse } from "../src";
+import { SismoConnectResponse } from "@sismo-core/sismo-connect-common";
 
 // SismoConnectResponse1 come form safeDrop project
 // https://case-studies.sismo.io/db/safe-drop

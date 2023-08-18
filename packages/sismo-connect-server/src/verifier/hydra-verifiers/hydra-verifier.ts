@@ -24,7 +24,7 @@ import {
   VerifiedAuth,
   VerifiedClaim,
   resolveSismoIdentifier,
-} from "../../common-types";
+} from "@sismo-core/sismo-connect-common";
 import { SNARK_FIELD } from "@sismo-core/hydra-s3";
 
 export type SnarkProof = {

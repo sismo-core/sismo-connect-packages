@@ -1,4 +1,4 @@
-import { SismoConnectResponse } from "../src";
+import { SismoConnectResponse } from "@sismo-core/sismo-connect-common";
 
 export const commitmentMapperPubKey = [
   "3602196582082511412345093208859330584743530098298494929484637038525722574265",

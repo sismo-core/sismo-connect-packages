@@ -1,4 +1,4 @@
-import { AuthRequest, ClaimRequest, SignatureRequest } from "./common-types";
+import { AuthRequest, ClaimRequest, SignatureRequest } from "@sismo-core/sismo-connect-common";
 
 export type RequestParams = {
   claims?: ClaimRequest[];

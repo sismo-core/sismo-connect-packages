@@ -1,4 +1,4 @@
-import { AuthRequest, ClaimRequest, SignatureRequest } from "./common-types";
+import { AuthRequest, ClaimRequest, SignatureRequest } from "@sismo-core/sismo-connect-common";
 import { SismoConnectProvider } from "./verifier/libs/onchain-provider";
 
 export type VerifyParamsSismoConnect = {

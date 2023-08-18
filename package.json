@@ -1,27 +1,33 @@
 {
+  "private": true,
   "name": "sismo-connect-sdk",
   "version": "1.0.8",
   "description": "Sismo Connect packages",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
+  "packageManager": "yarn@3.6.1",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "yarn && yarn build:sismo-connect-client && yarn build:sismo-connect-server && yarn build:sismo-connect-react",
-    "build:sismo-connect-client": "cd packages/sismo-connect-client && yarn && yarn build",
-    "build:sismo-connect-server": "cd packages/sismo-connect-server && yarn && yarn build",
-    "build:sismo-connect-react": "cd packages/sismo-connect-react && yarn && yarn build",
-    "prepare": "yarn prepare:client && yarn prepare:server",
-    "prepare:client": "cd ./packages/sismo-connect-client && yarn",
-    "prepare:server": "cd ./packages/sismo-connect-server && yarn",
+    "clean": "npx lerna clean --yes",
+    "build": "npx lerna run build",
+    "build:client": "npx lerna run build --scope=@sismo-core/sismo-connect-client",
+    "build:server": "npx lerna run build --scope=@sismo-core/sismo-connect-server",
+    "build:react": "npx lerna run build --scope=@sismo-core/sismo-connect-react",
+    "build:common": "npx lerna run build --scope=@sismo-core/sismo-connect-common",
+    "test": "npx lerna run test",
+    "test:client": "npx lerna run test --scope=@sismo-core/sismo-connect-client",
+    "test:server": "npx lerna run test --scope=@sismo-core/sismo-connect-server",
     "eslint": "eslint --max-warnings=0",
     "prettier": "prettier --write 'packages/**/*'",
     "prettier:check": "prettier --check 'packages/**/*'",
-    "test": "yarn test:client && yarn test:server",
-    "test:client": "cd ./packages/sismo-connect-client && yarn test",
-    "test:server": "cd ./packages/sismo-connect-server && yarn test"
+    "clear-nx-cache": "nx reset"
   },
   "devDependencies": {
     "eslint": "^8.34.0",
+    "lerna": "^7.1.5",
     "prettier": "^2.8.4",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"

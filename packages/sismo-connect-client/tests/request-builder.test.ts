@@ -1,7 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { RequestBuilder } from "../src";
-import { resolveSismoIdentifier } from "../src/common-types";
-import { AuthType } from "../src/common-types";
+import { RequestBuilder, resolveSismoIdentifier, AuthType } from "@sismo-core/sismo-connect-common";
 
 describe("RequestBuilder", () => {
   describe("resolveSismoIdentifier", () => {
