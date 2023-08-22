@@ -41,7 +41,7 @@
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
-    "@sismo-core/sismo-connect-common": "*",
+    "@sismo-core/sismo-connect-common": "workspace:*",
     "@ethersproject/bignumber": "5.7.0",
     "js-base64": "^3.7.5",
     "pako": "^2.1.0",

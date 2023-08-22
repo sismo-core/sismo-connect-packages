@@ -38,7 +38,7 @@
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
-    "@sismo-core/sismo-connect-client": "*"
+    "@sismo-core/sismo-connect-client": "workspace:*"
   },
   "lint-staged": {
     "src/**/*": "prettier --write --ignore-unknown",
