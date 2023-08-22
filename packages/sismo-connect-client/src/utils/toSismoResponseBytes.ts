@@ -7,9 +7,8 @@ import {
   keccak256,
   isHex,
   toBytes as toBytesViem,
-  stringToBytes,
 } from "viem";
-import { SismoConnectResponse } from "../common-types";
+import { SismoConnectResponse } from "@sismo-core/sismo-connect-common";
 
 const toBytes16 = (data) => {
   if (isHex(data)) return pad(data, { size: 16 });
@@ -193,6 +192,6 @@ export const toSismoConnectResponseBytes = (sismoConnectResponse: SismoConnectRe
         type: "tuple",
       },
     ],
-    [formatResponseToEncode(sismoConnectResponse)]
+    [formatResponseToEncode(sismoConnectResponse)],
   );
 };

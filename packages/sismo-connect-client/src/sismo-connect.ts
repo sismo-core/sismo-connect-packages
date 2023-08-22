@@ -4,7 +4,7 @@ import {
   SismoConnectResponse,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
-} from "./common-types";
+} from "@sismo-core/sismo-connect-common";
 import { Sdk, GroupParams } from "./sdk";
 import { IMPERSONATION_VAULT_APP_BASE_URL, MAIN_VAULT_APP_BASE_URL } from "./constants";
 import { unCompressResponse } from "./utils/unCompressResponse";

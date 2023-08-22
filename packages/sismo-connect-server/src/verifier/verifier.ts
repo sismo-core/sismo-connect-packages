@@ -10,7 +10,7 @@ import {
   SignatureRequest,
   SismoConnectProof,
   AuthType,
-} from "../common-types";
+} from "@sismo-core/sismo-connect-common";
 import { GNOSIS_AVAILABLE_ROOTS_REGISTRY_ADDRESS } from "../constants";
 import {
   AvailableRootsRegistryContract,

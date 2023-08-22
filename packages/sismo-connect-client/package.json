@@ -33,10 +33,15 @@
     "lib",
     "src"
   ],
-  "repository": "git@github.com:sismo-core/sismo-connect-packages.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sismo-core/sismo-connect-packages.git",
+    "directory": "packages/sismo-connect-client"
+  },
   "author": "leo@sismo.io",
   "license": "MIT",
   "dependencies": {
+    "@sismo-core/sismo-connect-common": "workspace:*",
     "@ethersproject/bignumber": "5.7.0",
     "js-base64": "^3.7.5",
     "pako": "^2.1.0",

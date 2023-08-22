@@ -9,7 +9,7 @@ import {
   SismoConnectVerifiedResult,
   SISMO_CONNECT_VERSION,
   SismoConnectConfig,
-} from "./common-types";
+} from "@sismo-core/sismo-connect-common";
 import { SismoConnectVerifier } from "./verifier";
 import { SismoConnectProvider, JsonRpcProvider } from "./verifier/libs/onchain-provider";
 

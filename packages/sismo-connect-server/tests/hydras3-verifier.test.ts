@@ -8,7 +8,7 @@ import {
   AuthType,
   AuthRequest,
   VerifiedAuth,
-} from "../src";
+} from "@sismo-core/sismo-connect-common";
 import { decodeProofData, encodeProofData } from "../src/verifier/utils/proofData";
 import { ethers } from "ethers";
 import { HydraS3VerifierMocked } from "./hydras3-verifier-mocked";
